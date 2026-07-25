@@ -338,6 +338,18 @@ export type Database = {
         Args: { net: string; r: Database["public"]["Enums"]["family_role"] }
         Returns: boolean
       }
+      invite_preview: {
+        Args: { invite_token: string }
+        Returns: {
+          expired: boolean
+          inviter_name: string
+          network_name: string
+          person_first_name: string
+          person_last_name: string
+          status: Database["public"]["Enums"]["invite_status"]
+        }[]
+      }
+      claim_invite: { Args: { invite_token: string }; Returns: string }
       me: { Args: Record<string, never>; Returns: string }
       my_networks: { Args: Record<string, never>; Returns: string[] }
       relation_label: { Args: { me: string; other: string }; Returns: string }

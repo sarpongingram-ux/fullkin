@@ -12,9 +12,11 @@ Een testfamilie van drie generaties bevestigt dat de afgeleide relatielabels
 (grootouder, oom/tante, neef/nicht) in alle richtingen kloppen, en dat een
 `DELETE` op relaties niets doet.
 
-Werkend: inloggen → familiekaart met "je familie bestaat uit N personen, je
-kent er M". Nog te bouwen in fase 1: personen toevoegen (kaart laten groeien),
-bulk uitnodigen, life events + collecte via Stripe, uitbetaling.
+Werkend: inloggen → familiekaart → familielid toevoegen → uitnodigen → claimen.
+De hele onboarding-lus is end-to-end getest: Kofi nodigde Kwame uit, Kwame
+claimde zijn plek en ziet nu de kaart vanuit zijn eigen perspectief (ouders in
+plaats van grootouders). Nog te bouwen in fase 1: life events + collecte via
+Stripe, uitbetaling.
 
 ## De vier beslissingen die vastliggen
 
@@ -127,7 +129,15 @@ cd ~/Desktop/fullkin
 PORT=3210 npm run dev      # http://localhost:3210
 ```
 
-Demo-login: `kofi@fullkin.test` / `fullkin-demo-2026` (alleen dev-database).
+Demo-logins (alleen dev-database): `kofi@fullkin.test` en
+`kwame@fullkin.test`, beide wachtwoord `fullkin-demo-2026`.
+
+**Let op — e-mailbevestiging.** De uitnodigings-claim laat een nieuwe gebruiker
+zijn account aanmaken en direct zijn plek claimen. Dat werkt alleen naadloos als
+e-mailbevestiging in Supabase Auth uitstaat (Authentication → Providers → Email
+→ "Confirm email" uit), óf als we later magic links gebruiken. Staat bevestiging
+aan, dan toont de claim-pagina netjes "bevestig je e-mail en open de link
+opnieuw". De demo-accounts zijn via SQL vooraf bevestigd om dit te omzeilen.
 
 Env staat in `.env.local` (niet in git). Na een migratie de types
 hergenereren en `src/lib/types/database.ts` bijwerken.

@@ -26,12 +26,25 @@ export default async function AppHome() {
   const [{ data: stats }, { data: kaart }, { data: mij }] = await Promise.all([
     supabase.rpc("family_stats", { me: meId }).single(),
     supabase.rpc("family_map", { me: meId }),
-    supabase.from("persons").select("first_name").eq("id", meId).single(),
+    supabase
+      .from("persons")
+      .select("first_name, network_id")
+      .eq("id", meId)
+      .single(),
   ])
+
+  const { data: netwerk } = mij
+    ? await supabase
+        .from("family_networks")
+        .select("name")
+        .eq("id", mij.network_id)
+        .single()
+    : { data: null }
 
   return (
     <FamilieKaart
       voornaam={mij?.first_name ?? "familielid"}
+      familieNaam={netwerk?.name ?? "je familie"}
       stats={stats ?? { total: 0, known: 0, silent: 0, out_of_touch: 0 }}
       leden={kaart ?? []}
     />

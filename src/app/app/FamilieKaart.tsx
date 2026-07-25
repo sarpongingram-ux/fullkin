@@ -2,6 +2,7 @@
 
 import type { Enums } from "@/lib/types/database"
 import { FamilielidToevoegen } from "./FamilielidToevoegen"
+import { UitnodigenKnop } from "./UitnodigenKnop"
 
 type Lid = {
   person_id: string
@@ -35,10 +36,12 @@ function jaarGeleden(iso: string | null): boolean {
 
 export function FamilieKaart({
   voornaam,
+  familieNaam,
   stats,
   leden,
 }: {
   voornaam: string
+  familieNaam: string
   stats: Stats
   leden: Lid[]
 }) {
@@ -89,46 +92,56 @@ export function FamilieKaart({
         {leden.map((lid) => (
           <li
             key={lid.person_id}
-            className="bg-oppervlak rounded-xl border border-rand p-3 flex items-center gap-3"
+            className="bg-oppervlak rounded-xl border border-rand p-3"
           >
-            <div
-              className="w-11 h-11 rounded-full flex items-center justify-center text-white font-semibold shrink-0"
-              style={{ background: "var(--terracotta)" }}
-            >
-              {lid.photo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={lid.photo_url}
-                  alt=""
-                  className="w-full h-full rounded-full object-cover"
+            <div className="flex items-center gap-3">
+              <div
+                className="w-11 h-11 rounded-full flex items-center justify-center text-white font-semibold shrink-0"
+                style={{ background: "var(--terracotta)" }}
+              >
+                {lid.photo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={lid.photo_url}
+                    alt=""
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  initialen(lid.first_name, lid.last_name)
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-inkt truncate">
+                  {lid.first_name} {lid.last_name}
+                </p>
+                <p className="text-sm text-inkt-zacht">
+                  {lid.label}
+                  {lid.city ? ` · ${lid.city}` : ""}
+                </p>
+                {!lid.is_claimed && (
+                  <UitnodigenKnop
+                    personId={lid.person_id}
+                    voornaam={lid.first_name}
+                    familieNaam={familieNaam}
+                    uitnodigerVoornaam={voornaam}
+                  />
+                )}
+              </div>
+
+              <div className="text-right shrink-0 self-start">
+                <span
+                  className="inline-block w-2.5 h-2.5 rounded-full"
+                  style={{ background: statusKleur[lid.status] }}
+                  title={lid.status}
                 />
-              ) : (
-                initialen(lid.first_name, lid.last_name)
-              )}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-inkt truncate">
-                {lid.first_name} {lid.last_name}
-              </p>
-              <p className="text-sm text-inkt-zacht">
-                {lid.label}
-                {lid.city ? ` · ${lid.city}` : ""}
-              </p>
-            </div>
-
-            <div className="text-right shrink-0">
-              <span
-                className="inline-block w-2.5 h-2.5 rounded-full"
-                style={{ background: statusKleur[lid.status] }}
-                title={lid.status}
-              />
-              {!lid.is_claimed && (
-                <p className="text-[11px] text-inkt-zacht mt-1">nog niet actief</p>
-              )}
-              {lid.is_claimed && jaarGeleden(lid.last_contact) && lid.status !== "stil" && (
-                <p className="text-[11px] text-goud mt-1">lang stil</p>
-              )}
+                {!lid.is_claimed && (
+                  <p className="text-[11px] text-inkt-zacht mt-1">nog niet actief</p>
+                )}
+                {lid.is_claimed && jaarGeleden(lid.last_contact) && lid.status !== "stil" && (
+                  <p className="text-[11px] text-goud mt-1">lang stil</p>
+                )}
+              </div>
             </div>
           </li>
         ))}
