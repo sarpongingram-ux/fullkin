@@ -200,6 +200,32 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["business_updates"]["Insert"]>
         Relationships: []
       }
+      payout_accounts: {
+        Row: {
+          id: string
+          person_id: string
+          network_id: string
+          provider: Database["public"]["Enums"]["payout_provider"]
+          external_id: string
+          status: Database["public"]["Enums"]["payout_status"]
+          country: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          person_id: string
+          network_id: string
+          provider: Database["public"]["Enums"]["payout_provider"]
+          external_id: string
+          status?: Database["public"]["Enums"]["payout_status"]
+          country?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["payout_accounts"]["Insert"]>
+        Relationships: []
+      }
       dreams: {
         Row: {
           collection_id: string | null
@@ -526,6 +552,7 @@ export type Database = {
       claim_invite: { Args: { invite_token: string }; Returns: string }
       me: { Args: Record<string, never>; Returns: string }
       my_networks: { Args: Record<string, never>; Returns: string[] }
+      payout_ready: { Args: { p: string }; Returns: boolean }
       relation_label: { Args: { me: string; other: string }; Returns: string }
       relation_route: { Args: { me: string; other: string }; Returns: string }
       settle_contribution: {
@@ -553,6 +580,8 @@ export type Database = {
         | "mediator"
         | "archivaris"
       invite_status: "open" | "geaccepteerd" | "verlopen"
+      payout_provider: "stripe" | "flutterwave"
+      payout_status: "onboarding" | "ready" | "restricted"
       life_event_kind:
         | "verjaardag"
         | "ronde_verjaardag"

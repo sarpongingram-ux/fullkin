@@ -96,11 +96,27 @@ export function FamilieKaart({
           </h1>
         </div>
         {isCoFounder && (
+          <div className="flex gap-2 shrink-0">
+            <Link
+              href="/app/uitbetaling"
+              className="mt-1 rounded-full border border-rand text-inkt text-sm px-4 py-2 hover:bg-oppervlak transition"
+            >
+              Uitbetaling
+            </Link>
+            <Link
+              href="/app/dashboard"
+              className="mt-1 rounded-full bg-inkt text-white text-sm px-4 py-2 hover:opacity-90 transition"
+            >
+              Dashboard
+            </Link>
+          </div>
+        )}
+        {!isCoFounder && (
           <Link
-            href="/app/dashboard"
-            className="mt-1 rounded-full bg-inkt text-white text-sm px-4 py-2 hover:opacity-90 transition shrink-0"
+            href="/app/uitbetaling"
+            className="mt-1 rounded-full border border-rand text-inkt text-sm px-4 py-2 hover:bg-oppervlak transition shrink-0"
           >
-            Dashboard
+            Uitbetaling
           </Link>
         )}
       </header>
