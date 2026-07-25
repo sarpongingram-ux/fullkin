@@ -1,6 +1,7 @@
 "use client"
 
 import type { Enums } from "@/lib/types/database"
+import { FamilielidToevoegen } from "./FamilielidToevoegen"
 
 type Lid = {
   person_id: string
@@ -72,6 +73,10 @@ export function FamilieKaart({
           )}
         </p>
       </section>
+
+      <div className="mb-4">
+        <FamilielidToevoegen />
+      </div>
 
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-semibold text-inkt-zacht uppercase tracking-wide">
