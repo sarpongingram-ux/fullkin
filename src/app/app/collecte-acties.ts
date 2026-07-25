@@ -158,6 +158,36 @@ export async function draagBij(
     return { ok: true, devPending: true }
   }
 
+  // Heeft de begunstigde een gekoppeld uitbetaalaccount? Dan wordt dit een
+  // destination charge: 95% gaat direct naar de ontvanger, 5% blijft als
+  // application fee bij Fullkin. Zo niet, dan valt het terug op een gewone
+  // betaling naar het platform (geld wacht tot de ontvanger koppelt).
+  const { data: col } = await supabase
+    .from("collections")
+    .select("beneficiary_id")
+    .eq("id", collectieId)
+    .single()
+
+  let destination: string | null = null
+  if (col) {
+    const { data: pa } = await supabase
+      .from("payout_accounts")
+      .select("external_id")
+      .eq("person_id", col.beneficiary_id)
+      .eq("provider", "stripe")
+      .eq("status", "ready")
+      .maybeSingle()
+    destination = pa?.external_id ?? null
+  }
+
+  // Application fee = de 5% (co-founder + rollen + pot + platform), met dezelfde
+  // afronding als compute_split: de restcent gaat naar de ontvanger.
+  const cf = Math.floor((cents * 50) / 10000)
+  const rh = Math.floor((cents * 50) / 10000)
+  const fp = Math.floor((cents * 100) / 10000)
+  const pf = Math.floor((cents * 300) / 10000)
+  const applicationFee = cf + rh + fp + pf
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3210"
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -172,6 +202,14 @@ export async function draagBij(
       },
     ],
     metadata: { contribution_id: bijdrage.id },
+    ...(destination
+      ? {
+          payment_intent_data: {
+            application_fee_amount: applicationFee,
+            transfer_data: { destination },
+          },
+        }
+      : {}),
     success_url: `${appUrl}/app/collecte/${collectieId}?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/app/collecte/${collectieId}?geannuleerd=1`,
   })
