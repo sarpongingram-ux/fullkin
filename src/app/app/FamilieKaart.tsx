@@ -67,6 +67,7 @@ export function FamilieKaart({
   dromen,
   mijnPersonId,
   mijnDroom,
+  isCoFounder,
 }: {
   voornaam: string
   familieNaam: string
@@ -76,17 +77,28 @@ export function FamilieKaart({
   dromen: Droom[]
   mijnPersonId: string | null
   mijnDroom: Droom | null
+  isCoFounder: boolean
 }) {
   const anderenDromen = dromen.filter((d) => d.person_id !== mijnPersonId)
   return (
     <main className="min-h-screen max-w-2xl mx-auto px-5 py-10">
-      <header className="mb-8">
-        <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
-          FULLKIN
-        </p>
-        <h1 className="text-2xl font-bold text-inkt mt-1">
-          Dag {voornaam}.
-        </h1>
+      <header className="mb-8 flex items-start justify-between">
+        <div>
+          <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
+            FULLKIN
+          </p>
+          <h1 className="text-2xl font-bold text-inkt mt-1">
+            Dag {voornaam}.
+          </h1>
+        </div>
+        {isCoFounder && (
+          <Link
+            href="/app/dashboard"
+            className="mt-1 rounded-full bg-inkt text-white text-sm px-4 py-2 hover:opacity-90 transition shrink-0"
+          >
+            Dashboard
+          </Link>
+        )}
       </header>
 
       {/* Het zinnetje uit sectie 6 — dit is de kern van laag 1. */}

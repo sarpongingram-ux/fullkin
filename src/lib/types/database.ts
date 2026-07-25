@@ -341,6 +341,35 @@ export type Database = {
         Args: { max_depth?: number; p: string }
         Returns: { generations: number; person_id: string }[]
       }
+      cofounder_dashboard: {
+        Args: Record<string, never>
+        Returns: {
+          leden_totaal: number
+          leden_deelnemend: number
+          leden_sluimerend: number
+          leden_onbekend: number
+          groei_maand: number
+          volume_totaal_cents: number
+          volume_maand_cents: number
+          volume_jaar_cents: number
+          cofounder_verdienste_cents: number
+          rolpool_cents: number
+          pot_saldo_cents: number
+          dromen_actief: number
+          dromen_bereikt: number
+          netwerksterkte: number
+        }[]
+      }
+      family_roles: {
+        Args: Record<string, never>
+        Returns: {
+          role: Database["public"]["Enums"]["family_role"]
+          drempel: number
+          ontgrendeld: boolean
+          houder_id: string | null
+          houder_naam: string | null
+        }[]
+      }
       family_dreams: {
         Args: Record<string, never>
         Returns: {

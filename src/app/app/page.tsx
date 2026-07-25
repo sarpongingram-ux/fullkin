@@ -41,6 +41,11 @@ export default async function AppHome() {
         .single()
     : { data: null }
 
+  // Ben ik Co-Founder? Dan toon ik de dashboard-link.
+  const { data: isCoFounder } = mij
+    ? await supabase.rpc("has_role", { net: mij.network_id, r: "co_founder" })
+    : { data: false }
+
   // Lopende collectes, met de naam van de begunstigde (apart opgehaald).
   const { data: collectes } = await supabase
     .from("collections")
@@ -89,6 +94,7 @@ export default async function AppHome() {
       dromen={alleDromen}
       mijnPersonId={meId}
       mijnDroom={mijnDroom}
+      isCoFounder={!!isCoFounder}
     />
   )
 }
