@@ -1,0 +1,138 @@
+"use client"
+
+import type { Enums } from "@/lib/types/database"
+
+type Lid = {
+  person_id: string
+  first_name: string
+  last_name: string
+  city: string | null
+  country: string | null
+  photo_url: string | null
+  is_claimed: boolean
+  label: string
+  status: Enums<"contact_status">
+  last_contact: string | null
+}
+
+type Stats = { total: number; known: number; silent: number; out_of_touch: number }
+
+const statusKleur: Record<Enums<"contact_status">, string> = {
+  verbonden: "var(--groen)",
+  stil: "var(--blauw)",
+  herstellend: "var(--goud)",
+}
+
+function initialen(voor: string, achter: string) {
+  return (voor[0] ?? "") + (achter[0] ?? "")
+}
+
+function jaarGeleden(iso: string | null): boolean {
+  if (!iso) return true
+  return new Date(iso) < new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
+}
+
+export function FamilieKaart({
+  voornaam,
+  stats,
+  leden,
+}: {
+  voornaam: string
+  stats: Stats
+  leden: Lid[]
+}) {
+  return (
+    <main className="min-h-screen max-w-2xl mx-auto px-5 py-10">
+      <header className="mb-8">
+        <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
+          FULLKIN
+        </p>
+        <h1 className="text-2xl font-bold text-inkt mt-1">
+          Dag {voornaam}.
+        </h1>
+      </header>
+
+      {/* Het zinnetje uit sectie 6 — dit is de kern van laag 1. */}
+      <section className="bg-oppervlak rounded-2xl border border-rand p-6 mb-6">
+        <p className="text-lg text-inkt leading-relaxed">
+          Je familie bestaat uit{" "}
+          <strong className="text-terracotta">{stats.total} personen</strong>.
+          {stats.known > 0 && (
+            <>
+              {" "}Je kent er{" "}
+              <strong className="text-groen">{stats.known}</strong>.
+            </>
+          )}
+          {stats.out_of_touch > 0 && (
+            <>
+              {" "}Met{" "}
+              <strong className="text-goud">{stats.out_of_touch}</strong> heb je
+              al meer dan een jaar geen contact gehad.
+            </>
+          )}
+        </p>
+      </section>
+
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-semibold text-inkt-zacht uppercase tracking-wide">
+          Jouw familie
+        </h2>
+        <span className="text-xs text-inkt-zacht">{leden.length} leden</span>
+      </div>
+
+      <ul className="space-y-2">
+        {leden.map((lid) => (
+          <li
+            key={lid.person_id}
+            className="bg-oppervlak rounded-xl border border-rand p-3 flex items-center gap-3"
+          >
+            <div
+              className="w-11 h-11 rounded-full flex items-center justify-center text-white font-semibold shrink-0"
+              style={{ background: "var(--terracotta)" }}
+            >
+              {lid.photo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={lid.photo_url}
+                  alt=""
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                initialen(lid.first_name, lid.last_name)
+              )}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-inkt truncate">
+                {lid.first_name} {lid.last_name}
+              </p>
+              <p className="text-sm text-inkt-zacht">
+                {lid.label}
+                {lid.city ? ` · ${lid.city}` : ""}
+              </p>
+            </div>
+
+            <div className="text-right shrink-0">
+              <span
+                className="inline-block w-2.5 h-2.5 rounded-full"
+                style={{ background: statusKleur[lid.status] }}
+                title={lid.status}
+              />
+              {!lid.is_claimed && (
+                <p className="text-[11px] text-inkt-zacht mt-1">nog niet actief</p>
+              )}
+              {lid.is_claimed && jaarGeleden(lid.last_contact) && lid.status !== "stil" && (
+                <p className="text-[11px] text-goud mt-1">lang stil</p>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <p className="mt-10 text-center text-xs text-inkt-zacht italic">
+        Familie kun je niet verwijderen. Alleen de afstand tussen jullie kan
+        kleiner worden.
+      </p>
+    </main>
+  )
+}

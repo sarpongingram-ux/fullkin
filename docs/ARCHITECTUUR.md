@@ -5,9 +5,16 @@ het schema is zoals het is, zodat latere keuzes de kern niet ondermijnen.
 
 ## Status
 
-Fase 1 in aanbouw. Migraties geschreven, **nog niet gedraaid** — er was geen
-database beschikbaar bij het schrijven. Alles hieronder is ontwerp, geen
-geverifieerd gedrag.
+Fase 1 — eerste verticale doorsnede werkend en geverifieerd in de browser
+(25 juli 2026). Supabase-project `fbphiwipvhmkvthmgvhv` (EU, eu-west-1). Zes
+migraties toegepast; security advisor schoon (alleen bewuste WARNs, zie onder).
+Een testfamilie van drie generaties bevestigt dat de afgeleide relatielabels
+(grootouder, oom/tante, neef/nicht) in alle richtingen kloppen, en dat een
+`DELETE` op relaties niets doet.
+
+Werkend: inloggen → familiekaart met "je familie bestaat uit N personen, je
+kent er M". Nog te bouwen in fase 1: personen toevoegen (kaart laten groeien),
+bulk uitnodigen, life events + collecte via Stripe, uitbetaling.
 
 ## De vier beslissingen die vastliggen
 
@@ -89,7 +96,7 @@ Actiepunt buiten de code: kansspeljurist raadplegen vóór fase 3 live gaat.
 
 | Fase | Periode | Inhoud | Status |
 |---|---|---|---|
-| 1 — De Kern | Maand 1-3 | Familiekaart, uitnodigen, profielen, collecte, uitbetaling | In aanbouw |
+| 1 — De Kern | Maand 1-3 | Familiekaart, uitnodigen, profielen, collecte, uitbetaling | Kaart werkend; rest in aanbouw |
 | 2 — De Economie | Maand 4-7 | Droom Wallet, Familie Pot, rollen, Co-Founder dashboard | |
 | 3 — Het Feest | Maand 8-11 | Het Rad, De Stem, titels, videocall | Juridisch geblokkeerd |
 | 4 — De Schaal | Maand 12-20 | Ambassadeurs, meertaligheid, mobiele app | |
@@ -100,3 +107,27 @@ Actiepunt buiten de code: kansspeljurist raadplegen vóór fase 3 live gaat.
 Next.js + Supabase + Stripe Connect, web eerst. React Native volgt in fase 4 op
 dezelfde backend. Web eerst omdat het sneller itereert en direct testbaar is met
 echte familie — geen App Store review tussen jou en je eerste transactie.
+
+## Bewust geaccepteerde security-warnings
+
+De Supabase advisor meldt 5 WARNs van het type "authenticated kan deze SECURITY
+DEFINER functie aanroepen". Dit is nodig en veilig:
+
+- `me()`, `my_networks()`, `has_role()` draaien *binnen* de RLS-policies. Zonder
+  SECURITY DEFINER krijg je oneindige policy-recursie. Ze geven alleen de eigen
+  identiteit/netwerken terug.
+- `collection_contributors()`, `collection_total()` zijn de anonimiteitsgrens.
+  Ze aggregeren langs de contributions-RLS heen, met een netwerkcheck erin, en
+  geven nooit een individueel bedrag terug.
+
+## Lokaal draaien
+
+```
+cd ~/Desktop/fullkin
+PORT=3210 npm run dev      # http://localhost:3210
+```
+
+Demo-login: `kofi@fullkin.test` / `fullkin-demo-2026` (alleen dev-database).
+
+Env staat in `.env.local` (niet in git). Na een migratie de types
+hergenereren en `src/lib/types/database.ts` bijwerken.

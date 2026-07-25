@@ -1,26 +1,52 @@
 @import "tailwindcss";
 
+/*
+  Fullkin — warm, menselijk, nooit koud of technisch (Masterdocument sectie 2).
+  Aardetinten: terracotta, warm goud, diep bruin. Geen strak tech-blauw.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --achtergrond: #fdf8f3;
+  --oppervlak: #ffffff;
+  --inkt: #2e2320;
+  --inkt-zacht: #6b5d54;
+  --terracotta: #c4571f;
+  --terracotta-diep: #a8451a;
+  --goud: #d99a2b;
+  --klei: #f4e6d8;
+  --groen: #4a7c59;
+  --blauw: #5b7a99;
+  --rand: #ece0d4;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-achtergrond: var(--achtergrond);
+  --color-oppervlak: var(--oppervlak);
+  --color-inkt: var(--inkt);
+  --color-inkt-zacht: var(--inkt-zacht);
+  --color-terracotta: var(--terracotta);
+  --color-terracotta-diep: var(--terracotta-diep);
+  --color-goud: var(--goud);
+  --color-klei: var(--klei);
+  --color-groen: var(--groen);
+  --color-blauw: var(--blauw);
+  --color-rand: var(--rand);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --achtergrond: #1c1613;
+    --oppervlak: #241c18;
+    --inkt: #f4e9e0;
+    --inkt-zacht: #b8a99d;
+    --klei: #33271f;
+    --rand: #3a2c23;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--achtergrond);
+  color: var(--inkt);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
