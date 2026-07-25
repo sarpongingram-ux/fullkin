@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server"
 import { getStripe } from "@/lib/stripe/server"
 import { kiesProvider } from "@/lib/payout/provider"
 import { redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
 
 export type StartResultaat = { ok: false; fout: string }
 // (Bij succes eindigt de functie in een redirect naar Stripe.)
@@ -117,5 +116,7 @@ export async function ververUitbetaalStatus(): Promise<void> {
   } catch {
     // Stripe onbereikbaar of account verwijderd — status ongewijzigd laten.
   }
-  revalidatePath("/app/uitbetaling")
+  // Let op: geen revalidatePath hier — deze functie draait tijdens het renderen
+  // van de pagina (vanuit de server component), en dan is revalidatePath niet
+  // toegestaan. De pagina leest de status direct hierna zelf vers in.
 }
