@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Bijdragen } from "./Bijdragen"
+import { settleFromSession } from "@/lib/stripe/settle"
 
 function euro(cents: number) {
   return new Intl.NumberFormat("nl-NL", {
@@ -16,10 +17,19 @@ function initialen(voor: string, achter: string) {
 
 export default async function CollectiePagina({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ session_id?: string }>
 }) {
   const { id } = await params
+  const { session_id } = await searchParams
+
+  // Terug van Stripe? Verifieer de betaling en reken direct af.
+  if (session_id) {
+    await settleFromSession(session_id)
+  }
+
   const supabase = await createClient()
 
   const {

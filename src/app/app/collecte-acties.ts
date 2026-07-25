@@ -172,7 +172,7 @@ export async function draagBij(
       },
     ],
     metadata: { contribution_id: bijdrage.id },
-    success_url: `${appUrl}/app/collecte/${collectieId}?betaald=1`,
+    success_url: `${appUrl}/app/collecte/${collectieId}?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/app/collecte/${collectieId}?geannuleerd=1`,
   })
 
