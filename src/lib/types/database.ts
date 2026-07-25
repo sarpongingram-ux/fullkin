@@ -108,6 +108,32 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["event_suggestions"]["Insert"]>
         Relationships: []
       }
+      dreams: {
+        Row: {
+          collection_id: string | null
+          created_at: string
+          fulfilled_at: string | null
+          id: string
+          network_id: string
+          person_id: string
+          status: Database["public"]["Enums"]["dream_status"]
+          target_cents: number
+          title: string
+        }
+        Insert: {
+          collection_id?: string | null
+          created_at?: string
+          fulfilled_at?: string | null
+          id?: string
+          network_id: string
+          person_id: string
+          status?: Database["public"]["Enums"]["dream_status"]
+          target_cents: number
+          title: string
+        }
+        Update: Partial<Database["public"]["Tables"]["dreams"]["Insert"]>
+        Relationships: []
+      }
       family_networks: {
         Row: { created_at: string; home_country: string | null; id: string; name: string }
         Insert: { created_at?: string; home_country?: string | null; id?: string; name: string }
@@ -315,6 +341,21 @@ export type Database = {
         Args: { max_depth?: number; p: string }
         Returns: { generations: number; person_id: string }[]
       }
+      family_dreams: {
+        Args: Record<string, never>
+        Returns: {
+          dream_id: string
+          person_id: string
+          first_name: string
+          last_name: string
+          photo_url: string | null
+          title: string
+          target_cents: number
+          raised_cents: number
+          collection_id: string | null
+          status: Database["public"]["Enums"]["dream_status"]
+        }[]
+      }
       family_map: {
         Args: { me: string }
         Returns: {
@@ -367,6 +408,7 @@ export type Database = {
       collection_status: "concept" | "open" | "gesloten" | "uitbetaald"
       contact_status: "verbonden" | "stil" | "herstellend"
       contribution_status: "wachtend" | "betaald" | "mislukt" | "terugbetaald"
+      dream_status: "actief" | "vervuld" | "gepauzeerd"
       family_role:
         | "co_founder"
         | "events_manager"

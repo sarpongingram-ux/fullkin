@@ -5,8 +5,20 @@ import Link from "next/link"
 import { FamilielidToevoegen } from "./FamilielidToevoegen"
 import { UitnodigenKnop } from "./UitnodigenKnop"
 import { StartCollecte } from "./StartCollecte"
+import { MijnDroom } from "./MijnDroom"
 
 type Collecte = { id: string; title: string; voornaam: string }
+
+export type Droom = {
+  dream_id: string
+  person_id: string
+  first_name: string
+  last_name: string
+  title: string
+  target_cents: number
+  raised_cents: number
+  collection_id: string | null
+}
 
 type Lid = {
   person_id: string
@@ -38,19 +50,34 @@ function jaarGeleden(iso: string | null): boolean {
   return new Date(iso) < new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
 }
 
+function euro(cents: number) {
+  return new Intl.NumberFormat("nl-NL", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(cents / 100)
+}
+
 export function FamilieKaart({
   voornaam,
   familieNaam,
   stats,
   leden,
   collectes,
+  dromen,
+  mijnPersonId,
+  mijnDroom,
 }: {
   voornaam: string
   familieNaam: string
   stats: Stats
   leden: Lid[]
   collectes: Collecte[]
+  dromen: Droom[]
+  mijnPersonId: string | null
+  mijnDroom: Droom | null
 }) {
+  const anderenDromen = dromen.filter((d) => d.person_id !== mijnPersonId)
   return (
     <main className="min-h-screen max-w-2xl mx-auto px-5 py-10">
       <header className="mb-8">
@@ -82,6 +109,54 @@ export function FamilieKaart({
           )}
         </p>
       </section>
+
+      {/* Mijn droom — één zin, één bedrag, zichtbare voortgang (sectie 7.2). */}
+      <MijnDroom
+        huidigeTitel={mijnDroom?.title ?? null}
+        huidigStreefCents={mijnDroom?.target_cents ?? null}
+        opgehaaldCents={mijnDroom?.raised_cents ?? 0}
+      />
+
+      {/* Dromen van de familie — waar je aan kunt bijdragen. */}
+      {anderenDromen.length > 0 && (
+        <section className="mb-4">
+          <h2 className="text-sm font-semibold text-inkt-zacht uppercase tracking-wide mb-2">
+            Dromen in de familie
+          </h2>
+          <ul className="space-y-2">
+            {anderenDromen.map((d) => {
+              const pct = Math.min(
+                100,
+                Math.round((d.raised_cents / d.target_cents) * 100),
+              )
+              return (
+                <li key={d.dream_id}>
+                  <Link
+                    href={d.collection_id ? `/app/collecte/${d.collection_id}` : "#"}
+                    className="block bg-oppervlak rounded-xl border border-rand p-4 hover:border-goud transition"
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium text-inkt">{d.title}</p>
+                      <span className="text-xs text-inkt-zacht">
+                        {d.first_name}
+                      </span>
+                    </div>
+                    <div className="mt-2 h-2 rounded-full bg-klei overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-goud"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-inkt-zacht mt-1.5">
+                      {euro(d.raised_cents)} van {euro(d.target_cents)} · draag bij →
+                    </p>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      )}
 
       {/* Lopende collectes — de economische hartslag, bovenaan. */}
       {collectes.length > 0 && (

@@ -65,6 +65,20 @@ export default async function AppHome() {
     voornaam: naamVan.get(c.beneficiary_id) ?? "",
   }))
 
+  // Actieve dromen in de familie, met voortgang.
+  const { data: dromen } = await supabase.rpc("family_dreams")
+  const alleDromen = (dromen ?? []).map((d) => ({
+    dream_id: d.dream_id,
+    person_id: d.person_id,
+    first_name: d.first_name,
+    last_name: d.last_name,
+    title: d.title,
+    target_cents: d.target_cents,
+    raised_cents: Number(d.raised_cents),
+    collection_id: d.collection_id,
+  }))
+  const mijnDroom = alleDromen.find((d) => d.person_id === meId) ?? null
+
   return (
     <FamilieKaart
       voornaam={mij?.first_name ?? "familielid"}
@@ -72,6 +86,9 @@ export default async function AppHome() {
       stats={stats ?? { total: 0, known: 0, silent: 0, out_of_touch: 0 }}
       leden={kaart ?? []}
       collectes={lopende}
+      dromen={alleDromen}
+      mijnPersonId={meId}
+      mijnDroom={mijnDroom}
     />
   )
 }
