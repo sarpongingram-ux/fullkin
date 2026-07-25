@@ -353,6 +353,7 @@ export type Database = {
       me: { Args: Record<string, never>; Returns: string }
       my_networks: { Args: Record<string, never>; Returns: string[] }
       relation_label: { Args: { me: string; other: string }; Returns: string }
+      relation_route: { Args: { me: string; other: string }; Returns: string }
       settle_contribution: {
         Args: { p_contribution: string; p_intent: string | null }
         Returns: undefined
