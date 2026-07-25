@@ -5,9 +5,11 @@ import Link from "next/link"
 import { FamilielidToevoegen } from "./FamilielidToevoegen"
 import { UitnodigenKnop } from "./UitnodigenKnop"
 import { StartCollecte } from "./StartCollecte"
+import { StartBusiness } from "./StartBusiness"
 import { MijnDroom } from "./MijnDroom"
 
 type Collecte = { id: string; title: string; voornaam: string }
+type BusinessDroom = { id: string; name: string; voornaam: string; status: string }
 
 export type Droom = {
   dream_id: string
@@ -68,6 +70,7 @@ export function FamilieKaart({
   mijnPersonId,
   mijnDroom,
   isCoFounder,
+  businessDromen,
 }: {
   voornaam: string
   familieNaam: string
@@ -78,6 +81,7 @@ export function FamilieKaart({
   mijnPersonId: string | null
   mijnDroom: Droom | null
   isCoFounder: boolean
+  businessDromen: BusinessDroom[]
 }) {
   const anderenDromen = dromen.filter((d) => d.person_id !== mijnPersonId)
   return (
@@ -170,6 +174,35 @@ export function FamilieKaart({
         </section>
       )}
 
+      {/* Business Dromen — familie als investeerder. */}
+      {businessDromen.length > 0 && (
+        <section className="mb-4">
+          <h2 className="text-sm font-semibold text-inkt-zacht uppercase tracking-wide mb-2">
+            Business Dromen
+          </h2>
+          <ul className="space-y-2">
+            {businessDromen.map((b) => (
+              <li key={b.id}>
+                <Link
+                  href={`/app/business/${b.id}`}
+                  className="block bg-oppervlak rounded-xl border border-blauw/40 p-4 hover:border-blauw transition"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium text-inkt">{b.name}</p>
+                    <span className="text-xs text-inkt-zacht">
+                      {b.status === "stemming" ? "stemming loopt" : "goedgekeurd"}
+                    </span>
+                  </div>
+                  <p className="text-sm text-inkt-zacht">
+                    van {b.voornaam} · {b.status === "stemming" ? "stem mee →" : "bekijk →"}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {/* Lopende collectes — de economische hartslag, bovenaan. */}
       {collectes.length > 0 && (
         <section className="mb-4">
@@ -197,6 +230,8 @@ export function FamilieKaart({
       <div className="mb-3">
         <StartCollecte leden={leden} />
       </div>
+
+      <StartBusiness />
 
       <div className="mb-4">
         <FamilielidToevoegen />

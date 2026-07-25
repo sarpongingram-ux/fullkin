@@ -108,7 +108,7 @@ Actiepunt buiten de code: kansspeljurist raadplegen vóór fase 3 live gaat.
 | Fase | Periode | Inhoud | Status |
 |---|---|---|---|
 | 1 — De Kern | Maand 1-3 | Familiekaart, uitnodigen, profielen, collecte, uitbetaling | **Compleet** (Stripe-sleutels nog invullen) |
-| 2 — De Economie | Maand 4-7 | Droom Wallet, Familie Pot, rollen, Co-Founder dashboard | Droom Wallet, rollen + dashboard werkend; Familie Pot + Business Droom volgen |
+| 2 — De Economie | Maand 4-7 | Droom Wallet, Familie Pot, rollen, Co-Founder dashboard | Droom Wallet, rollen + dashboard, Business Droom werkend; alleen Familie Pot rest |
 | 3 — Het Feest | Maand 8-11 | Het Rad, De Stem, titels, videocall | Juridisch geblokkeerd |
 | 4 — De Schaal | Maand 12-20 | Ambassadeurs, meertaligheid, mobiele app | |
 | 5 — Infrastructuur | Jaar 3+ | Medische partnerships, bank partnerships | |

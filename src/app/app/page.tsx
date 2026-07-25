@@ -70,6 +70,24 @@ export default async function AppHome() {
     voornaam: naamVan.get(c.beneficiary_id) ?? "",
   }))
 
+  // Business Dromen in de familie (in stemming of goedgekeurd).
+  const { data: businessRaw } = await supabase
+    .from("business_dreams")
+    .select("id, name, person_id, status")
+    .in("status", ["stemming", "goedgekeurd"])
+    .order("created_at", { ascending: false })
+  const bIds = [...new Set((businessRaw ?? []).map((b) => b.person_id))]
+  const { data: bOndernemers } = bIds.length
+    ? await supabase.from("persons").select("id, first_name").in("id", bIds)
+    : { data: [] }
+  const bNaam = new Map((bOndernemers ?? []).map((p) => [p.id, p.first_name]))
+  const businessDromen = (businessRaw ?? []).map((b) => ({
+    id: b.id,
+    name: b.name,
+    voornaam: bNaam.get(b.person_id) ?? "",
+    status: b.status,
+  }))
+
   // Actieve dromen in de familie, met voortgang.
   const { data: dromen } = await supabase.rpc("family_dreams")
   const alleDromen = (dromen ?? []).map((d) => ({
@@ -95,6 +113,7 @@ export default async function AppHome() {
       mijnPersonId={meId}
       mijnDroom={mijnDroom}
       isCoFounder={!!isCoFounder}
+      businessDromen={businessDromen}
     />
   )
 }

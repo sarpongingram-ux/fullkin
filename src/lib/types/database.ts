@@ -108,6 +108,98 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["event_suggestions"]["Insert"]>
         Relationships: []
       }
+      business_dreams: {
+        Row: {
+          id: string
+          network_id: string
+          person_id: string
+          name: string
+          description: string
+          target_cents: number
+          expected_revenue_cents: number | null
+          give_back: string | null
+          status: Database["public"]["Enums"]["business_status"]
+          collection_id: string | null
+          created_at: string
+          approved_at: string | null
+        }
+        Insert: {
+          id?: string
+          network_id: string
+          person_id: string
+          name: string
+          description: string
+          target_cents: number
+          expected_revenue_cents?: number | null
+          give_back?: string | null
+          status?: Database["public"]["Enums"]["business_status"]
+          collection_id?: string | null
+          created_at?: string
+          approved_at?: string | null
+        }
+        Update: Partial<Database["public"]["Tables"]["business_dreams"]["Insert"]>
+        Relationships: []
+      }
+      business_questions: {
+        Row: {
+          id: string
+          business_id: string
+          asker_id: string
+          question: string
+          answer: string | null
+          answered_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          business_id: string
+          asker_id: string
+          question: string
+          answer?: string | null
+          answered_at?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["business_questions"]["Insert"]>
+        Relationships: []
+      }
+      business_votes: {
+        Row: {
+          id: string
+          business_id: string
+          voter_id: string
+          approve: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          business_id: string
+          voter_id: string
+          approve: boolean
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["business_votes"]["Insert"]>
+        Relationships: []
+      }
+      business_updates: {
+        Row: {
+          id: string
+          business_id: string
+          photo_url: string | null
+          metric: string | null
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          business_id: string
+          photo_url?: string | null
+          metric?: string | null
+          note?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["business_updates"]["Insert"]>
+        Relationships: []
+      }
       dreams: {
         Row: {
           collection_id: string | null
@@ -341,6 +433,18 @@ export type Database = {
         Args: { max_depth?: number; p: string }
         Returns: { generations: number; person_id: string }[]
       }
+      business_tally: {
+        Args: { bid: string }
+        Returns: {
+          ja: number
+          nee: number
+          actief: number
+          nodig: number
+          goedgekeurd: boolean
+          mijn_stem: boolean | null
+        }[]
+      }
+      approve_business: { Args: { bid: string }; Returns: string | null }
       cofounder_dashboard: {
         Args: Record<string, never>
         Returns: {
@@ -436,6 +540,7 @@ export type Database = {
     Enums: {
       collection_status: "concept" | "open" | "gesloten" | "uitbetaald"
       contact_status: "verbonden" | "stil" | "herstellend"
+      business_status: "stemming" | "goedgekeurd" | "afgewezen" | "afgerond"
       contribution_status: "wachtend" | "betaald" | "mislukt" | "terugbetaald"
       dream_status: "actief" | "vervuld" | "gepauzeerd"
       family_role:
