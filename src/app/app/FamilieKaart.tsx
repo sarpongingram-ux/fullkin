@@ -1,8 +1,12 @@
 "use client"
 
 import type { Enums } from "@/lib/types/database"
+import Link from "next/link"
 import { FamilielidToevoegen } from "./FamilielidToevoegen"
 import { UitnodigenKnop } from "./UitnodigenKnop"
+import { StartCollecte } from "./StartCollecte"
+
+type Collecte = { id: string; title: string; voornaam: string }
 
 type Lid = {
   person_id: string
@@ -39,11 +43,13 @@ export function FamilieKaart({
   familieNaam,
   stats,
   leden,
+  collectes,
 }: {
   voornaam: string
   familieNaam: string
   stats: Stats
   leden: Lid[]
+  collectes: Collecte[]
 }) {
   return (
     <main className="min-h-screen max-w-2xl mx-auto px-5 py-10">
@@ -76,6 +82,34 @@ export function FamilieKaart({
           )}
         </p>
       </section>
+
+      {/* Lopende collectes — de economische hartslag, bovenaan. */}
+      {collectes.length > 0 && (
+        <section className="mb-4">
+          <h2 className="text-sm font-semibold text-inkt-zacht uppercase tracking-wide mb-2">
+            Lopende collectes
+          </h2>
+          <ul className="space-y-2">
+            {collectes.map((c) => (
+              <li key={c.id}>
+                <Link
+                  href={`/app/collecte/${c.id}`}
+                  className="block bg-oppervlak rounded-xl border border-goud/40 p-4 hover:border-goud transition"
+                >
+                  <p className="font-medium text-inkt">{c.title}</p>
+                  <p className="text-sm text-inkt-zacht">
+                    voor {c.voornaam} · draag bij →
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <div className="mb-3">
+        <StartCollecte leden={leden} />
+      </div>
 
       <div className="mb-4">
         <FamilielidToevoegen />

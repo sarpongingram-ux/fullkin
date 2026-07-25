@@ -12,11 +12,20 @@ Een testfamilie van drie generaties bevestigt dat de afgeleide relatielabels
 (grootouder, oom/tante, neef/nicht) in alle richtingen kloppen, en dat een
 `DELETE` op relaties niets doet.
 
-Werkend: inloggen → familiekaart → familielid toevoegen → uitnodigen → claimen.
-De hele onboarding-lus is end-to-end getest: Kofi nodigde Kwame uit, Kwame
-claimde zijn plek en ziet nu de kaart vanuit zijn eigen perspectief (ouders in
-plaats van grootouders). Nog te bouwen in fase 1: life events + collecte via
-Stripe, uitbetaling.
+**Fase 1 is compleet en end-to-end getest.** De volledige kern loopt: inloggen →
+familiekaart → familielid toevoegen → uitnodigen → claimen → collecte starten →
+bijdragen → afrekenen met 5%-splitsing → anonimiteitsweergave.
+
+De collecte "Verjaardag van Kwame" bewees de kernbelofte: Kofi gaf €5, Ama €200,
+Abena €0,75 anoniem. De pagina toont totaal €205,75 en drie namen (waarvan één
+"Een familielid"), maar nergens een individueel bedrag. De 5%-splitsing klopt op
+de cent, met de afrondingsrest naar de ontvanger.
+
+Openstaand voor productie: Stripe-sleutels invullen (`.env.local`) zodat de
+echte Checkout-flow en webhook lopen; nu draait de collecte in dev-modus waarin
+bijdragen handmatig worden afgerekend via `settle_contribution`. En: geld gaat
+nu naar het platform-account; om het conform sectie 8 rechtstreeks naar de
+ontvanger te laten gaan is Stripe Connect-onboarding van de begunstigde nodig.
 
 ## De vier beslissingen die vastliggen
 
@@ -98,7 +107,7 @@ Actiepunt buiten de code: kansspeljurist raadplegen vóór fase 3 live gaat.
 
 | Fase | Periode | Inhoud | Status |
 |---|---|---|---|
-| 1 — De Kern | Maand 1-3 | Familiekaart, uitnodigen, profielen, collecte, uitbetaling | Kaart werkend; rest in aanbouw |
+| 1 — De Kern | Maand 1-3 | Familiekaart, uitnodigen, profielen, collecte, uitbetaling | **Compleet** (Stripe-sleutels nog invullen) |
 | 2 — De Economie | Maand 4-7 | Droom Wallet, Familie Pot, rollen, Co-Founder dashboard | |
 | 3 — Het Feest | Maand 8-11 | Het Rad, De Stem, titels, videocall | Juridisch geblokkeerd |
 | 4 — De Schaal | Maand 12-20 | Ambassadeurs, meertaligheid, mobiele app | |

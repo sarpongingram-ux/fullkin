@@ -41,12 +41,37 @@ export default async function AppHome() {
         .single()
     : { data: null }
 
+  // Lopende collectes, met de naam van de begunstigde (apart opgehaald).
+  const { data: collectes } = await supabase
+    .from("collections")
+    .select("id, title, beneficiary_id")
+    .eq("status", "open")
+    .order("created_at", { ascending: false })
+
+  const beneficiaryIds = (collectes ?? []).map((c) => c.beneficiary_id)
+  const { data: begunstigden } = beneficiaryIds.length
+    ? await supabase
+        .from("persons")
+        .select("id, first_name")
+        .in("id", beneficiaryIds)
+    : { data: [] }
+  const naamVan = new Map(
+    (begunstigden ?? []).map((p) => [p.id, p.first_name]),
+  )
+
+  const lopende = (collectes ?? []).map((c) => ({
+    id: c.id,
+    title: c.title,
+    voornaam: naamVan.get(c.beneficiary_id) ?? "",
+  }))
+
   return (
     <FamilieKaart
       voornaam={mij?.first_name ?? "familielid"}
       familieNaam={netwerk?.name ?? "je familie"}
       stats={stats ?? { total: 0, known: 0, silent: 0, out_of_touch: 0 }}
       leden={kaart ?? []}
+      collectes={lopende}
     />
   )
 }
