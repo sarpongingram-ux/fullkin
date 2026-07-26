@@ -5,6 +5,7 @@ import { getStripe } from "@/lib/stripe/server"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import type { Enums } from "@/lib/types/database"
+import type Stripe from "stripe"
 
 // ---------------------------------------------------------------------------
 // Een collecte starten voor een familielid bij een life event.
@@ -189,7 +190,7 @@ export async function draagBij(
   const applicationFee = cf + rh + fp + pf
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3210"
-  const session = await stripe.checkout.sessions.create({
+  const params: Stripe.Checkout.SessionCreateParams = {
     mode: "payment",
     line_items: [
       {
@@ -212,7 +213,12 @@ export async function draagBij(
       : {}),
     success_url: `${appUrl}/app/collecte/${collectieId}?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/app/collecte/${collectieId}?geannuleerd=1`,
-  })
+  }
+  // Managed Payments (standaard aan op nieuwe accounts) eist een tax-code per
+  // line item; voor familiebijdragen zetten we het per betaling uit.
+  ;(params as Record<string, unknown>).managed_payments = { enabled: false }
+
+  const session = await stripe.checkout.sessions.create(params)
 
   redirect(session.url!)
 }

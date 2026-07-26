@@ -95,30 +95,28 @@ export function FamilieKaart({
             Dag {voornaam}.
           </h1>
         </div>
-        {isCoFounder && (
-          <div className="flex gap-2 shrink-0">
-            <Link
-              href="/app/uitbetaling"
-              className="mt-1 rounded-full border border-rand text-inkt text-sm px-4 py-2 hover:bg-oppervlak transition"
-            >
-              Uitbetaling
-            </Link>
+        <div className="flex flex-wrap gap-2 justify-end shrink-0 max-w-[55%]">
+          <Link
+            href="/app/pot"
+            className="mt-1 rounded-full border border-rand text-inkt text-sm px-4 py-2 hover:bg-oppervlak transition"
+          >
+            Pot
+          </Link>
+          <Link
+            href="/app/uitbetaling"
+            className="mt-1 rounded-full border border-rand text-inkt text-sm px-4 py-2 hover:bg-oppervlak transition"
+          >
+            Uitbetaling
+          </Link>
+          {isCoFounder && (
             <Link
               href="/app/dashboard"
               className="mt-1 rounded-full bg-inkt text-white text-sm px-4 py-2 hover:opacity-90 transition"
             >
               Dashboard
             </Link>
-          </div>
-        )}
-        {!isCoFounder && (
-          <Link
-            href="/app/uitbetaling"
-            className="mt-1 rounded-full border border-rand text-inkt text-sm px-4 py-2 hover:bg-oppervlak transition shrink-0"
-          >
-            Uitbetaling
-          </Link>
-        )}
+          )}
+        </div>
       </header>
 
       {/* Het zinnetje uit sectie 6 — dit is de kern van laag 1. */}

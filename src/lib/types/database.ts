@@ -200,6 +200,32 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["business_updates"]["Insert"]>
         Relationships: []
       }
+      pot_ledger: {
+        Row: {
+          id: string
+          network_id: string
+          kind: Database["public"]["Enums"]["pot_entry_kind"]
+          amount_cents: number
+          contribution_id: string | null
+          person_id: string | null
+          stripe_ref: string | null
+          description: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          network_id: string
+          kind: Database["public"]["Enums"]["pot_entry_kind"]
+          amount_cents: number
+          contribution_id?: string | null
+          person_id?: string | null
+          stripe_ref?: string | null
+          description?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["pot_ledger"]["Insert"]>
+        Relationships: []
+      }
       payout_accounts: {
         Row: {
           id: string
@@ -553,6 +579,20 @@ export type Database = {
       me: { Args: Record<string, never>; Returns: string }
       my_networks: { Args: Record<string, never>; Returns: string[] }
       payout_ready: { Args: { p: string }; Returns: boolean }
+      my_pot_summary: {
+        Args: Record<string, never>
+        Returns: {
+          saldo_cents: number
+          uit_1pct_cents: number
+          uit_donaties_cents: number
+          uitgekeerd_cents: number
+          donatie_aantal: number
+        }[]
+      }
+      record_pot_donation: {
+        Args: { p_network: string; p_person: string; p_amount: number; p_ref: string }
+        Returns: undefined
+      }
       relation_label: { Args: { me: string; other: string }; Returns: string }
       relation_route: { Args: { me: string; other: string }; Returns: string }
       settle_contribution: {
@@ -582,6 +622,7 @@ export type Database = {
       invite_status: "open" | "geaccepteerd" | "verlopen"
       payout_provider: "stripe" | "flutterwave"
       payout_status: "onboarding" | "ready" | "restricted"
+      pot_entry_kind: "transactie_1pct" | "maandbijdrage" | "donatie" | "uitkering"
       life_event_kind:
         | "verjaardag"
         | "ronde_verjaardag"
