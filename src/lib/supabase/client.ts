@@ -9,5 +9,9 @@ export function createClient() {
   return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    // In dev (bv. testen via een LAN-IP over http) mag de sessie-cookie geen
+    // Secure-vlag hebben, anders weigert de browser 'm. In productie (https)
+    // blijft Secure aan.
+    { cookieOptions: { secure: process.env.NODE_ENV === "production" } },
   )
 }
