@@ -1,11 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 
 export default function Inloggen() {
-  const router = useRouter()
   const [email, setEmail] = useState("kofi@fullkin.test")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -22,8 +20,10 @@ export default function Inloggen() {
       setBezig(false)
       return
     }
-    router.push("/app")
-    router.refresh()
+    // Volledige navigatie i.p.v. router.push: zo gaat de net gezette
+    // sessie-cookie mee met het verzoek en ziet de server je als ingelogd.
+    // (Client-side navigeren gaf een race waarbij je terugkaatste naar login.)
+    window.location.assign("/app")
   }
 
   return (
@@ -68,7 +68,7 @@ export default function Inloggen() {
         </button>
 
         <p className="mt-6 text-center text-xs text-inkt-zacht">
-          Demo: kofi@fullkin.test / fullkin-demo-2026
+          Demo: kofi@fullkin.test / fullkin
         </p>
       </form>
     </main>
