@@ -426,6 +426,32 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["pot_ledger"]["Insert"]>
         Relationships: []
       }
+      pot_subscriptions: {
+        Row: {
+          id: string
+          network_id: string
+          person_id: string
+          amount_cents: number
+          stripe_subscription_id: string | null
+          stripe_customer_id: string | null
+          status: Database["public"]["Enums"]["pot_sub_status"]
+          created_at: string
+          canceled_at: string | null
+        }
+        Insert: {
+          id?: string
+          network_id: string
+          person_id: string
+          amount_cents: number
+          stripe_subscription_id?: string | null
+          stripe_customer_id?: string | null
+          status?: Database["public"]["Enums"]["pot_sub_status"]
+          created_at?: string
+          canceled_at?: string | null
+        }
+        Update: Partial<Database["public"]["Tables"]["pot_subscriptions"]["Insert"]>
+        Relationships: []
+      }
       payout_accounts: {
         Row: {
           id: string
@@ -811,6 +837,7 @@ export type Database = {
           saldo_cents: number
           uit_1pct_cents: number
           uit_donaties_cents: number
+          uit_maandbijdrage_cents: number
           uitgekeerd_cents: number
           donatie_aantal: number
         }[]
@@ -818,6 +845,14 @@ export type Database = {
       record_pot_donation: {
         Args: { p_network: string; p_person: string; p_amount: number; p_ref: string }
         Returns: undefined
+      }
+      record_pot_maandbijdrage: {
+        Args: { p_network: string; p_person: string; p_amount: number; p_ref: string }
+        Returns: undefined
+      }
+      pot_maandbijdrage_stats: {
+        Args: Record<string, never>
+        Returns: { leden: number; per_maand_cents: number }[]
       }
       relation_label: { Args: { me: string; other: string }; Returns: string }
       relation_route: { Args: { me: string; other: string }; Returns: string }
@@ -907,6 +942,7 @@ export type Database = {
       payout_provider: "stripe" | "flutterwave"
       payout_status: "onboarding" | "ready" | "restricted"
       pot_entry_kind: "transactie_1pct" | "maandbijdrage" | "donatie" | "uitkering"
+      pot_sub_status: "actief" | "geannuleerd"
       life_event_kind:
         | "verjaardag"
         | "ronde_verjaardag"

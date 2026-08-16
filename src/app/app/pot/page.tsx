@@ -2,7 +2,9 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Doneren } from "./Doneren"
+import { Maandbijdrage } from "./Maandbijdrage"
 import { settlePotDonationFromSession } from "@/lib/stripe/potDonation"
+import { settlePotSubscriptionFromSession } from "@/lib/stripe/potSubscription"
 
 function euro(cents: number, decimals = 2) {
   return new Intl.NumberFormat("nl-NL", {
@@ -15,13 +17,17 @@ function euro(cents: number, decimals = 2) {
 export default async function PotPagina({
   searchParams,
 }: {
-  searchParams: Promise<{ session_id?: string }>
+  searchParams: Promise<{ session_id?: string; sub_session?: string }>
 }) {
-  const { session_id } = await searchParams
+  const { session_id, sub_session } = await searchParams
 
   // Terug van een donatie-betaling? Boek 'm in het grootboek.
   if (session_id) {
     await settlePotDonationFromSession(session_id)
+  }
+  // Terug van het instellen van een maandbijdrage? Leg 'm vast + boek maand 1.
+  if (sub_session) {
+    await settlePotSubscriptionFromSession(sub_session)
   }
 
   const supabase = await createClient()
@@ -33,14 +39,26 @@ export default async function PotPagina({
   const { data: meId } = await supabase.rpc("me")
   if (!meId) redirect("/app")
 
-  const { data: samenvatting } = await supabase.rpc("my_pot_summary").single()
+  const [{ data: samenvatting }, { data: maandStats }, { data: mijnSub }] =
+    await Promise.all([
+      supabase.rpc("my_pot_summary").single(),
+      supabase.rpc("pot_maandbijdrage_stats").single(),
+      supabase
+        .from("pot_subscriptions")
+        .select("amount_cents")
+        .eq("person_id", meId)
+        .eq("status", "actief")
+        .maybeSingle(),
+    ])
   const p = samenvatting ?? {
     saldo_cents: 0,
     uit_1pct_cents: 0,
     uit_donaties_cents: 0,
+    uit_maandbijdrage_cents: 0,
     uitgekeerd_cents: 0,
     donatie_aantal: 0,
   }
+  const maand = maandStats ?? { leden: 0, per_maand_cents: 0 }
 
   const { data: mij } = await supabase
     .from("persons")
@@ -87,6 +105,10 @@ export default async function PotPagina({
             <dd className="text-inkt">{euro(p.uit_1pct_cents)}</dd>
           </div>
           <div className="flex justify-between">
+            <dt className="text-inkt-zacht">Maandelijkse bijdragen</dt>
+            <dd className="text-inkt">{euro(p.uit_maandbijdrage_cents)}</dd>
+          </div>
+          <div className="flex justify-between">
             <dt className="text-inkt-zacht">
               Donaties ({p.donatie_aantal} {p.donatie_aantal === 1 ? "keer" : "keer"})
             </dt>
@@ -100,6 +122,15 @@ export default async function PotPagina({
           )}
         </dl>
       </section>
+
+      {/* Maandelijkse bijdrage — €3 suggestie, zelf te bepalen. */}
+      <div className="mb-3">
+        <Maandbijdrage
+          mijnBedragCents={mijnSub?.amount_cents ?? null}
+          ledenAantal={maand.leden}
+          perMaandCents={maand.per_maand_cents}
+        />
+      </div>
 
       <div className="mb-4">
         <Doneren />
