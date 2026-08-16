@@ -200,6 +200,90 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["business_updates"]["Insert"]>
         Relationships: []
       }
+      album_items: {
+        Row: {
+          id: string
+          network_id: string
+          uploaded_by: string
+          file_url: string
+          file_type: Database["public"]["Enums"]["media_kind"]
+          title: string | null
+          memory_text: string | null
+          date_of_memory: string | null
+          location: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          network_id: string
+          uploaded_by: string
+          file_url: string
+          file_type?: Database["public"]["Enums"]["media_kind"]
+          title?: string | null
+          memory_text?: string | null
+          date_of_memory?: string | null
+          location?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["album_items"]["Insert"]>
+        Relationships: []
+      }
+      album_tags: {
+        Row: {
+          id: string
+          album_item_id: string
+          person_id: string
+          tagged_by: string
+          confirmed: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          album_item_id: string
+          person_id: string
+          tagged_by: string
+          confirmed?: boolean
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["album_tags"]["Insert"]>
+        Relationships: []
+      }
+      album_reactions: {
+        Row: {
+          id: string
+          album_item_id: string
+          person_id: string
+          reaction: Database["public"]["Enums"]["reaction_kind"]
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          album_item_id: string
+          person_id: string
+          reaction: Database["public"]["Enums"]["reaction_kind"]
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["album_reactions"]["Insert"]>
+        Relationships: []
+      }
+      album_comments: {
+        Row: {
+          id: string
+          album_item_id: string
+          person_id: string
+          comment_text: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          album_item_id: string
+          person_id: string
+          comment_text: string
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["album_comments"]["Insert"]>
+        Relationships: []
+      }
       pot_ledger: {
         Row: {
           id: string
@@ -579,6 +663,13 @@ export type Database = {
       me: { Args: Record<string, never>; Returns: string }
       my_networks: { Args: Record<string, never>; Returns: string[] }
       payout_ready: { Args: { p: string }; Returns: boolean }
+      album_reaction_counts: {
+        Args: { p_item: string }
+        Returns: {
+          reaction: Database["public"]["Enums"]["reaction_kind"]
+          aantal: number
+        }[]
+      }
       my_pot_summary: {
         Args: Record<string, never>
         Returns: {
@@ -620,6 +711,8 @@ export type Database = {
         | "mediator"
         | "archivaris"
       invite_status: "open" | "geaccepteerd" | "verlopen"
+      media_kind: "foto" | "video" | "audio"
+      reaction_kind: "hart" | "lach" | "traan" | "vuur"
       payout_provider: "stripe" | "flutterwave"
       payout_status: "onboarding" | "ready" | "restricted"
       pot_entry_kind: "transactie_1pct" | "maandbijdrage" | "donatie" | "uitkering"

@@ -97,6 +97,12 @@ export function FamilieKaart({
         </div>
         <div className="flex flex-wrap gap-2 justify-end shrink-0 max-w-[55%]">
           <Link
+            href="/app/album"
+            className="mt-1 rounded-full border border-rand text-inkt text-sm px-4 py-2 hover:bg-oppervlak transition"
+          >
+            Album
+          </Link>
+          <Link
             href="/app/pot"
             className="mt-1 rounded-full border border-rand text-inkt text-sm px-4 py-2 hover:bg-oppervlak transition"
           >
