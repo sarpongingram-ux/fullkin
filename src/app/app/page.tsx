@@ -46,6 +46,12 @@ export default async function AppHome() {
     ? await supabase.rpc("has_role", { net: mij.network_id, r: "co_founder" })
     : { data: false }
 
+  // Ongelezen meldingen voor de badge in de header.
+  const { count: ongelezen } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .is("read_at", null)
+
   // Lopende collectes, met de naam van de begunstigde (apart opgehaald).
   const { data: collectes } = await supabase
     .from("collections")
@@ -114,6 +120,7 @@ export default async function AppHome() {
       mijnDroom={mijnDroom}
       isCoFounder={!!isCoFounder}
       businessDromen={businessDromen}
+      ongelezenMeldingen={ongelezen ?? 0}
     />
   )
 }

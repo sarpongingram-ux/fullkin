@@ -30,7 +30,7 @@ export default async function HerinneringPagina({
 
   const { data: item } = await supabase
     .from("album_items")
-    .select("id, file_url, title, memory_text, date_of_memory, location, uploaded_by")
+    .select("id, file_url, file_type, title, memory_text, date_of_memory, location, uploaded_by")
     .eq("id", id)
     .single()
 
@@ -88,14 +88,28 @@ export default async function HerinneringPagina({
         ← Terug naar het album
       </Link>
 
-      {/* De foto, groot */}
+      {/* De herinnering, groot — foto, video of geluid */}
       <div className="mt-4 rounded-2xl overflow-hidden bg-klei">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={fotoUrl}
-          alt={item.title ?? "Herinnering"}
-          className="w-full object-contain max-h-[70vh]"
-        />
+        {item.file_type === "video" ? (
+          <video
+            src={fotoUrl}
+            controls
+            playsInline
+            className="w-full max-h-[70vh] bg-black"
+          />
+        ) : item.file_type === "audio" ? (
+          <div className="flex flex-col items-center gap-4 py-12 bg-inkt">
+            <span className="text-5xl">🎙️</span>
+            <audio src={fotoUrl} controls className="w-full max-w-sm px-4" />
+          </div>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={fotoUrl}
+            alt={item.title ?? "Herinnering"}
+            className="w-full object-contain max-h-[70vh]"
+          />
+        )}
       </div>
 
       {item.title && (

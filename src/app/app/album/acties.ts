@@ -13,6 +13,7 @@ export type NieuwResultaat =
 // de gekozen tags door.
 export async function maakHerinnering(input: {
   filePath: string
+  fileType?: Enums<"media_kind">
   title?: string | null
   memoryText?: string | null
   dateOfMemory?: string | null
@@ -43,7 +44,7 @@ export async function maakHerinnering(input: {
       network_id: mij.network_id,
       uploaded_by: meId,
       file_url: input.filePath,
-      file_type: "foto",
+      file_type: input.fileType ?? "foto",
       title: input.title?.trim() || null,
       memory_text: input.memoryText?.trim() || null,
       date_of_memory: input.dateOfMemory || null,
@@ -65,6 +66,15 @@ export async function maakHerinnering(input: {
         tagged_by: meId,
       })),
     )
+    // Iedereen die getagd is een melding sturen (meld() slaat jezelf over).
+    for (const pid of uniek) {
+      await supabase.rpc("meld", {
+        p_recipient: pid,
+        p_kind: "album_tag",
+        p_subject_type: "album_item",
+        p_subject_id: item.id,
+      })
+    }
   }
 
   revalidatePath("/app/album")
@@ -86,8 +96,29 @@ export async function reageer(
       { album_item_id: itemId, person_id: meId, reaction },
       { onConflict: "album_item_id,person_id" },
     )
+  if (!error) await meldEigenaar(supabase, itemId, "album_reactie")
   revalidatePath(`/app/album/${itemId}`)
   return { ok: !error }
+}
+
+// Stuurt de uploader van een herinnering een melding (niet als jij het zelf bent).
+async function meldEigenaar(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  itemId: string,
+  kind: "album_reactie" | "album_opmerking",
+) {
+  const { data: item } = await supabase
+    .from("album_items")
+    .select("uploaded_by")
+    .eq("id", itemId)
+    .single()
+  if (!item) return
+  await supabase.rpc("meld", {
+    p_recipient: item.uploaded_by,
+    p_kind: kind,
+    p_subject_type: "album_item",
+    p_subject_id: itemId,
+  })
 }
 
 // Reactie weghalen (nog eens op dezelfde tikken = uit).
@@ -118,6 +149,7 @@ export async function plaatsOpmerking(
     person_id: meId,
     comment_text: schoon,
   })
+  if (!error) await meldEigenaar(supabase, itemId, "album_opmerking")
   revalidatePath(`/app/album/${itemId}`)
   return { ok: !error }
 }

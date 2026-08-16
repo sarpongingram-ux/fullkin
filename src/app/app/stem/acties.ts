@@ -29,6 +29,14 @@ export async function nomineer(
     return { ok: false, fout: error.message }
   }
 
+  // De genomineerde een warme melding sturen.
+  await supabase.rpc("meld", {
+    p_recipient: nomineeId,
+    p_kind: "stem_nominatie",
+    p_subject_type: "stem_round",
+    p_subject_id: roundId,
+  })
+
   revalidatePath("/app/stem")
   return { ok: true }
 }
@@ -60,8 +68,20 @@ export async function sluitStem(
   roundId: string,
 ): Promise<{ ok: boolean; fout?: string }> {
   const supabase = await createClient()
-  const { error } = await supabase.rpc("sluit_stem", { p_round: roundId })
+  const { data: winnaar, error } = await supabase.rpc("sluit_stem", {
+    p_round: roundId,
+  })
   if (error) return { ok: false, fout: error.message }
+
+  // De gekozen persoon laten weten dat de familie hen koos.
+  if (winnaar) {
+    await supabase.rpc("meld", {
+      p_recipient: winnaar,
+      p_kind: "stem_winst",
+      p_subject_type: "stem_round",
+      p_subject_id: roundId,
+    })
+  }
 
   revalidatePath("/app/stem")
   return { ok: true }

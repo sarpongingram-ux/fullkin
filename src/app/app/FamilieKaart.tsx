@@ -71,6 +71,7 @@ export function FamilieKaart({
   mijnDroom,
   isCoFounder,
   businessDromen,
+  ongelezenMeldingen,
 }: {
   voornaam: string
   familieNaam: string
@@ -82,6 +83,7 @@ export function FamilieKaart({
   mijnDroom: Droom | null
   isCoFounder: boolean
   businessDromen: BusinessDroom[]
+  ongelezenMeldingen: number
 }) {
   const anderenDromen = dromen.filter((d) => d.person_id !== mijnPersonId)
   return (
@@ -96,6 +98,17 @@ export function FamilieKaart({
           </h1>
         </div>
         <div className="flex flex-wrap gap-2 justify-end shrink-0 max-w-[55%]">
+          <Link
+            href="/app/meldingen"
+            className="mt-1 relative rounded-full border border-rand text-inkt text-sm px-4 py-2 hover:bg-oppervlak transition"
+          >
+            Meldingen
+            {ongelezenMeldingen > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-terracotta text-white text-[11px] font-semibold flex items-center justify-center">
+                {ongelezenMeldingen > 9 ? "9+" : ongelezenMeldingen}
+              </span>
+            )}
+          </Link>
           <Link
             href="/app/rad"
             className="mt-1 rounded-full border border-goud/50 text-goud text-sm px-4 py-2 hover:bg-klei/40 transition"

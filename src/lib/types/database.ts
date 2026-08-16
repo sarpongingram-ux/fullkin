@@ -290,6 +290,32 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["stem_votes"]["Insert"]>
         Relationships: []
       }
+      notifications: {
+        Row: {
+          id: string
+          network_id: string
+          recipient_person_id: string
+          actor_person_id: string | null
+          kind: Database["public"]["Enums"]["notification_kind"]
+          subject_type: string | null
+          subject_id: string | null
+          read_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          network_id: string
+          recipient_person_id: string
+          actor_person_id?: string | null
+          kind: Database["public"]["Enums"]["notification_kind"]
+          subject_type?: string | null
+          subject_id?: string | null
+          read_at?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>
+        Relationships: []
+      }
       album_items: {
         Row: {
           id: string
@@ -827,6 +853,29 @@ export type Database = {
         }[]
       }
       sluit_stem: { Args: { p_round: string }; Returns: string }
+      meld: {
+        Args: {
+          p_recipient: string
+          p_kind: Database["public"]["Enums"]["notification_kind"]
+          p_subject_type: string | null
+          p_subject_id: string | null
+        }
+        Returns: undefined
+      }
+      markeer_meldingen_gelezen: {
+        Args: Record<string, never>
+        Returns: undefined
+      }
+      ontdek_verbindingen: {
+        Args: Record<string, never>
+        Returns: {
+          a_id: string
+          a_naam: string
+          b_id: string
+          b_naam: string
+          samen: number
+        }[]
+      }
     }
     Enums: {
       collection_status: "concept" | "open" | "gesloten" | "uitbetaald"
@@ -849,6 +898,12 @@ export type Database = {
       rad_status: "getrokken" | "besloten"
       rad_choice: "zelf" | "gunnen" | "pot" | "dromen"
       stem_status: "open" | "afgerond"
+      notification_kind:
+        | "album_reactie"
+        | "album_opmerking"
+        | "album_tag"
+        | "stem_nominatie"
+        | "stem_winst"
       payout_provider: "stripe" | "flutterwave"
       payout_status: "onboarding" | "ready" | "restricted"
       pot_entry_kind: "transactie_1pct" | "maandbijdrage" | "donatie" | "uitkering"

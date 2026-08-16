@@ -4,8 +4,15 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { maakHerinnering } from "../acties"
+import type { Enums } from "@/lib/types/database"
 
 type Lid = { id: string; naam: string }
+
+function mediaSoort(mime: string): Enums<"media_kind"> {
+  if (mime.startsWith("video/")) return "video"
+  if (mime.startsWith("audio/")) return "audio"
+  return "foto"
+}
 
 export function Uploader({
   networkId,
@@ -16,6 +23,7 @@ export function Uploader({
 }) {
   const router = useRouter()
   const [bestand, setBestand] = useState<File | null>(null)
+  const [soort, setSoort] = useState<Enums<"media_kind">>("foto")
   const [voorbeeld, setVoorbeeld] = useState<string | null>(null)
   const [titel, setTitel] = useState("")
   const [datum, setDatum] = useState("")
@@ -29,12 +37,13 @@ export function Uploader({
   function kiesBestand(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
     if (!f) return
-    if (f.size > 50 * 1024 * 1024) {
-      setFout("Dit bestand is groter dan 50MB.")
+    if (f.size > 200 * 1024 * 1024) {
+      setFout("Dit bestand is groter dan 200MB.")
       return
     }
     setFout(null)
     setBestand(f)
+    setSoort(mediaSoort(f.type))
     setVoorbeeld(URL.createObjectURL(f))
   }
 
@@ -49,7 +58,7 @@ export function Uploader({
 
   async function delen() {
     if (!bestand) {
-      setFout("Kies eerst een foto.")
+      setFout("Kies eerst iets om te delen.")
       return
     }
     setBezig(true)
@@ -70,6 +79,7 @@ export function Uploader({
 
     const res = await maakHerinnering({
       filePath: pad,
+      fileType: soort,
       title: titel,
       memoryText: verhaal,
       dateOfMemory: datum || null,
@@ -90,23 +100,36 @@ export function Uploader({
 
   return (
     <div className="space-y-5">
-      {/* Foto kiezen */}
+      {/* Media kiezen — foto, video of geluid */}
       <div>
         {voorbeeld ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={voorbeeld}
-            alt="Voorbeeld"
-            className="w-full rounded-2xl object-cover max-h-80"
-          />
+          soort === "video" ? (
+            <video
+              src={voorbeeld}
+              controls
+              className="w-full rounded-2xl bg-black max-h-80"
+            />
+          ) : soort === "audio" ? (
+            <div className="flex flex-col items-center gap-3 rounded-2xl bg-oppervlak border border-rand py-8">
+              <span className="text-4xl">🎙️</span>
+              <audio src={voorbeeld} controls className="w-full max-w-xs" />
+            </div>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={voorbeeld}
+              alt="Voorbeeld"
+              className="w-full rounded-2xl object-cover max-h-80"
+            />
+          )
         ) : (
           <label className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-rand bg-oppervlak py-14 cursor-pointer hover:bg-klei/40 transition">
-            <span className="text-4xl mb-2">📷</span>
-            <span className="text-inkt font-medium">Kies een foto</span>
-            <span className="text-xs text-inkt-zacht mt-1">Tot 50MB</span>
+            <span className="text-4xl mb-2">📷🎬🎙️</span>
+            <span className="text-inkt font-medium">Kies foto, video of geluid</span>
+            <span className="text-xs text-inkt-zacht mt-1">Tot 200MB</span>
             <input
               type="file"
-              accept="image/*"
+              accept="image/*,video/*,audio/*"
               onChange={kiesBestand}
               className="hidden"
             />
@@ -114,8 +137,13 @@ export function Uploader({
         )}
         {voorbeeld && (
           <label className="mt-2 block text-center text-sm text-terracotta cursor-pointer">
-            Andere foto kiezen
-            <input type="file" accept="image/*" onChange={kiesBestand} className="hidden" />
+            Iets anders kiezen
+            <input
+              type="file"
+              accept="image/*,video/*,audio/*"
+              onChange={kiesBestand}
+              className="hidden"
+            />
           </label>
         )}
       </div>
