@@ -52,6 +52,10 @@ export default async function AppHome() {
     .select("id", { count: "exact", head: true })
     .is("read_at", null)
 
+  // Eerstvolgende verjaardag als warme nudge op de kaart.
+  const { data: verjaardagen } = await supabase.rpc("komende_verjaardagen")
+  const komendeVerjaardag = (verjaardagen ?? [])[0] ?? null
+
   // Lopende collectes, met de naam van de begunstigde (apart opgehaald).
   const { data: collectes } = await supabase
     .from("collections")
@@ -121,6 +125,7 @@ export default async function AppHome() {
       isCoFounder={!!isCoFounder}
       businessDromen={businessDromen}
       ongelezenMeldingen={ongelezen ?? 0}
+      komendeVerjaardag={komendeVerjaardag}
     />
   )
 }

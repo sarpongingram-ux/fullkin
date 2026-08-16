@@ -72,6 +72,7 @@ export function FamilieKaart({
   isCoFounder,
   businessDromen,
   ongelezenMeldingen,
+  komendeVerjaardag,
 }: {
   voornaam: string
   familieNaam: string
@@ -84,7 +85,22 @@ export function FamilieKaart({
   isCoFounder: boolean
   businessDromen: BusinessDroom[]
   ongelezenMeldingen: number
+  komendeVerjaardag: {
+    person_id: string
+    naam: string
+    wordt: number
+    dagen_tot: number
+  } | null
 }) {
+  const verjaardagTekst = komendeVerjaardag
+    ? komendeVerjaardag.dagen_tot === 0
+      ? `${komendeVerjaardag.naam} is vandaag jarig en wordt ${komendeVerjaardag.wordt} 🎂`
+      : `${komendeVerjaardag.naam} wordt ${komendeVerjaardag.wordt} — ${
+          komendeVerjaardag.dagen_tot === 1
+            ? "morgen"
+            : `over ${komendeVerjaardag.dagen_tot} dagen`
+        } 🎂`
+    : null
   const anderenDromen = dromen.filter((d) => d.person_id !== mijnPersonId)
   return (
     <main className="min-h-screen max-w-2xl mx-auto px-5 py-10">
@@ -120,6 +136,12 @@ export function FamilieKaart({
             className="mt-1 rounded-full border border-terracotta/50 text-terracotta text-sm px-4 py-2 hover:bg-klei/40 transition"
           >
             De Stem
+          </Link>
+          <Link
+            href="/app/mijlpalen"
+            className="mt-1 rounded-full border border-rand text-inkt text-sm px-4 py-2 hover:bg-oppervlak transition"
+          >
+            Mijlpalen
           </Link>
           <Link
             href="/app/album"
@@ -170,6 +192,19 @@ export function FamilieKaart({
           )}
         </p>
       </section>
+
+      {/* Warme nudge: de eerstvolgende verjaardag. */}
+      {verjaardagTekst && (
+        <Link
+          href="/app/mijlpalen"
+          className="block bg-klei/40 rounded-2xl border border-goud/40 p-4 mb-6 hover:border-goud transition"
+        >
+          <p className="text-inkt">{verjaardagTekst}</p>
+          <p className="text-xs text-inkt-zacht mt-0.5">
+            Bekijk de levenslijn · vier mee →
+          </p>
+        </Link>
+      )}
 
       {/* Mijn droom — één zin, één bedrag, zichtbare voortgang (sectie 7.2). */}
       <MijnDroom

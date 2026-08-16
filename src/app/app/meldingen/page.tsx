@@ -22,6 +22,7 @@ const emojiVan: Record<Enums<"notification_kind">, string> = {
   album_tag: "📷",
   stem_nominatie: "🌟",
   stem_winst: "🕊️",
+  mijlpaal: "🎈",
 }
 
 function tekstVan(kind: Enums<"notification_kind">, actor: string): string {
@@ -36,12 +37,15 @@ function tekstVan(kind: Enums<"notification_kind">, actor: string): string {
       return `${actor} nomineerde je bij De Stem`
     case "stem_winst":
       return "De familie koos jou bij De Stem"
+    case "mijlpaal":
+      return `${actor} zette een mijlpaal voor jou op de levenslijn`
   }
 }
 
 function linkVan(subjectType: string | null, subjectId: string | null): string {
   if (subjectType === "album_item" && subjectId) return `/app/album/${subjectId}`
   if (subjectType === "stem_round") return "/app/stem"
+  if (subjectType === "mijlpaal") return "/app/mijlpalen"
   return "/app"
 }
 

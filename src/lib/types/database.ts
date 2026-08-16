@@ -911,6 +911,29 @@ export type Database = {
           samen: number
         }[]
       }
+      komende_verjaardagen: {
+        Args: Record<string, never>
+        Returns: {
+          person_id: string
+          naam: string
+          born_on: string
+          volgende: string
+          wordt: number
+          dagen_tot: number
+        }[]
+      }
+      mijlpalen_tijdlijn: {
+        Args: Record<string, never>
+        Returns: {
+          id: string
+          person_id: string
+          naam: string
+          kind: Database["public"]["Enums"]["life_event_kind"]
+          title: string
+          occurs_on: string
+          collection_id: string | null
+        }[]
+      }
     }
     Enums: {
       collection_status: "concept" | "open" | "gesloten" | "uitbetaald"
@@ -939,6 +962,7 @@ export type Database = {
         | "album_tag"
         | "stem_nominatie"
         | "stem_winst"
+        | "mijlpaal"
       payout_provider: "stripe" | "flutterwave"
       payout_status: "onboarding" | "ready" | "restricted"
       pot_entry_kind: "transactie_1pct" | "maandbijdrage" | "donatie" | "uitkering"
