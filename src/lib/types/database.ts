@@ -212,6 +212,7 @@ export type Database = {
           recipient_person_id: string | null
           created_at: string
           decided_at: string | null
+          stripe_transfer_id: string | null
         }
         Insert: {
           id?: string
@@ -224,6 +225,7 @@ export type Database = {
           recipient_person_id?: string | null
           created_at?: string
           decided_at?: string | null
+          stripe_transfer_id?: string | null
         }
         Update: Partial<Database["public"]["Tables"]["rad_draws"]["Insert"]>
         Relationships: []
@@ -713,6 +715,7 @@ export type Database = {
           p_draw: string
           p_choice: Database["public"]["Enums"]["rad_choice"]
           p_recipient: string | null
+          p_transfer?: string | null
         }
         Returns: undefined
       }
