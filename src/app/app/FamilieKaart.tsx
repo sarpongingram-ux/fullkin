@@ -277,7 +277,8 @@ export function FamilieKaart({
             className="bg-oppervlak rounded-xl border border-rand p-3"
           >
             <div className="flex items-center gap-3">
-              <div
+              <Link
+                href={`/app/persoon/${lid.person_id}`}
                 className="w-11 h-11 rounded-full flex items-center justify-center text-white font-semibold shrink-0"
                 style={{ background: "var(--terracotta)" }}
               >
@@ -291,12 +292,15 @@ export function FamilieKaart({
                 ) : (
                   initialen(lid.first_name, lid.last_name)
                 )}
-              </div>
+              </Link>
 
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-inkt truncate">
+                <Link
+                  href={`/app/persoon/${lid.person_id}`}
+                  className="font-medium text-inkt truncate block hover:text-terracotta transition"
+                >
                   {lid.first_name} {lid.last_name}
-                </p>
+                </Link>
                 <p className="text-sm text-inkt-zacht">
                   {lid.label}
                   {lid.city ? ` · ${lid.city}` : ""}

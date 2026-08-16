@@ -1,0 +1,191 @@
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
+import Link from "next/link"
+import { tekenFotoUrls } from "@/lib/album/urls"
+
+function euro(cents: number) {
+  return new Intl.NumberFormat("nl-NL", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(cents / 100)
+}
+
+function jaar(iso: string | null) {
+  if (!iso) return null
+  return new Date(iso).getFullYear()
+}
+
+function initialen(voor: string, achter: string) {
+  return (voor[0] ?? "") + (achter[0] ?? "")
+}
+
+export default async function PersoonPagina({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect("/inloggen")
+
+  const { data: meId } = await supabase.rpc("me")
+  if (!meId) redirect("/app")
+
+  const { data: p } = await supabase
+    .from("persons")
+    .select("id, first_name, last_name, city, country, photo_url")
+    .eq("id", id)
+    .single()
+
+  if (!p) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-6 text-center">
+        <p className="text-inkt-zacht">Dit familielid is niet gevonden.</p>
+      </main>
+    )
+  }
+
+  const ikZelf = id === meId
+
+  // Relatie t.o.v. mij + leesbare route.
+  const [{ data: label }, { data: route }, { data: dromen }] = await Promise.all([
+    ikZelf ? { data: "jij" } : supabase.rpc("relation_label", { me: meId, other: id }),
+    ikZelf ? { data: null } : supabase.rpc("relation_route", { me: meId, other: id }),
+    supabase.rpc("family_dreams"),
+  ])
+
+  const droom = (dromen ?? []).find((d) => d.person_id === id)
+
+  // Herinneringen met deze persoon (album, chronologisch — oudste eerst).
+  const { data: tags } = await supabase
+    .from("album_tags")
+    .select("album_item_id")
+    .eq("person_id", id)
+  const itemIds = (tags ?? []).map((t) => t.album_item_id)
+  const { data: items } = itemIds.length
+    ? await supabase
+        .from("album_items")
+        .select("id, file_url, title, date_of_memory, created_at")
+        .in("id", itemIds)
+    : { data: [] }
+  const gesorteerd = (items ?? []).sort((a, b) => {
+    const da = a.date_of_memory ?? a.created_at
+    const db = b.date_of_memory ?? b.created_at
+    return da < db ? -1 : da > db ? 1 : 0
+  })
+  const urls = await tekenFotoUrls(
+    supabase,
+    gesorteerd.map((i) => i.file_url),
+  )
+
+  return (
+    <main className="min-h-screen max-w-md mx-auto px-5 py-10">
+      <Link href="/app" className="text-sm text-inkt-zacht hover:text-inkt">
+        ← Terug naar je familie
+      </Link>
+
+      {/* Kop met foto + relatie */}
+      <header className="mt-6 flex items-center gap-4">
+        <div
+          className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-semibold shrink-0"
+          style={{ background: "var(--terracotta)" }}
+        >
+          {p.photo_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={p.photo_url} alt="" className="w-full h-full rounded-full object-cover" />
+          ) : (
+            initialen(p.first_name, p.last_name)
+          )}
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-inkt">
+            {p.first_name} {p.last_name}
+          </h1>
+          <p className="text-inkt-zacht">
+            {ikZelf ? "Jij" : label}
+            {p.city ? ` · ${p.city}` : ""}
+          </p>
+        </div>
+      </header>
+
+      {/* De leesbare route — hoe jullie verbonden zijn */}
+      {!ikZelf && route && (
+        <p className="mt-4 rounded-xl bg-klei/40 border border-rand p-4 text-sm text-inkt">
+          {route}
+        </p>
+      )}
+
+      {/* Hun droom */}
+      {droom && (
+        <section className="mt-4 bg-oppervlak rounded-2xl border border-goud/40 p-5">
+          <p className="text-xs font-semibold text-goud uppercase tracking-wide mb-1">
+            Droom
+          </p>
+          <p className="font-semibold text-inkt">{droom.title}</p>
+          <div className="mt-2 h-2 rounded-full bg-klei overflow-hidden">
+            <div
+              className="h-full rounded-full bg-goud"
+              style={{
+                width: `${Math.min(100, Math.round((Number(droom.raised_cents) / droom.target_cents) * 100))}%`,
+              }}
+            />
+          </div>
+          <p className="text-xs text-inkt-zacht mt-1.5">
+            {euro(Number(droom.raised_cents))} van {euro(droom.target_cents)}
+            {droom.collection_id && (
+              <>
+                {" · "}
+                <Link href={`/app/collecte/${droom.collection_id}`} className="text-terracotta">
+                  draag bij →
+                </Link>
+              </>
+            )}
+          </p>
+        </section>
+      )}
+
+      {/* Herinneringen met deze persoon */}
+      <section className="mt-6">
+        <h2 className="text-sm font-semibold text-inkt-zacht uppercase tracking-wide mb-3">
+          {ikZelf ? "Herinneringen met jou" : `Herinneringen met ${p.first_name}`}
+        </h2>
+        {gesorteerd.length === 0 ? (
+          <p className="text-sm text-inkt-zacht">
+            Nog geen herinneringen. Tag {ikZelf ? "jezelf" : p.first_name} op een foto in het
+            album.
+          </p>
+        ) : (
+          <div className="grid grid-cols-3 gap-2">
+            {gesorteerd.map((item) => (
+              <Link
+                key={item.id}
+                href={`/app/album/${item.id}`}
+                className="aspect-square rounded-lg overflow-hidden bg-klei block relative"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={urls.get(item.file_url) ?? ""}
+                  alt={item.title ?? "Herinnering"}
+                  className="w-full h-full object-cover"
+                />
+                {jaar(item.date_of_memory) && (
+                  <span className="absolute bottom-0 left-0 right-0 bg-inkt/60 text-white text-[10px] text-center py-0.5">
+                    {jaar(item.date_of_memory)}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <p className="mt-10 text-center text-xs text-inkt-zacht italic">
+        De familiekaart en het album versterken elkaar.
+      </p>
+    </main>
+  )
+}

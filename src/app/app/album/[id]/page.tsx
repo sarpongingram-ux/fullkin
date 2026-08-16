@@ -109,9 +109,12 @@ export default async function HerinneringPagina({
           {(tags ?? []).map((t, i) => (
             <span key={t.person_id}>
               {i > 0 && ", "}
-              <span className="text-terracotta font-medium">
+              <Link
+                href={`/app/persoon/${t.person_id}`}
+                className="text-terracotta font-medium hover:underline"
+              >
                 {naamVan.get(t.person_id) ?? "Familielid"}
-              </span>
+              </Link>
             </span>
           ))}
         </p>
