@@ -200,6 +200,34 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["business_updates"]["Insert"]>
         Relationships: []
       }
+      rad_draws: {
+        Row: {
+          id: string
+          network_id: string
+          year: number
+          winner_person_id: string | null
+          prize_cents: number
+          status: Database["public"]["Enums"]["rad_status"]
+          choice: Database["public"]["Enums"]["rad_choice"] | null
+          recipient_person_id: string | null
+          created_at: string
+          decided_at: string | null
+        }
+        Insert: {
+          id?: string
+          network_id: string
+          year: number
+          winner_person_id?: string | null
+          prize_cents: number
+          status?: Database["public"]["Enums"]["rad_status"]
+          choice?: Database["public"]["Enums"]["rad_choice"] | null
+          recipient_person_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+        }
+        Update: Partial<Database["public"]["Tables"]["rad_draws"]["Insert"]>
+        Relationships: []
+      }
       album_items: {
         Row: {
           id: string
@@ -670,6 +698,24 @@ export type Database = {
           aantal: number
         }[]
       }
+      rad_lootjes: {
+        Args: Record<string, never>
+        Returns: {
+          person_id: string
+          first_name: string
+          last_name: string
+          lootjes: number
+        }[]
+      }
+      draai_rad: { Args: Record<string, never>; Returns: string }
+      beslis_rad: {
+        Args: {
+          p_draw: string
+          p_choice: Database["public"]["Enums"]["rad_choice"]
+          p_recipient: string | null
+        }
+        Returns: undefined
+      }
       my_pot_summary: {
         Args: Record<string, never>
         Returns: {
@@ -713,6 +759,8 @@ export type Database = {
       invite_status: "open" | "geaccepteerd" | "verlopen"
       media_kind: "foto" | "video" | "audio"
       reaction_kind: "hart" | "lach" | "traan" | "vuur"
+      rad_status: "getrokken" | "besloten"
+      rad_choice: "zelf" | "gunnen" | "pot" | "dromen"
       payout_provider: "stripe" | "flutterwave"
       payout_status: "onboarding" | "ready" | "restricted"
       pot_entry_kind: "transactie_1pct" | "maandbijdrage" | "donatie" | "uitkering"
