@@ -230,6 +230,66 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["rad_draws"]["Insert"]>
         Relationships: []
       }
+      stem_rounds: {
+        Row: {
+          id: string
+          network_id: string
+          year: number
+          status: Database["public"]["Enums"]["stem_status"]
+          winner_person_id: string | null
+          created_at: string
+          decided_at: string | null
+        }
+        Insert: {
+          id?: string
+          network_id: string
+          year: number
+          status?: Database["public"]["Enums"]["stem_status"]
+          winner_person_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+        }
+        Update: Partial<Database["public"]["Tables"]["stem_rounds"]["Insert"]>
+        Relationships: []
+      }
+      stem_nominations: {
+        Row: {
+          id: string
+          round_id: string
+          nominee_person_id: string
+          nominated_by: string
+          reason: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          round_id: string
+          nominee_person_id: string
+          nominated_by: string
+          reason: string
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["stem_nominations"]["Insert"]>
+        Relationships: []
+      }
+      stem_votes: {
+        Row: {
+          id: string
+          round_id: string
+          nomination_id: string
+          voter_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          round_id: string
+          nomination_id: string
+          voter_id: string
+          created_at?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["stem_votes"]["Insert"]>
+        Relationships: []
+      }
       album_items: {
         Row: {
           id: string
@@ -743,6 +803,30 @@ export type Database = {
         Args: { p: string }
         Returns: { person_id: string; shared_parents: number }[]
       }
+      stem_ronde: {
+        Args: Record<string, never>
+        Returns: {
+          id: string
+          network_id: string
+          year: number
+          status: Database["public"]["Enums"]["stem_status"]
+          winner_person_id: string | null
+          created_at: string
+          decided_at: string | null
+        }
+      }
+      stem_uitslag: {
+        Args: { p_round: string }
+        Returns: {
+          nomination_id: string
+          nominee_id: string
+          nominee_naam: string
+          reason: string
+          stemmen: number
+          mijn_stem: boolean
+        }[]
+      }
+      sluit_stem: { Args: { p_round: string }; Returns: string }
     }
     Enums: {
       collection_status: "concept" | "open" | "gesloten" | "uitbetaald"
@@ -764,6 +848,7 @@ export type Database = {
       reaction_kind: "hart" | "lach" | "traan" | "vuur"
       rad_status: "getrokken" | "besloten"
       rad_choice: "zelf" | "gunnen" | "pot" | "dromen"
+      stem_status: "open" | "afgerond"
       payout_provider: "stripe" | "flutterwave"
       payout_status: "onboarding" | "ready" | "restricted"
       pot_entry_kind: "transactie_1pct" | "maandbijdrage" | "donatie" | "uitkering"

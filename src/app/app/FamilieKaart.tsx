@@ -103,6 +103,12 @@ export function FamilieKaart({
             Het Rad
           </Link>
           <Link
+            href="/app/stem"
+            className="mt-1 rounded-full border border-terracotta/50 text-terracotta text-sm px-4 py-2 hover:bg-klei/40 transition"
+          >
+            De Stem
+          </Link>
+          <Link
             href="/app/album"
             className="mt-1 rounded-full border border-rand text-inkt text-sm px-4 py-2 hover:bg-oppervlak transition"
           >
