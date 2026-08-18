@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useEffect } from "react"
+import { useMemo, useRef, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
 type Persoon = {
@@ -34,6 +34,8 @@ export function Stamboom({
 }) {
   const router = useRouter()
   const scrollRef = useRef<HTMLDivElement>(null)
+  const centerRef = useRef<{ cx: number; cy: number } | null>(null)
+  const [zoom, setZoom] = useState(1)
 
   const layout = useMemo(() => {
     const byId = new Map(personen.map((p) => [p.id, p]))
@@ -190,17 +192,38 @@ export function Stamboom({
     return { nodes, lijnen, partnerLijnen, width, height }
   }, [personen, relaties])
 
-  // Start gecentreerd op jezelf (beide richtingen), zodat je meteen je eigen
-  // tak ziet en van daaruit kunt rondkijken.
+  // Start gecentreerd op jezelf (beide richtingen).
   useEffect(() => {
     const el = scrollRef.current
-    if (!el) return
     const ik = layout.nodes.find((n) => n.id === meId) ?? layout.nodes[0]
-    if (ik) {
-      el.scrollLeft = Math.max(0, ik.x - el.clientWidth / 2)
-      el.scrollTop = Math.max(0, ik.y - el.clientHeight / 2)
+    if (ik) centerRef.current = { cx: ik.x, cy: ik.y }
+    if (el && centerRef.current) {
+      el.scrollLeft = Math.max(0, centerRef.current.cx * zoom - el.clientWidth / 2)
+      el.scrollTop = Math.max(0, centerRef.current.cy * zoom - el.clientHeight / 2)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout, meId])
+
+  // Bij zoomen: houd het huidige middelpunt vast.
+  useEffect(() => {
+    const el = scrollRef.current
+    const c = centerRef.current
+    if (el && c) {
+      el.scrollLeft = Math.max(0, c.cx * zoom - el.clientWidth / 2)
+      el.scrollTop = Math.max(0, c.cy * zoom - el.clientHeight / 2)
+    }
+  }, [zoom])
+
+  function zoomBy(delta: number) {
+    const el = scrollRef.current
+    if (el) {
+      centerRef.current = {
+        cx: (el.scrollLeft + el.clientWidth / 2) / zoom,
+        cy: (el.scrollTop + el.clientHeight / 2) / zoom,
+      }
+    }
+    setZoom((z) => Math.min(1.4, Math.max(0.4, Math.round((z + delta) * 10) / 10)))
+  }
 
   function initialen(p: Persoon) {
     return (p.first_name[0] ?? "") + (p.last_name[0] ?? "")
@@ -224,14 +247,21 @@ export function Stamboom({
 
   return (
     <>
+    <div className="relative">
     <div
       ref={scrollRef}
       className="fk-card p-0 overflow-auto"
       style={{ height: "70vh", touchAction: "pan-x pan-y" }}
     >
+      <div style={{ width: layout.width * zoom, height: layout.height * zoom }}>
       <div
         className="relative"
-        style={{ width: layout.width, height: layout.height }}
+        style={{
+          width: layout.width,
+          height: layout.height,
+          transform: `scale(${zoom})`,
+          transformOrigin: "0 0",
+        }}
       >
         {/* Verbindingslijnen */}
         <svg
@@ -311,6 +341,30 @@ export function Stamboom({
         })}
       </div>
       </div>
+      </div>
+
+      {/* Zoomknoppen */}
+      <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+        <button
+          onClick={() => zoomBy(0.2)}
+          disabled={zoom >= 1.4}
+          aria-label="Inzoomen"
+          className="w-12 h-12 rounded-full bg-white text-inkt text-2xl font-black flex items-center justify-center disabled:opacity-40 active:scale-95 transition"
+          style={{ boxShadow: "var(--schaduw)" }}
+        >
+          +
+        </button>
+        <button
+          onClick={() => zoomBy(-0.2)}
+          disabled={zoom <= 0.4}
+          aria-label="Uitzoomen"
+          className="w-12 h-12 rounded-full bg-white text-inkt text-2xl font-black flex items-center justify-center disabled:opacity-40 active:scale-95 transition"
+          style={{ boxShadow: "var(--schaduw)" }}
+        >
+          −
+        </button>
+      </div>
+    </div>
 
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 mt-3 text-xs text-inkt-zacht font-semibold">
         <span className="flex items-center gap-1.5">
