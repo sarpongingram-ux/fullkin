@@ -174,23 +174,31 @@ export function FamilieKaart({
 
       {/* Het zinnetje uit sectie 6 — dit is de kern van laag 1. */}
       <section className="bg-oppervlak rounded-2xl border border-rand p-6 mb-6">
-        <p className="text-lg text-inkt leading-relaxed">
-          Je familie bestaat uit{" "}
-          <strong className="text-terracotta">{stats.total} personen</strong>.
-          {stats.known > 0 && (
-            <>
-              {" "}Je kent er{" "}
-              <strong className="text-groen">{stats.known}</strong>.
-            </>
-          )}
-          {stats.out_of_touch > 0 && (
-            <>
-              {" "}Met{" "}
-              <strong className="text-goud">{stats.out_of_touch}</strong> heb je
-              al meer dan een jaar geen contact gehad.
-            </>
-          )}
-        </p>
+        {stats.total === 0 ? (
+          <p className="text-lg text-inkt leading-relaxed">
+            Je familie begint <strong className="text-terracotta">bij jou</strong>.
+            Voeg je eerste familielid toe en nodig ze uit — zo groeit de kaart,
+            persoon voor persoon.
+          </p>
+        ) : (
+          <p className="text-lg text-inkt leading-relaxed">
+            Je familie bestaat uit{" "}
+            <strong className="text-terracotta">{stats.total} personen</strong>.
+            {stats.known > 0 && (
+              <>
+                {" "}Je kent er{" "}
+                <strong className="text-groen">{stats.known}</strong>.
+              </>
+            )}
+            {stats.out_of_touch > 0 && (
+              <>
+                {" "}Met{" "}
+                <strong className="text-goud">{stats.out_of_touch}</strong> heb je
+                al meer dan een jaar geen contact gehad.
+              </>
+            )}
+          </p>
+        )}
       </section>
 
       {/* Warme nudge: de eerstvolgende verjaardag. */}

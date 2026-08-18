@@ -901,6 +901,16 @@ export type Database = {
         Args: Record<string, never>
         Returns: undefined
       }
+      start_familie: {
+        Args: {
+          p_naam: string
+          p_land: string | null
+          p_voornaam: string
+          p_achternaam: string
+          p_stad: string | null
+        }
+        Returns: string
+      }
       ontdek_verbindingen: {
         Args: Record<string, never>
         Returns: {

@@ -10,18 +10,10 @@ export default async function AppHome() {
   } = await supabase.auth.getUser()
   if (!user) redirect("/inloggen")
 
-  // Wie ben ik als persoon op de kaart?
+  // Wie ben ik als persoon op de kaart? Nog geen familie? Dan naar de voordeur:
+  // een nieuwe familie starten (uitgenodigden komen binnen via /welkom).
   const { data: meId } = await supabase.rpc("me")
-  if (!meId) {
-    return (
-      <main className="min-h-screen flex items-center justify-center px-6 text-center">
-        <p className="text-inkt-zacht max-w-sm">
-          Je account is nog niet gekoppeld aan een familielid. Vraag degene die
-          jou heeft uitgenodigd om je toe te voegen aan de familiekaart.
-        </p>
-      </main>
-    )
-  }
+  if (!meId) redirect("/start")
 
   const [{ data: stats }, { data: kaart }, { data: mij }] = await Promise.all([
     supabase.rpc("family_stats", { me: meId }).single(),
