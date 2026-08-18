@@ -54,6 +54,9 @@ export function FamilieLeden({
 
       {/* Acties */}
       <div className="space-y-3">
+        <Link href="/app/familie/stamboom" className="fk-btn fk-btn-full block bg-inkt text-white">
+          🌳 Bekijk de stamboom
+        </Link>
         <FamilielidToevoegen />
         <StartCollecte leden={leden} />
         {isFamilyKeeper && (
