@@ -43,9 +43,9 @@ export default async function AlbumPagina() {
 
       <Link
         href="/app/album/nieuw"
-        className="block w-full rounded-xl bg-terracotta py-4 text-center text-white font-medium hover:bg-terracotta-diep transition mb-6"
+        className="fk-btn fk-btn-primary fk-btn-full mb-6"
       >
-        Voeg een herinnering toe +
+        📷 Deel een herinnering
       </Link>
 
       {/* Ontdeklaag — samen op de foto, nog niet verbonden op de kaart. */}
@@ -87,12 +87,12 @@ export default async function AlbumPagina() {
       )}
 
       {(items ?? []).length === 0 ? (
-        <div className="text-center py-16 px-6">
-          <p className="text-5xl mb-4">📷</p>
-          <p className="text-inkt font-medium">
-            Jullie album groeit met elke herinnering die je deelt.
+        <div className="fk-card text-center py-12">
+          <p className="text-5xl mb-3">📷</p>
+          <p className="font-black text-inkt text-lg">Jullie album is nog leeg</p>
+          <p className="text-inkt-zacht mt-1">
+            Deel de eerste herinnering van jullie familie.
           </p>
-          <p className="text-inkt-zacht mt-1">Begin vandaag.</p>
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-2">

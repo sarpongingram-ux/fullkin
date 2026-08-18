@@ -15,9 +15,8 @@ export default async function AppHome() {
   const { data: meId } = await supabase.rpc("me")
   if (!meId) redirect("/start")
 
-  const [{ data: stats }, { data: kaart }, { data: mij }] = await Promise.all([
+  const [{ data: stats }, { data: mij }] = await Promise.all([
     supabase.rpc("family_stats", { me: meId }).single(),
-    supabase.rpc("family_map", { me: meId }),
     supabase
       .from("persons")
       .select("first_name, network_id")
@@ -109,7 +108,6 @@ export default async function AppHome() {
       voornaam={mij?.first_name ?? "familielid"}
       familieNaam={netwerk?.name ?? "je familie"}
       stats={stats ?? { total: 0, known: 0, silent: 0, out_of_touch: 0 }}
-      leden={kaart ?? []}
       collectes={lopende}
       dromen={alleDromen}
       mijnPersonId={meId}

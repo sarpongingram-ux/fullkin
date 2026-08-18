@@ -1,21 +1,29 @@
 @import "tailwindcss";
 
 /*
-  Fullkin — warm, menselijk, nooit koud of technisch (Masterdocument sectie 2).
-  Aardetinten: terracotta, warm goud, diep bruin. Geen strak tech-blauw.
+  Fullkin — look & feel: Cash App × Duolingo.
+  Wit en licht, veel ademruimte, grote ronde knoppen, grote vette getallen,
+  warm en uitnodigend. Nooit koud of technisch.
+
+  De bestaande utility-namen (bg-oppervlak, text-inkt, text-terracotta, …)
+  blijven bestaan maar wijzen nu naar het nieuwe palet, zodat de hele app in
+  één keer meekleurt. 'terracotta' en 'blauw' zijn nu allebei het primaire
+  blauw.
 */
 :root {
-  --achtergrond: #fdf8f3;
-  --oppervlak: #ffffff;
-  --inkt: #2e2320;
-  --inkt-zacht: #6b5d54;
-  --terracotta: #c4571f;
-  --terracotta-diep: #a8451a;
-  --goud: #d99a2b;
-  --klei: #f4e6d8;
-  --groen: #4a7c59;
-  --blauw: #5b7a99;
-  --rand: #ece0d4;
+  --achtergrond: #ffffff;   /* primaire achtergrond: wit */
+  --oppervlak: #f4f6fb;     /* kaarten en secties: lichtgrijs */
+  --inkt: #1a1a2e;          /* donkere tekst */
+  --inkt-zacht: #6b7280;    /* subtiele tekst */
+  --terracotta: #1b4fd8;    /* primair blauw */
+  --terracotta-diep: #1642b0;
+  --blauw: #1b4fd8;
+  --goud: #c9972b;          /* goud accent */
+  --groen: #15803d;         /* succes groen */
+  --klei: #e9effd;          /* licht blauwe accent-achtergrond */
+  --rand: #e6eaf2;          /* zeer subtiele rand */
+  --schaduw: 0 6px 20px rgba(26, 26, 46, 0.06);
+  --schaduw-diep: 0 10px 30px rgba(27, 79, 216, 0.12);
 }
 
 @theme inline {
@@ -30,23 +38,146 @@
   --color-groen: var(--groen);
   --color-blauw: var(--blauw);
   --color-rand: var(--rand);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-nunito);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --achtergrond: #1c1613;
-    --oppervlak: #241c18;
-    --inkt: #f4e9e0;
-    --inkt-zacht: #b8a99d;
-    --klei: #33271f;
-    --rand: #3a2c23;
-  }
+html {
+  font-size: 16px; /* body-tekst nooit kleiner dan 16px */
 }
 
 body {
   background: var(--achtergrond);
   color: var(--inkt);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-nunito), system-ui, sans-serif;
+  font-size: 1rem;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------------------------------------------------------------------------
+   Herbruikbare bouwstenen — Cash App × Duolingo
+   --------------------------------------------------------------------------- */
+
+/* Knoppen: groot, breed, ronde hoeken, minimaal 56px hoog. */
+.fk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 56px;
+  padding: 0 1.5rem;
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 1.0625rem;
+  line-height: 1.1;
+  text-align: center;
+  transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+.fk-btn:active { transform: scale(0.97); }
+.fk-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+.fk-btn-full { width: 100%; }
+
+.fk-btn-primary {
+  background: var(--terracotta);
+  color: #ffffff;
+  box-shadow: 0 4px 0 0 var(--terracotta-diep); /* Duolingo-achtige 'onderrand' */
+}
+.fk-btn-primary:hover { background: var(--terracotta-diep); }
+.fk-btn-primary:active { box-shadow: 0 1px 0 0 var(--terracotta-diep); }
+
+.fk-btn-secondary {
+  background: #ffffff;
+  color: var(--terracotta);
+  border: 2px solid var(--terracotta);
+}
+.fk-btn-secondary:hover { background: var(--klei); }
+
+.fk-btn-gold {
+  background: var(--goud);
+  color: #ffffff;
+  box-shadow: 0 4px 0 0 #a87c1f;
+}
+.fk-btn-gold:active { box-shadow: 0 1px 0 0 #a87c1f; }
+
+/* Kaarten: zachte schaduw, geen harde rand, ronde hoeken, ruime padding. */
+.fk-card {
+  background: var(--oppervlak);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: var(--schaduw);
+}
+.fk-card-white {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: var(--schaduw);
+}
+.fk-card-dark {
+  background: var(--inkt);
+  color: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: var(--schaduw-diep);
+}
+
+/* Grote bedragen — extra groot en vet, altijd leesbaar zonder bril. */
+.fk-amount {
+  font-weight: 900;
+  font-size: 3.25rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.fk-stat-num {
+  font-weight: 900;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+/* Voortgangsbalk in Duolingo-stijl. */
+.fk-progress {
+  height: 16px;
+  border-radius: 999px;
+  background: var(--rand);
+  overflow: hidden;
+}
+.fk-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--goud), #e0b455);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------------------------------------------------------------------------
+   Animaties — subtiel en snel (<300ms), nooit storend
+   --------------------------------------------------------------------------- */
+@keyframes fk-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.fk-pop { animation: fk-pop 0.28s ease-out both; }
+
+@keyframes fk-rise {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.fk-rise { animation: fk-rise 0.25s ease-out both; }
+
+@keyframes fk-heart {
+  0% { transform: scale(0.6); opacity: 0; }
+  50% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.fk-heart { animation: fk-heart 0.28s ease-out both; }
+
+@keyframes fk-confetti-fall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fk-pop, .fk-rise, .fk-heart, .fk-progress > span { animation: none; transition: none; }
 }

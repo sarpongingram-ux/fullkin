@@ -31,9 +31,9 @@ export function FamilielidToevoegen() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-xl border border-dashed border-terracotta/50 bg-oppervlak py-4 text-terracotta font-medium hover:bg-klei/50 transition"
+        className="fk-btn fk-btn-primary fk-btn-full"
       >
-        + Familielid toevoegen
+        ➕ Familielid toevoegen
       </button>
     )
   }

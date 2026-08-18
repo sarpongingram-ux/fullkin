@@ -42,26 +42,23 @@ export function MijnDroom({
 
   if (!open && heeftDroom) {
     return (
-      <section className="bg-oppervlak rounded-2xl border border-goud/40 p-5 mb-4">
-        <div className="flex items-center justify-between mb-1">
-          <p className="text-xs font-semibold text-goud uppercase tracking-wide">
-            Mijn droom
+      <section className="fk-card">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-black text-goud uppercase tracking-wide">
+            ✨ Jouw droom
           </p>
           <button
             onClick={() => setOpen(true)}
-            className="text-xs text-inkt-zacht hover:text-inkt"
+            className="text-sm font-bold text-terracotta"
           >
             Aanpassen
           </button>
         </div>
-        <p className="text-lg font-semibold text-inkt">{huidigeTitel}</p>
-        <div className="mt-3 h-2.5 rounded-full bg-klei overflow-hidden">
-          <div
-            className="h-full rounded-full bg-goud transition-all"
-            style={{ width: `${pct}%` }}
-          />
+        <p className="text-xl font-black text-inkt">{huidigeTitel}</p>
+        <div className="fk-progress mt-3">
+          <span style={{ width: `${pct}%` }} />
         </div>
-        <p className="text-sm text-inkt-zacht mt-1.5">
+        <p className="text-base text-inkt-zacht mt-2 font-semibold">
           {euro(opgehaaldCents)} van {euro(huidigStreefCents!)} · {pct}%
           {pct >= 100 && " — bereikt! 🎉"}
         </p>
@@ -73,7 +70,7 @@ export function MijnDroom({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-xl border border-dashed border-goud/60 bg-oppervlak py-4 text-goud font-medium hover:bg-klei/50 transition mb-4"
+        className="fk-btn fk-btn-secondary fk-btn-full"
       >
         ✨ Stel jouw droom in
       </button>
@@ -81,19 +78,19 @@ export function MijnDroom({
   }
 
   return (
-    <section className="bg-oppervlak rounded-2xl border border-rand p-5 mb-4">
+    <section className="fk-card">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-inkt">Jouw droom</h3>
+        <h3 className="font-black text-inkt text-lg">Jouw droom</h3>
         <button
           onClick={() => setOpen(false)}
-          className="text-inkt-zacht text-sm hover:text-inkt"
+          className="text-inkt-zacht font-bold hover:text-inkt"
         >
           Sluiten
         </button>
       </div>
-      <form action={actie} className="space-y-3">
+      <form action={actie} className="space-y-4">
         <div>
-          <label className="block text-sm text-inkt-zacht mb-1">
+          <label className="block text-sm text-inkt-zacht mb-1 font-semibold">
             Wat is je droom? (één zin)
           </label>
           <input
@@ -101,11 +98,11 @@ export function MijnDroom({
             defaultValue={huidigeTitel ?? ""}
             placeholder="Een fatbike"
             required
-            className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+            className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           />
         </div>
         <div>
-          <label className="block text-sm text-inkt-zacht mb-1">
+          <label className="block text-sm text-inkt-zacht mb-1 font-semibold">
             Streefbedrag (€)
           </label>
           <input
@@ -116,16 +113,16 @@ export function MijnDroom({
             defaultValue={huidigStreefCents != null ? huidigStreefCents / 100 : ""}
             placeholder="1200"
             required
-            className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+            className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           />
         </div>
         {resultaat && !resultaat.ok && (
-          <p className="text-sm text-terracotta">{resultaat.fout}</p>
+          <p className="text-base text-terracotta font-semibold">{resultaat.fout}</p>
         )}
         <button
           type="submit"
           disabled={bezig}
-          className="w-full rounded-full bg-terracotta py-2.5 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+          className="fk-btn fk-btn-primary fk-btn-full"
         >
           {bezig ? "Bezig…" : heeftDroom ? "Droom bijwerken" : "Droom instellen"}
         </button>

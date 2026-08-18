@@ -40,9 +40,9 @@ export function StartCollecte({ leden }: { leden: Lid[] }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-xl border border-dashed border-goud/60 bg-oppervlak py-4 text-goud font-medium hover:bg-klei/50 transition"
+        className="fk-btn fk-btn-secondary fk-btn-full"
       >
-        ♥ Start een collecte
+        ❤️ Start een collecte
       </button>
     )
   }
