@@ -161,7 +161,7 @@ export default async function StemPagina() {
         <Nomineren roundId={ronde.id} leden={teNomineren} />
       )}
 
-      {/* Co-Founder sluit de stemming af */}
+      {/* Family Keeper sluit de stemming af */}
       {!afgerond && isCoFounder && nominaties.length > 0 && (
         <div className="mt-6">
           <SluitKnop roundId={ronde.id} />

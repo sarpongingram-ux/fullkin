@@ -85,7 +85,7 @@ export default async function UitbetalingPagina({
         </p>
         <p className="text-sm text-inkt-zacht mt-1">
           Van elke bijdrage gaat 95% direct naar de ontvanger en 5% naar Fullkin
-          (co-founder, rollen, de Familie Pot en het platform). Fullkin houdt
+          (Family Keeper, rollen, de Familie Pot en het platform). Fullkin houdt
           jouw geld nooit vast.
         </p>
       </div>

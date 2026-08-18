@@ -31,7 +31,7 @@ export default async function Dashboard() {
     .single()
   if (!mij) redirect("/app")
 
-  // Alleen Co-Founders zien dit dashboard.
+  // Alleen Family Keepers zien dit dashboard.
   const { data: isCoFounder } = await supabase.rpc("has_role", {
     net: mij.network_id,
     r: "co_founder",
@@ -40,8 +40,8 @@ export default async function Dashboard() {
     return (
       <main className="min-h-screen flex items-center justify-center px-6 text-center">
         <p className="text-inkt-zacht max-w-sm">
-          Het Co-Founder dashboard is alleen zichtbaar voor de oprichters van de
-          familie.{" "}
+          Het Family Keeper-dashboard is alleen zichtbaar voor de oprichters van
+          de familie.{" "}
           <Link href="/app" className="text-terracotta underline">
             Terug naar je familie
           </Link>
@@ -126,7 +126,7 @@ export default async function Dashboard() {
 
       <header className="mt-4 mb-6">
         <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
-          CO-FOUNDER DASHBOARD
+          FAMILY KEEPER DASHBOARD
         </p>
         <h1 className="text-2xl font-bold text-inkt mt-1">
           Dag {mij.first_name}. Dit is jullie familie.

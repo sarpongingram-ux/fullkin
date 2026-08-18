@@ -181,7 +181,7 @@ export async function draagBij(
     destination = pa?.external_id ?? null
   }
 
-  // Application fee = de 5% (co-founder + rollen + pot + platform), met dezelfde
+  // Application fee = de 5% (Family Keeper + rollen + pot + platform), met dezelfde
   // afronding als compute_split: de restcent gaat naar de ontvanger.
   const cf = Math.floor((cents * 50) / 10000)
   const rh = Math.floor((cents * 50) / 10000)

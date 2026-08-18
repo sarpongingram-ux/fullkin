@@ -131,7 +131,7 @@ export function StemPaneel({
   )
 }
 
-// Co-Founder sluit de stemming — de meest gekozen persoon wint.
+// Family Keeper sluit de stemming — de meest gekozen persoon wint.
 export function SluitKnop({ roundId }: { roundId: string }) {
   const router = useRouter()
   const [bezig, start] = useTransition()
@@ -156,7 +156,7 @@ export function SluitKnop({ roundId }: { roundId: string }) {
         onClick={() => setBevestig(true)}
         className="w-full rounded-full border border-rand text-inkt-zacht text-sm py-2.5 hover:bg-klei/40 transition"
       >
-        Stemming sluiten (Co-Founder)
+        Stemming sluiten (Family Keeper)
       </button>
     )
   }

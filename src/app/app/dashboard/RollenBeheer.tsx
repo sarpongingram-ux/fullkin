@@ -16,7 +16,7 @@ type Rol = {
 type Lid = { id: string; naam: string }
 
 const rolNamen: Record<Enums<"family_role">, string> = {
-  co_founder: "Co-Founder Family Keeper",
+  co_founder: "Family Keeper",
   events_manager: "Events Manager",
   verhalen_manager: "Verhalen Manager",
   pot_beheerder: "Pot Beheerder",

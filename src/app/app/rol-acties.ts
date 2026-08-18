@@ -6,14 +6,14 @@ import type { Enums } from "@/lib/types/database"
 
 export type RolResultaat = { ok: true } | { ok: false; fout: string }
 
-// Een Co-Founder wijst een rol toe aan een familielid. De Co-Founder-rol zelf
+// Een Family Keeper wijst een rol toe aan een familielid. De Family Keeper-rol zelf
 // is permanent en wordt hier nooit toegewezen of ingetrokken.
 export async function wijsRolToe(
   personId: string,
   role: Enums<"family_role">,
 ): Promise<RolResultaat> {
   if (role === "co_founder") {
-    return { ok: false, fout: "De Co-Founder-rol is permanent en niet toewijsbaar." }
+    return { ok: false, fout: "De Family Keeper-rol is permanent en niet toewijsbaar." }
   }
 
   const supabase = await createClient()
@@ -32,13 +32,13 @@ export async function wijsRolToe(
     .single()
   if (!mij) return { ok: false, fout: "Je profiel is niet gevonden." }
 
-  // Alleen een Co-Founder mag rollen toewijzen (dubbel op de RLS-policy).
+  // Alleen een Family Keeper mag rollen toewijzen (dubbel op de RLS-policy).
   const { data: isCoFounder } = await supabase.rpc("has_role", {
     net: mij.network_id,
     r: "co_founder",
   })
   if (!isCoFounder) {
-    return { ok: false, fout: "Alleen een Co-Founder kan rollen toewijzen." }
+    return { ok: false, fout: "Alleen een Family Keeper kan rollen toewijzen." }
   }
 
   // Controleer of de rol ontgrendeld is op basis van familiegrootte.
