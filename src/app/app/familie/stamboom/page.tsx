@@ -13,12 +13,26 @@ export default async function StamboomPagina() {
   const { data: meId } = await supabase.rpc("me")
   if (!meId) redirect("/start")
 
-  const [{ data: personen }, { data: relaties }] = await Promise.all([
-    supabase
-      .from("persons")
-      .select("id, first_name, last_name, photo_url, born_on, died_on"),
-    supabase.from("relationships").select("kind, from_person, to_person"),
-  ])
+  const { data: mij } = await supabase
+    .from("persons")
+    .select("network_id")
+    .eq("id", meId)
+    .single()
+
+  const [{ data: personen }, { data: relaties }, { data: netwerk }] =
+    await Promise.all([
+      supabase
+        .from("persons")
+        .select("id, first_name, last_name, photo_url, born_on, died_on"),
+      supabase.from("relationships").select("kind, from_person, to_person"),
+      mij
+        ? supabase
+            .from("family_networks")
+            .select("name")
+            .eq("id", mij.network_id)
+            .single()
+        : Promise.resolve({ data: null }),
+    ])
 
   return (
     <main className="max-w-md mx-auto px-5 py-8">
@@ -34,7 +48,7 @@ export default async function StamboomPagina() {
         </p>
         <h1 className="text-3xl font-black text-inkt mt-1">Jullie stamboom 🌳</h1>
         <p className="text-inkt-zacht mt-1">
-          Van generatie op generatie. Tik op iemand om meer te zien.
+          Jullie hele familie in één beeld. Tik op iemand om meer te zien.
         </p>
       </header>
 
@@ -42,6 +56,7 @@ export default async function StamboomPagina() {
         personen={personen ?? []}
         relaties={relaties ?? []}
         meId={meId}
+        familieNaam={netwerk?.name ?? "Familie"}
       />
     </main>
   )
