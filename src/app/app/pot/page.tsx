@@ -5,6 +5,7 @@ import { Doneren } from "./Doneren"
 import { Maandbijdrage } from "./Maandbijdrage"
 import { settlePotDonationFromSession } from "@/lib/stripe/potDonation"
 import { settlePotSubscriptionFromSession } from "@/lib/stripe/potSubscription"
+import { Confetti } from "@/components/Confetti"
 
 function euro(cents: number, decimals = 2) {
   return new Intl.NumberFormat("nl-NL", {
@@ -76,6 +77,7 @@ export default async function PotPagina({
 
   return (
     <main className="max-w-md mx-auto px-5 py-8 space-y-6">
+      {(session_id || sub_session) && <Confetti />}
       <Link href="/app" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug naar je familie
       </Link>

@@ -3,6 +3,7 @@
 import { useActionState, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { startMaandbijdrage, stopMaandbijdrage, type MaandResultaat } from "./acties"
+import { Confetti } from "@/components/Confetti"
 
 function euro(cents: number, decimals = 2) {
   return new Intl.NumberFormat("nl-NL", {
@@ -97,6 +98,7 @@ export function Maandbijdrage({
 
   return (
     <div className="fk-card">
+      {res?.ok && <Confetti />}
       <div className="flex items-center justify-between mb-1">
         <h3 className="font-black text-inkt text-lg">Maandelijkse bijdrage</h3>
         <button

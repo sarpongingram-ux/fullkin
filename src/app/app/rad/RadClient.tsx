@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { draaiHetRad, beslisRad } from "./acties"
+import { Confetti } from "@/components/Confetti"
 import type { Enums } from "@/lib/types/database"
 
 type Lid = { id: string; naam: string }
@@ -63,6 +64,7 @@ export function KeuzePaneel({ drawId, leden }: { drawId: string; leden: Lid[] })
   const [gunModus, setGunModus] = useState(false)
   const [ontvanger, setOntvanger] = useState("")
   const [fout, setFout] = useState<string | null>(null)
+  const [gelukt, setGelukt] = useState(false)
 
   function kies(choice: Enums<"rad_choice">, recipient: string | null) {
     setFout(null)
@@ -72,13 +74,16 @@ export function KeuzePaneel({ drawId, leden }: { drawId: string; leden: Lid[] })
         setFout(res.fout ?? "Er ging iets mis.")
         return
       }
-      router.refresh()
+      // Vier het even met goud confetti, ververs daarna.
+      setGelukt(true)
+      setTimeout(() => router.refresh(), 2400)
     })
   }
 
   if (gunModus) {
     return (
       <div className="fk-card space-y-3">
+        {gelukt && <Confetti gold count={90} />}
         <p className="font-black text-inkt text-lg">Aan wie gun je de prijs?</p>
         <select
           value={ontvanger}
@@ -120,6 +125,7 @@ export function KeuzePaneel({ drawId, leden }: { drawId: string; leden: Lid[] })
 
   return (
     <div className="space-y-3">
+      {gelukt && <Confetti gold count={90} />}
       <p className="text-lg font-black text-inkt">Wat doe je met de prijs?</p>
       <button
         onClick={() => setGunModus(true)}

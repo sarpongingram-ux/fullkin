@@ -173,11 +173,28 @@ body {
 }
 .fk-heart { animation: fk-heart 0.28s ease-out both; }
 
+/* Confetti — valt en dwarrelt, ruimt zichzelf op na de animatie. */
+.fk-confetti-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 60;
+}
+.fk-confetti-piece {
+  position: absolute;
+  top: -8vh;
+  will-change: transform, opacity;
+  animation-name: fk-confetti-fall;
+  animation-timing-function: cubic-bezier(0.3, 0.1, 0.3, 1);
+  animation-fill-mode: forwards;
+}
 @keyframes fk-confetti-fall {
-  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  0% { transform: translate(0, -8vh) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--drift, 0px), 112vh) rotate(720deg); opacity: 0.85; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .fk-pop, .fk-rise, .fk-heart, .fk-progress > span { animation: none; transition: none; }
+  .fk-confetti-root { display: none; }
 }

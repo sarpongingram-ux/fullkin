@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react"
 import { doneerAanPot, type DonatieResultaat } from "./acties"
+import { Confetti } from "@/components/Confetti"
 
 export function Doneren() {
   const [open, setOpen] = useState(false)
@@ -23,6 +24,7 @@ export function Doneren() {
 
   return (
     <div className="fk-card">
+      {res?.ok && <Confetti />}
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-black text-inkt text-lg">Doneer aan de pot</h3>
         <button

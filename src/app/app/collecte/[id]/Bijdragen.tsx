@@ -4,6 +4,7 @@ import { useActionState } from "react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { draagBij, type BijdrageResultaat } from "../../collecte-acties"
+import { Confetti } from "@/components/Confetti"
 
 export function Bijdragen({
   collectieId,
@@ -28,6 +29,7 @@ export function Bijdragen({
 
   return (
     <div className="fk-card">
+      {resultaat?.ok && <Confetti />}
       <h2 className="font-black text-inkt text-lg mb-3">
         Draag bij voor {voornaamBegunstigde} ❤️
       </h2>

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Bijdragen } from "./Bijdragen"
 import { settleFromSession } from "@/lib/stripe/settle"
+import { Confetti } from "@/components/Confetti"
 
 function euro(cents: number) {
   return new Intl.NumberFormat("nl-NL", {
@@ -71,6 +72,7 @@ export default async function CollectiePagina({
 
   return (
     <main className="max-w-md mx-auto px-5 py-8 space-y-6">
+      {session_id && <Confetti />}
       <Link href="/app" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug
       </Link>
