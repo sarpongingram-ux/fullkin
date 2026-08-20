@@ -42,32 +42,32 @@ export function MijlpaalToevoegen({ leden }: { leden: Lid[] }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-full border border-terracotta text-terracotta font-medium py-3 hover:bg-klei/40 transition"
+        className="fk-btn fk-btn-secondary fk-btn-full"
       >
-        Voeg een mijlpaal toe
+        🎉 Voeg een mijlpaal toe
       </button>
     )
   }
 
   return (
-    <div className="bg-oppervlak rounded-2xl border border-rand p-5">
+    <div className="fk-card">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-inkt">Nieuwe mijlpaal</h3>
+        <h3 className="font-black text-inkt text-lg">Nieuwe mijlpaal</h3>
         <button
           onClick={() => setOpen(false)}
-          className="text-inkt-zacht text-sm hover:text-inkt"
+          className="text-inkt-zacht font-bold hover:text-inkt"
         >
           Sluiten
         </button>
       </div>
-      <form action={actie} className="space-y-3">
+      <form action={actie} className="space-y-4">
         <div>
-          <label className="block text-sm text-inkt-zacht mb-1">Voor wie?</label>
+          <label className="block text-sm text-inkt-zacht mb-1 font-semibold">Voor wie?</label>
           <select
             name="person_id"
             required
             defaultValue=""
-            className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+            className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           >
             <option value="" disabled>
               Kies een familielid…
@@ -81,12 +81,12 @@ export function MijlpaalToevoegen({ leden }: { leden: Lid[] }) {
         </div>
 
         <div>
-          <label className="block text-sm text-inkt-zacht mb-1">Wat?</label>
+          <label className="block text-sm text-inkt-zacht mb-1 font-semibold">Wat?</label>
           <select
             name="kind"
             required
             defaultValue=""
-            className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+            className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           >
             <option value="" disabled>
               Kies een soort…
@@ -104,25 +104,25 @@ export function MijlpaalToevoegen({ leden }: { leden: Lid[] }) {
           placeholder="Titel, bijv. “Ama slaagt voor haar rijbewijs”"
           required
           maxLength={120}
-          className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
         />
 
         <div>
-          <label className="block text-xs text-inkt-zacht mb-1">Wanneer?</label>
+          <label className="block text-sm text-inkt-zacht mb-1 font-semibold">Wanneer?</label>
           <input
             name="occurs_on"
             type="date"
             required
-            className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt text-sm outline-none focus:border-terracotta"
+            className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           />
         </div>
 
-        {res && !res.ok && <p className="text-sm text-terracotta">{res.fout}</p>}
+        {res && !res.ok && <p className="text-terracotta font-semibold">{res.fout}</p>}
 
         <button
           type="submit"
           disabled={bezig}
-          className="w-full rounded-full bg-terracotta py-2.5 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+          className="fk-btn fk-btn-primary fk-btn-full"
         >
           {bezig ? "Bezig…" : "Mijlpaal toevoegen"}
         </button>

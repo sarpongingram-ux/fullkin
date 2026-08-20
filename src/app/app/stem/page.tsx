@@ -13,12 +13,11 @@ export default async function StemPagina() {
   const { data: meId } = await supabase.rpc("me")
   if (!meId) redirect("/app")
 
-  // De ronde van dit jaar (wordt aangemaakt als die nog niet bestaat).
   const { data: ronde, error: rondeFout } = await supabase.rpc("stem_ronde")
   if (rondeFout || !ronde) {
     return (
       <main className="min-h-screen flex items-center justify-center px-6 text-center">
-        <p className="text-inkt-zacht">De Stem kon niet worden geladen.</p>
+        <p className="text-inkt-zacht font-semibold">De Stem kon niet worden geladen.</p>
       </main>
     )
   }
@@ -29,7 +28,7 @@ export default async function StemPagina() {
     .eq("id", meId)
     .single()
 
-  const [{ data: uitslag }, { data: leden }, { data: isCoFounder }] =
+  const [{ data: uitslag }, { data: leden }, { data: isKeeper }] =
     await Promise.all([
       supabase.rpc("stem_uitslag", { p_round: ronde.id }),
       supabase
@@ -46,7 +45,6 @@ export default async function StemPagina() {
     id: l.id,
     naam: `${l.first_name} ${l.last_name}`,
   }))
-  // Al genomineerde personen niet nog eens aanbieden.
   const genomineerd = new Set(nominaties.map((n) => n.nominee_id))
   const teNomineren = ledenLijst.filter((l) => !genomineerd.has(l.id))
 
@@ -60,43 +58,42 @@ export default async function StemPagina() {
     : null
 
   return (
-    <main className="min-h-screen max-w-md mx-auto px-5 py-10">
-      <Link href="/app" className="text-sm text-inkt-zacht hover:text-inkt">
+    <main className="max-w-md mx-auto px-5 py-8 space-y-6">
+      <Link href="/app" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug naar je familie
       </Link>
 
-      <header className="mt-4 mb-6 text-center">
-        <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
+      <header>
+        <p className="text-terracotta font-extrabold tracking-[0.2em] text-xs">
           DE STEM · {ronde.year}
         </p>
-        <h1 className="text-2xl font-bold text-inkt mt-1">
-          Wie verdient dit jaar erkenning?
+        <h1 className="text-3xl font-black text-inkt mt-1">
+          Wie verdient erkenning? 🕊️
         </h1>
-        <p className="text-sm text-inkt-zacht mt-2 leading-relaxed">
+        <p className="text-inkt-zacht mt-2 leading-relaxed">
           De familie kiest bewust één persoon. Nomineer met één zin waarom.
           Iedereen stemt anoniem.
         </p>
       </header>
 
       {afgerond && winnaarNaam && (
-        <section className="bg-inkt text-white rounded-2xl p-8 mb-6 text-center">
-          <p className="text-5xl mb-3">🕊️</p>
-          <p className="text-sm opacity-70 uppercase tracking-wide">
+        <section className="fk-card-dark text-center fk-pop">
+          <p className="text-6xl mb-3">🕊️</p>
+          <p className="text-sm opacity-70 uppercase tracking-wide font-bold">
             De familie koos
           </p>
-          <p className="text-3xl font-bold text-goud mt-1">{winnaarNaam}</p>
+          <p className="text-3xl font-black text-goud mt-1">{winnaarNaam}</p>
           <Link
-            href="/app"
-            className="inline-block mt-5 rounded-full bg-goud text-inkt text-sm font-semibold px-5 py-2.5 hover:opacity-90 transition"
+            href="/app/familie"
+            className="fk-btn fk-btn-gold mt-5 inline-flex"
           >
             Start een collecte voor {winnaarNaam.split(" ")[0]} →
           </Link>
         </section>
       )}
 
-      {/* De nominaties met stemtellingen */}
       {nominaties.length > 0 ? (
-        <ul className="space-y-3 mb-6">
+        <ul className="space-y-3">
           {nominaties.map((n) => {
             const pct =
               totaalStemmen > 0 ? Math.round((n.stemmen / totaalStemmen) * 100) : 0
@@ -104,33 +101,30 @@ export default async function StemPagina() {
             return (
               <li
                 key={n.nomination_id}
-                className={`rounded-2xl border p-4 ${
+                className={`fk-card ${
                   isWinnaar
-                    ? "border-goud bg-klei/40"
+                    ? "ring-2 ring-goud"
                     : n.mijn_stem
-                      ? "border-terracotta bg-oppervlak"
-                      : "border-rand bg-oppervlak"
+                      ? "ring-2 ring-terracotta"
+                      : ""
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <Link
                     href={`/app/persoon/${n.nominee_id}`}
-                    className="font-semibold text-inkt hover:text-terracotta transition"
+                    className="font-black text-inkt hover:text-terracotta transition"
                   >
                     {n.nominee_naam}
                   </Link>
-                  <span className="text-sm text-inkt-zacht">
+                  <span className="text-inkt-zacht font-bold">
                     {n.stemmen} {n.stemmen === 1 ? "stem" : "stemmen"}
                   </span>
                 </div>
-                <p className="text-sm text-inkt mt-1 italic leading-relaxed">
+                <p className="text-inkt mt-1 italic leading-relaxed">
                   “{n.reason}”
                 </p>
-                <div className="mt-2 h-1.5 rounded-full bg-klei overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-goud"
-                    style={{ width: `${pct}%` }}
-                  />
+                <div className="fk-progress mt-3" style={{ height: 10 }}>
+                  <span style={{ width: `${pct}%` }} />
                 </div>
                 {!afgerond && !ikHebGestemd && (
                   <div className="mt-3">
@@ -138,37 +132,35 @@ export default async function StemPagina() {
                   </div>
                 )}
                 {n.mijn_stem && (
-                  <p className="text-xs text-terracotta mt-2">Jouw stem ✓</p>
+                  <p className="text-sm text-terracotta font-bold mt-2">Jouw stem ✓</p>
                 )}
               </li>
             )
           })}
         </ul>
       ) : (
-        <p className="text-center text-sm text-inkt-zacht mb-6">
-          Nog niemand genomineerd. Wees de eerste.
-        </p>
+        <div className="fk-card text-center py-8">
+          <p className="text-4xl mb-2">🌟</p>
+          <p className="font-black text-inkt">Nog niemand genomineerd</p>
+          <p className="text-inkt-zacht mt-1">Wees de eerste die iemand eert.</p>
+        </div>
       )}
 
       {ikHebGestemd && !afgerond && (
-        <p className="text-center text-sm text-inkt-zacht mb-6">
-          Je hebt gestemd. Bedankt voor je stem.
+        <p className="text-center text-inkt-zacht font-semibold">
+          Je hebt gestemd. Bedankt voor je stem. 💛
         </p>
       )}
 
-      {/* Nomineren — kan zolang de ronde open is */}
       {!afgerond && teNomineren.length > 0 && (
         <Nomineren roundId={ronde.id} leden={teNomineren} />
       )}
 
-      {/* Family Keeper sluit de stemming af */}
-      {!afgerond && isCoFounder && nominaties.length > 0 && (
-        <div className="mt-6">
-          <SluitKnop roundId={ronde.id} />
-        </div>
+      {!afgerond && isKeeper && nominaties.length > 0 && (
+        <SluitKnop roundId={ronde.id} />
       )}
 
-      <p className="mt-10 text-center text-xs text-inkt-zacht leading-relaxed">
+      <p className="text-center text-sm text-inkt-zacht leading-relaxed px-4">
         Iedereen ziet de tellingen, niemand ziet wie op wie stemde. Eén stem per
         familielid.
       </p>

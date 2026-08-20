@@ -82,30 +82,30 @@ export default async function MeldingenPagina() {
   const ongelezen = lijst.filter((m) => !m.read_at).length
 
   return (
-    <main className="min-h-screen max-w-md mx-auto px-5 py-10">
+    <main className="max-w-md mx-auto px-5 py-8 space-y-6">
       <MarkeerGelezen ongelezen={ongelezen} />
 
-      <Link href="/app" className="text-sm text-inkt-zacht hover:text-inkt">
+      <Link href="/app" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug naar je familie
       </Link>
 
-      <header className="mt-4 mb-6">
-        <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
+      <header>
+        <p className="text-terracotta font-extrabold tracking-[0.2em] text-xs">
           MELDINGEN
         </p>
-        <h1 className="text-2xl font-bold text-inkt mt-1">Wat er speelt</h1>
+        <h1 className="text-3xl font-black text-inkt mt-1">Wat er speelt 🔔</h1>
       </header>
 
       {lijst.length === 0 ? (
-        <div className="text-center py-16 px-6">
-          <p className="text-5xl mb-4">🔔</p>
-          <p className="text-inkt font-medium">Nog geen meldingen.</p>
+        <div className="fk-card text-center py-12">
+          <p className="text-5xl mb-3">🔔</p>
+          <p className="font-black text-inkt text-lg">Nog geen meldingen</p>
           <p className="text-inkt-zacht mt-1">
             Zodra de familie iets deelt of op jou reageert, zie je het hier.
           </p>
         </div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {lijst.map((m) => {
             const actor = m.actor_person_id
               ? naamVan.get(m.actor_person_id) ?? "Een familielid"
@@ -114,23 +114,21 @@ export default async function MeldingenPagina() {
               <li key={m.id}>
                 <Link
                   href={linkVan(m.subject_type, m.subject_id)}
-                  className={`flex items-start gap-3 rounded-xl border p-4 transition hover:border-terracotta ${
-                    m.read_at
-                      ? "border-rand bg-oppervlak"
-                      : "border-terracotta/40 bg-klei/40"
+                  className={`flex items-start gap-4 fk-card transition ${
+                    m.read_at ? "" : "ring-2 ring-terracotta"
                   }`}
                 >
-                  <span className="text-xl shrink-0">{emojiVan[m.kind]}</span>
-                  <div className="min-w-0">
-                    <p className="text-inkt leading-snug">
+                  <span className="text-2xl shrink-0">{emojiVan[m.kind]}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-inkt leading-snug font-semibold">
                       {tekstVan(m.kind, actor)}
                     </p>
-                    <p className="text-xs text-inkt-zacht mt-0.5">
+                    <p className="text-sm text-inkt-zacht mt-0.5">
                       {tijdGeleden(m.created_at)}
                     </p>
                   </div>
                   {!m.read_at && (
-                    <span className="ml-auto mt-1 w-2 h-2 rounded-full bg-terracotta shrink-0" />
+                    <span className="mt-1 w-2.5 h-2.5 rounded-full bg-terracotta shrink-0" />
                   )}
                 </Link>
               </li>

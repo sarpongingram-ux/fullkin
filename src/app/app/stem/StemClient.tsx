@@ -6,14 +6,11 @@ import { nomineer, stem, sluitStem } from "./acties"
 
 type Lid = { id: string; naam: string }
 
+const invoer =
+  "w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
+
 // Nomineren — één familielid, één zin waarom.
-export function Nomineren({
-  roundId,
-  leden,
-}: {
-  roundId: string
-  leden: Lid[]
-}) {
+export function Nomineren({ roundId, leden }: { roundId: string; leden: Lid[] }) {
   const router = useRouter()
   const [bezig, start] = useTransition()
   const [open, setOpen] = useState(false)
@@ -40,20 +37,20 @@ export function Nomineren({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-full border border-terracotta text-terracotta font-medium py-3 hover:bg-klei/40 transition"
+        className="fk-btn fk-btn-secondary fk-btn-full"
       >
-        Iemand nomineren
+        🌟 Iemand nomineren
       </button>
     )
   }
 
   return (
-    <div className="bg-oppervlak rounded-2xl border border-rand p-5 space-y-3">
-      <p className="font-semibold text-inkt">Wie wil je nomineren?</p>
+    <div className="fk-card space-y-3">
+      <p className="font-black text-inkt text-lg">Wie wil je nomineren?</p>
       <select
         value={nominee}
         onChange={(e) => setNominee(e.target.value)}
-        className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+        className={invoer}
       >
         <option value="">Kies een familielid…</option>
         {leden.map((l) => (
@@ -68,23 +65,23 @@ export function Nomineren({
         placeholder="Eén zin waarom. Bijv. “Ze heeft dit jaar veel voor iedereen gedaan.”"
         rows={2}
         maxLength={200}
-        className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta resize-none"
+        className={`${invoer} resize-none`}
       />
-      {fout && <p className="text-sm text-terracotta">{fout}</p>}
-      <div className="flex gap-2">
+      {fout && <p className="text-terracotta font-semibold">{fout}</p>}
+      <div className="flex gap-3">
         <button
           onClick={() => {
             setOpen(false)
             setFout(null)
           }}
-          className="flex-1 rounded-full border border-rand py-2.5 text-inkt-zacht hover:bg-klei/40 transition"
+          className="fk-btn fk-btn-secondary flex-1"
         >
           Terug
         </button>
         <button
           onClick={verstuur}
           disabled={bezig || !nominee || reden.trim().length < 3}
-          className="flex-1 rounded-full bg-terracotta py-2.5 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+          className="fk-btn fk-btn-primary flex-1"
         >
           Nomineren
         </button>
@@ -122,11 +119,12 @@ export function StemPaneel({
       <button
         onClick={stemUit}
         disabled={bezig}
-        className="w-full rounded-full bg-inkt text-white text-sm font-medium py-2.5 hover:opacity-90 transition disabled:opacity-60"
+        className="fk-btn fk-btn-primary fk-btn-full"
+        style={{ minHeight: 48 }}
       >
         Stem op deze persoon
       </button>
-      {fout && <p className="text-sm text-terracotta mt-2">{fout}</p>}
+      {fout && <p className="text-terracotta font-semibold mt-2">{fout}</p>}
     </>
   )
 }
@@ -154,7 +152,7 @@ export function SluitKnop({ roundId }: { roundId: string }) {
     return (
       <button
         onClick={() => setBevestig(true)}
-        className="w-full rounded-full border border-rand text-inkt-zacht text-sm py-2.5 hover:bg-klei/40 transition"
+        className="w-full text-inkt-zacht font-bold py-3 hover:text-inkt transition"
       >
         Stemming sluiten (Family Keeper)
       </button>
@@ -162,23 +160,23 @@ export function SluitKnop({ roundId }: { roundId: string }) {
   }
 
   return (
-    <div className="bg-oppervlak rounded-2xl border border-goud/40 p-4 space-y-3 text-center">
-      <p className="text-sm text-inkt">
+    <div className="fk-card space-y-3 text-center">
+      <p className="text-inkt font-semibold">
         Weet je het zeker? De persoon met de meeste stemmen wint. Dit kan niet
         terug.
       </p>
-      {fout && <p className="text-sm text-terracotta">{fout}</p>}
-      <div className="flex gap-2">
+      {fout && <p className="text-terracotta font-semibold">{fout}</p>}
+      <div className="flex gap-3">
         <button
           onClick={() => setBevestig(false)}
-          className="flex-1 rounded-full border border-rand py-2.5 text-inkt-zacht hover:bg-klei/40 transition"
+          className="fk-btn fk-btn-secondary flex-1"
         >
           Terug
         </button>
         <button
           onClick={sluit}
           disabled={bezig}
-          className="flex-1 rounded-full bg-goud py-2.5 text-inkt font-semibold hover:opacity-90 transition disabled:opacity-60"
+          className="fk-btn fk-btn-gold flex-1"
         >
           Sluiten
         </button>

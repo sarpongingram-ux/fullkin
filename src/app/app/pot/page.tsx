@@ -75,68 +75,64 @@ export default async function PotPagina({
   const familieNaam = netwerk?.name ?? "de familie"
 
   return (
-    <main className="min-h-screen max-w-md mx-auto px-5 py-10">
-      <Link href="/app" className="text-sm text-inkt-zacht hover:text-inkt">
+    <main className="max-w-md mx-auto px-5 py-8 space-y-6">
+      <Link href="/app" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug naar je familie
       </Link>
 
-      <header className="mt-4 mb-6">
-        <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
-          FAMILIE POT
+      <header>
+        <p className="text-terracotta font-extrabold tracking-[0.2em] text-xs">
+          FAMILIEPOT
         </p>
-        <h1 className="text-2xl font-bold text-inkt mt-1">De pot van {familieNaam}</h1>
+        <h1 className="text-3xl font-black text-inkt mt-1">De familiepot 🌍</h1>
       </header>
 
-      {/* Het saldo — groot, warm, het feest. */}
-      <section className="bg-inkt text-white rounded-2xl p-8 mb-4 text-center">
-        <p className="text-xs uppercase tracking-wide opacity-70">Huidig saldo</p>
-        <p className="text-5xl font-bold text-goud mt-2">{euro(p.saldo_cents, 0)}</p>
+      {/* Het saldo — groot, Cash App-stijl. */}
+      <section className="fk-card-dark text-center">
+        <p className="text-sm font-bold opacity-70">Huidig saldo</p>
+        <p className="fk-amount mt-2 text-goud">{euro(p.saldo_cents, 0)}</p>
         <p className="text-sm opacity-70 mt-2">
           Samen opgebouwd door {familieNaam}
         </p>
       </section>
 
       {/* Bronnen — geaggregeerd, nooit individuele bedragen. */}
-      <section className="bg-oppervlak rounded-2xl border border-rand p-5 mb-4">
-        <h2 className="font-semibold text-inkt mb-3">Waar komt het vandaan</h2>
-        <dl className="space-y-2 text-sm">
+      <section className="fk-card">
+        <h2 className="font-black text-inkt mb-3 text-lg">Waar komt het vandaan</h2>
+        <dl className="space-y-3">
           <div className="flex justify-between">
-            <dt className="text-inkt-zacht">Automatische 1% van elke bijdrage</dt>
-            <dd className="text-inkt">{euro(p.uit_1pct_cents)}</dd>
+            <dt className="text-inkt-zacht font-semibold">Automatische 1% van elke bijdrage</dt>
+            <dd className="text-inkt font-bold">{euro(p.uit_1pct_cents)}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-inkt-zacht">Maandelijkse bijdragen</dt>
-            <dd className="text-inkt">{euro(p.uit_maandbijdrage_cents)}</dd>
+            <dt className="text-inkt-zacht font-semibold">Maandelijkse bijdragen</dt>
+            <dd className="text-inkt font-bold">{euro(p.uit_maandbijdrage_cents)}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-inkt-zacht">
-              Donaties ({p.donatie_aantal} {p.donatie_aantal === 1 ? "keer" : "keer"})
+            <dt className="text-inkt-zacht font-semibold">
+              Donaties ({p.donatie_aantal}×)
             </dt>
-            <dd className="text-inkt">{euro(p.uit_donaties_cents)}</dd>
+            <dd className="text-inkt font-bold">{euro(p.uit_donaties_cents)}</dd>
           </div>
           {p.uitgekeerd_cents > 0 && (
-            <div className="flex justify-between border-t border-rand pt-2">
-              <dt className="text-inkt-zacht">Uitgekeerd</dt>
-              <dd className="text-inkt">− {euro(p.uitgekeerd_cents)}</dd>
+            <div className="flex justify-between border-t border-rand pt-3">
+              <dt className="text-inkt-zacht font-semibold">Uitgekeerd</dt>
+              <dd className="text-inkt font-bold">− {euro(p.uitgekeerd_cents)}</dd>
             </div>
           )}
         </dl>
       </section>
 
       {/* Maandelijkse bijdrage — €3 suggestie, zelf te bepalen. */}
-      <div className="mb-3">
-        <Maandbijdrage
-          mijnBedragCents={mijnSub?.amount_cents ?? null}
-          ledenAantal={maand.leden}
-          perMaandCents={maand.per_maand_cents}
-        />
-      </div>
+      <Maandbijdrage
+        mijnBedragCents={mijnSub?.amount_cents ?? null}
+        ledenAantal={maand.leden}
+        perMaandCents={maand.per_maand_cents}
+      />
 
-      <div className="mb-4">
-        <Doneren />
-      </div>
+      <Doneren />
 
-      <p className="text-center text-xs text-inkt-zacht leading-relaxed">
+      <p className="text-center text-sm text-inkt-zacht leading-relaxed px-4">
         De pot is altijd groter dan verwacht. €3 per lid per maand, 1% van elke
         transactie, en vrije donaties — samen bouwen jullie iets op dat groter is
         dan ieder van jullie alleen.

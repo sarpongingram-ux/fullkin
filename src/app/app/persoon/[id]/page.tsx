@@ -83,29 +83,29 @@ export default async function PersoonPagina({
   )
 
   return (
-    <main className="min-h-screen max-w-md mx-auto px-5 py-10">
-      <Link href="/app" className="text-sm text-inkt-zacht hover:text-inkt">
+    <main className="max-w-md mx-auto px-5 py-8 space-y-6">
+      <Link href="/app" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug naar je familie
       </Link>
 
       {/* Kop met foto + relatie */}
-      <header className="mt-6 flex items-center gap-4">
+      <header className="flex items-center gap-4">
         <div
-          className="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-semibold shrink-0"
+          className="w-20 h-20 rounded-3xl flex items-center justify-center text-white text-2xl font-black shrink-0 overflow-hidden"
           style={{ background: "var(--terracotta)" }}
         >
           {p.photo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={p.photo_url} alt="" className="w-full h-full rounded-full object-cover" />
+            <img src={p.photo_url} alt="" className="w-full h-full object-cover" />
           ) : (
             initialen(p.first_name, p.last_name)
           )}
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-inkt">
+          <h1 className="text-2xl font-black text-inkt">
             {p.first_name} {p.last_name}
           </h1>
-          <p className="text-inkt-zacht">
+          <p className="text-inkt-zacht font-semibold">
             {ikZelf ? "Jij" : label}
             {p.city ? ` · ${p.city}` : ""}
           </p>
@@ -114,27 +114,24 @@ export default async function PersoonPagina({
 
       {/* De leesbare route — hoe jullie verbonden zijn */}
       {!ikZelf && route && (
-        <p className="mt-4 rounded-xl bg-klei/40 border border-rand p-4 text-sm text-inkt">
-          {route}
-        </p>
+        <p className="fk-card text-inkt">{route}</p>
       )}
 
       {/* Hun droom */}
       {droom && (
-        <section className="mt-4 bg-oppervlak rounded-2xl border border-goud/40 p-5">
-          <p className="text-xs font-semibold text-goud uppercase tracking-wide mb-1">
-            Droom
+        <section className="fk-card">
+          <p className="text-xs font-black text-goud uppercase tracking-wide mb-1">
+            ✨ Droom
           </p>
-          <p className="font-semibold text-inkt">{droom.title}</p>
-          <div className="mt-2 h-2 rounded-full bg-klei overflow-hidden">
-            <div
-              className="h-full rounded-full bg-goud"
+          <p className="font-black text-inkt text-lg">{droom.title}</p>
+          <div className="fk-progress mt-3">
+            <span
               style={{
                 width: `${Math.min(100, Math.round((Number(droom.raised_cents) / droom.target_cents) * 100))}%`,
               }}
             />
           </div>
-          <p className="text-xs text-inkt-zacht mt-1.5">
+          <p className="text-sm text-inkt-zacht mt-2 font-semibold">
             {euro(Number(droom.raised_cents))} van {euro(droom.target_cents)}
             {droom.collection_id && (
               <>
@@ -149,12 +146,12 @@ export default async function PersoonPagina({
       )}
 
       {/* Herinneringen met deze persoon */}
-      <section className="mt-6">
-        <h2 className="text-sm font-semibold text-inkt-zacht uppercase tracking-wide mb-3">
+      <section>
+        <h2 className="text-lg font-black text-inkt mb-3">
           {ikZelf ? "Herinneringen met jou" : `Herinneringen met ${p.first_name}`}
         </h2>
         {gesorteerd.length === 0 ? (
-          <p className="text-sm text-inkt-zacht">
+          <p className="text-inkt-zacht">
             Nog geen herinneringen. Tag {ikZelf ? "jezelf" : p.first_name} op een foto in het
             album.
           </p>

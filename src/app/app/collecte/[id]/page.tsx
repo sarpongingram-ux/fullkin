@@ -70,16 +70,16 @@ export default async function CollectiePagina({
   const isBegunstigde = collectie.beneficiary_id === meId
 
   return (
-    <main className="min-h-screen max-w-2xl mx-auto px-5 py-10">
-      <Link href="/app" className="text-sm text-inkt-zacht hover:text-inkt">
+    <main className="max-w-md mx-auto px-5 py-8 space-y-6">
+      <Link href="/app" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug
       </Link>
 
-      <header className="mt-4 mb-6">
-        <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
+      <header>
+        <p className="text-terracotta font-extrabold tracking-[0.2em] text-xs">
           COLLECTE
         </p>
-        <h1 className="text-2xl font-bold text-inkt mt-1">{collectie.title}</h1>
+        <h1 className="text-3xl font-black text-inkt mt-1">{collectie.title}</h1>
         <p className="text-inkt-zacht mt-1">
           voor {begunstigde?.first_name} {begunstigde?.last_name}
           {begunstigde?.city ? ` · ${begunstigde.city}` : ""}
@@ -87,9 +87,9 @@ export default async function CollectiePagina({
       </header>
 
       {/* Het totaal is het feest — dat mag iedereen zien. */}
-      <section className="bg-oppervlak rounded-2xl border border-rand p-6 mb-4 text-center">
-        <p className="text-4xl font-bold text-terracotta">{euro(total)}</p>
-        <p className="text-sm text-inkt-zacht mt-1">
+      <section className="fk-card-dark text-center">
+        <p className="fk-amount text-goud">{euro(total)}</p>
+        <p className="text-sm opacity-70 mt-2">
           bijeengebracht door {aantal} {aantal === 1 ? "familielid" : "familieleden"}
         </p>
       </section>
@@ -103,45 +103,43 @@ export default async function CollectiePagina({
         />
       )}
       {alBijgedragen && (
-        <p className="text-center text-sm text-groen mb-4">
-          Je hebt bijgedragen. Dankjewel.
-        </p>
+        <div className="fk-card text-center">
+          <p className="text-groen font-black text-lg">Je hebt bijgedragen 💛</p>
+          <p className="text-inkt-zacht">Dankjewel.</p>
+        </div>
       )}
 
       {/* Wie gaf — namen, nooit bedragen. Dit is de wet uit sectie 7.1. */}
-      <h2 className="text-sm font-semibold text-inkt-zacht uppercase tracking-wide mt-8 mb-3">
-        Wie heeft bijgedragen
-      </h2>
-      <ul className="space-y-2">
-        {(gevers ?? []).map((g, i) => (
-          <li
-            key={i}
-            className="bg-oppervlak rounded-xl border border-rand p-3 flex items-center gap-3"
-          >
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-semibold shrink-0"
-              style={{ background: g.hide_name ? "var(--inkt-zacht)" : "var(--terracotta)" }}
-            >
-              {g.hide_name ? "?" : initialen(g.first_name, g.last_name)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-inkt">
-                {g.hide_name ? "Een familielid" : `${g.first_name} ${g.last_name}`}
-              </p>
-              {g.message && (
-                <p className="text-sm text-inkt-zacht truncate">{g.message}</p>
-              )}
-            </div>
-          </li>
-        ))}
-        {(gevers ?? []).length === 0 && (
-          <li className="text-sm text-inkt-zacht text-center py-4">
-            Nog niemand heeft bijgedragen. Wees de eerste.
-          </li>
-        )}
-      </ul>
+      <section>
+        <h2 className="text-lg font-black text-inkt mb-3">Wie heeft bijgedragen</h2>
+        <ul className="space-y-3">
+          {(gevers ?? []).map((g, i) => (
+            <li key={i} className="fk-card flex items-center gap-3">
+              <div
+                className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-black shrink-0"
+                style={{ background: g.hide_name ? "var(--inkt-zacht)" : "var(--terracotta)" }}
+              >
+                {g.hide_name ? "?" : initialen(g.first_name, g.last_name)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-inkt">
+                  {g.hide_name ? "Een familielid" : `${g.first_name} ${g.last_name}`}
+                </p>
+                {g.message && (
+                  <p className="text-inkt-zacht truncate">{g.message}</p>
+                )}
+              </div>
+            </li>
+          ))}
+          {(gevers ?? []).length === 0 && (
+            <li className="fk-card text-inkt-zacht text-center">
+              Nog niemand heeft bijgedragen. Wees de eerste. 💛
+            </li>
+          )}
+        </ul>
+      </section>
 
-      <p className="mt-8 text-center text-xs text-inkt-zacht leading-relaxed">
+      <p className="text-center text-sm text-inkt-zacht leading-relaxed px-4">
         Iedereen ziet wie heeft bijgedragen. Niemand ziet hoeveel. De oma die
         €0,75 geeft staat naast de oom die €200 geeft.
       </p>

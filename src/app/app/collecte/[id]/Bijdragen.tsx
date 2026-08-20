@@ -27,16 +27,16 @@ export function Bijdragen({
   const suggestie = (suggestieCents / 100).toFixed(2)
 
   return (
-    <div className="bg-oppervlak rounded-2xl border border-rand p-5 mb-4">
-      <h2 className="font-semibold text-inkt mb-3">
-        Draag bij voor {voornaamBegunstigde}
+    <div className="fk-card">
+      <h2 className="font-black text-inkt text-lg mb-3">
+        Draag bij voor {voornaamBegunstigde} ❤️
       </h2>
 
-      <form action={actie} className="space-y-3">
+      <form action={actie} className="space-y-4">
         <input type="hidden" name="collectie_id" value={collectieId} />
 
         <div>
-          <label className="block text-sm text-inkt-zacht mb-1">Bedrag (€)</label>
+          <label className="block text-sm text-inkt-zacht mb-1 font-semibold">Bedrag (€)</label>
           <input
             name="bedrag"
             type="number"
@@ -44,30 +44,29 @@ export function Bijdragen({
             min="0.01"
             defaultValue={suggestie}
             required
-            className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+            className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           />
-          <p className="text-xs text-inkt-zacht mt-1">
-            Suggestie: €{suggestie}. Geef wat je wil — je bedrag blijft
-            geheim.
+          <p className="text-sm text-inkt-zacht mt-2">
+            Suggestie: €{suggestie}. Geef wat je wil — je bedrag blijft geheim.
           </p>
         </div>
 
         <input
           name="bericht"
           placeholder="Een berichtje (optioneel)"
-          className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
         />
 
-        <label className="flex items-center gap-2 text-sm text-inkt cursor-pointer">
-          <input type="checkbox" name="verberg_naam" className="accent-terracotta" />
+        <label className="flex items-center gap-2 text-inkt font-semibold cursor-pointer">
+          <input type="checkbox" name="verberg_naam" className="w-5 h-5 accent-terracotta" />
           Verberg ook mijn naam (volledig anoniem)
         </label>
 
         {resultaat && !resultaat.ok && (
-          <p className="text-sm text-terracotta">{resultaat.fout}</p>
+          <p className="text-terracotta font-semibold">{resultaat.fout}</p>
         )}
         {resultaat?.ok && resultaat.devPending && (
-          <p className="text-sm text-goud">
+          <p className="text-goud font-semibold">
             Bijdrage geregistreerd (dev-modus, nog niet afgerekend). Zodra Stripe
             is gekoppeld gaat de echte betaling lopen.
           </p>
@@ -76,7 +75,7 @@ export function Bijdragen({
         <button
           type="submit"
           disabled={bezig}
-          className="w-full rounded-full bg-terracotta py-3 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+          className="fk-btn fk-btn-primary fk-btn-full"
         >
           {bezig ? "Bezig…" : "Bijdragen"}
         </button>
