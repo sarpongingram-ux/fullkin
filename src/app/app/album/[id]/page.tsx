@@ -83,13 +83,16 @@ export default async function HerinneringPagina({
   for (const c of counts ?? []) tellingen[c.reaction] = c.aantal
 
   return (
-    <main className="min-h-screen max-w-lg mx-auto px-5 py-10">
-      <Link href="/app/album" className="text-sm text-inkt-zacht hover:text-inkt">
+    <main className="max-w-md mx-auto px-5 py-8">
+      <Link href="/app/album" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug naar het album
       </Link>
 
       {/* De herinnering, groot — foto, video of geluid */}
-      <div className="mt-4 rounded-2xl overflow-hidden bg-klei">
+      <div
+        className="mt-4 rounded-3xl overflow-hidden bg-klei"
+        style={{ boxShadow: "var(--schaduw)" }}
+      >
         {item.file_type === "video" ? (
           <video
             src={fotoUrl}
@@ -113,7 +116,7 @@ export default async function HerinneringPagina({
       </div>
 
       {item.title && (
-        <h1 className="text-xl font-bold text-inkt mt-4">{item.title}</h1>
+        <h1 className="text-2xl font-black text-inkt mt-4">{item.title}</h1>
       )}
 
       {/* Wie staat erop */}
@@ -157,26 +160,24 @@ export default async function HerinneringPagina({
 
       {/* Opmerkingen */}
       <section className="mt-6">
-        <h2 className="text-sm font-semibold text-inkt-zacht uppercase tracking-wide mb-2">
-          Opmerkingen
-        </h2>
-        <ul className="space-y-3">
+        <h2 className="text-lg font-black text-inkt mb-3">Opmerkingen</h2>
+        <ul className="space-y-2 mb-3">
           {(opmerkingen ?? []).map((c) => (
-            <li key={c.id} className="text-sm">
-              <span className="font-medium text-inkt">
+            <li key={c.id} className="fk-card py-3">
+              <span className="font-bold text-inkt">
                 {naamVan.get(c.person_id) ?? "Familielid"}
               </span>{" "}
               <span className="text-inkt">{c.comment_text}</span>
             </li>
           ))}
           {(opmerkingen ?? []).length === 0 && (
-            <li className="text-sm text-inkt-zacht">Nog geen opmerkingen.</li>
+            <li className="text-inkt-zacht">Nog geen opmerkingen.</li>
           )}
         </ul>
         <Opmerken itemId={id} />
       </section>
 
-      <p className="mt-8 text-center text-xs text-inkt-zacht">
+      <p className="mt-8 text-center text-sm text-inkt-zacht">
         Iedereen ziet de reacties, niemand ziet wie wat koos.
       </p>
     </main>

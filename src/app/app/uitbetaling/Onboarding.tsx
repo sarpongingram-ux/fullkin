@@ -37,7 +37,7 @@ export function Onboarding({ nieuw }: { nieuw: boolean }) {
       <button
         type="submit"
         disabled={bezig}
-        className="w-full rounded-full bg-terracotta py-3 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+        className="fk-btn fk-btn-primary fk-btn-full"
       >
         {bezig
           ? "Bezig…"

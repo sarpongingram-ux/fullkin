@@ -99,16 +99,16 @@ export default async function BusinessPagina({
   }
 
   return (
-    <main className="min-h-screen max-w-2xl mx-auto px-5 py-10">
-      <Link href="/app" className="text-sm text-inkt-zacht hover:text-inkt">
+    <main className="max-w-md mx-auto px-5 py-8 space-y-4">
+      <Link href="/app" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug naar je familie
       </Link>
 
-      <header className="mt-4 mb-6">
-        <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
+      <header>
+        <p className="text-terracotta font-extrabold tracking-[0.2em] text-xs">
           BUSINESS DROOM
         </p>
-        <h1 className="text-2xl font-bold text-inkt mt-1">{b.name}</h1>
+        <h1 className="text-3xl font-black text-inkt mt-1">{b.name} 🚀</h1>
         <p className="text-inkt-zacht mt-1">
           {ondernemer?.first_name} {ondernemer?.last_name}
           {ondernemer?.city ? ` · ${ondernemer.city}` : ""}
@@ -116,24 +116,24 @@ export default async function BusinessPagina({
       </header>
 
       {/* Het plan */}
-      <section className="bg-oppervlak rounded-2xl border border-rand p-5 mb-4">
+      <section className="fk-card">
         <p className="text-inkt leading-relaxed whitespace-pre-line">
           {b.description}
         </p>
-        <dl className="mt-4 space-y-1.5 text-sm border-t border-rand pt-3">
+        <dl className="mt-4 space-y-2 border-t border-rand pt-3">
           <div className="flex justify-between">
-            <dt className="text-inkt-zacht">Doelbedrag</dt>
-            <dd className="font-semibold text-inkt">{euro(b.target_cents)}</dd>
+            <dt className="text-inkt-zacht font-semibold">Doelbedrag</dt>
+            <dd className="font-black text-inkt">{euro(b.target_cents)}</dd>
           </div>
           {b.expected_revenue_cents != null && (
             <div className="flex justify-between">
-              <dt className="text-inkt-zacht">Verwachte omzet</dt>
-              <dd className="text-inkt">{euro(b.expected_revenue_cents)}/jaar</dd>
+              <dt className="text-inkt-zacht font-semibold">Verwachte omzet</dt>
+              <dd className="text-inkt font-bold">{euro(b.expected_revenue_cents)}/jaar</dd>
             </div>
           )}
           {b.give_back && (
             <div className="pt-1">
-              <dt className="text-inkt-zacht">Teruggave aan de familie</dt>
+              <dt className="text-inkt-zacht font-semibold">Teruggave aan de familie</dt>
               <dd className="text-inkt mt-0.5">{b.give_back}</dd>
             </div>
           )}

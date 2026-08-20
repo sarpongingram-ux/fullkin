@@ -42,15 +42,13 @@ export function Reacties({
             key={r.kind}
             onClick={() => klik(r.kind)}
             disabled={bezig}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-2 transition disabled:opacity-60 ${
-              actief
-                ? "border-terracotta bg-klei/60"
-                : "border-rand hover:bg-klei/30"
+            className={`flex items-center gap-1.5 rounded-2xl px-4 py-2.5 font-bold transition active:scale-95 disabled:opacity-60 ${
+              actief ? "bg-klei ring-2 ring-terracotta" : "bg-oppervlak"
             }`}
           >
-            <span className="text-lg">{r.emoji}</span>
+            <span className="text-xl">{r.emoji}</span>
             {aantal > 0 && (
-              <span className="text-sm text-inkt-zacht">{aantal}</span>
+              <span className="text-inkt-zacht">{aantal}</span>
             )}
           </button>
         )
@@ -79,12 +77,12 @@ export function Opmerken({ itemId }: { itemId: string }) {
         value={tekst}
         onChange={(e) => setTekst(e.target.value)}
         placeholder="Schrijf iets liefs…"
-        className="flex-1 rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt text-sm outline-none focus:border-terracotta"
+        className="flex-1 rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
       />
       <button
         onClick={plaats}
         disabled={bezig}
-        className="rounded-full bg-terracotta px-4 py-2 text-white text-sm font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+        className="rounded-2xl bg-terracotta px-5 text-white font-bold hover:bg-terracotta-diep transition active:scale-95 disabled:opacity-60"
       >
         Plaats
       </button>

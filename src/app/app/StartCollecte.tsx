@@ -48,19 +48,19 @@ export function StartCollecte({ leden }: { leden: Lid[] }) {
   }
 
   return (
-    <div className="bg-oppervlak rounded-2xl border border-rand p-5">
+    <div className="fk-card">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-inkt">Start een collecte</h3>
+        <h3 className="font-black text-inkt text-lg">Start een collecte</h3>
         <button
           onClick={() => setOpen(false)}
-          className="text-inkt-zacht text-sm hover:text-inkt"
+          className="text-inkt-zacht font-bold hover:text-inkt"
         >
           Sluiten
         </button>
       </div>
 
       {kandidaten.length === 0 ? (
-        <p className="text-sm text-inkt-zacht">
+        <p className="text-inkt-zacht">
           Je kunt een collecte starten voor je directe familie (ouder, kind,
           partner, broer of zus). Voeg eerst zo iemand toe aan je kaart.
         </p>
@@ -71,7 +71,7 @@ export function StartCollecte({ leden }: { leden: Lid[] }) {
             <select
               name="beneficiary_id"
               required
-              className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+              className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
             >
               {kandidaten.map((l) => (
                 <option key={l.person_id} value={l.person_id}>
@@ -88,7 +88,7 @@ export function StartCollecte({ leden }: { leden: Lid[] }) {
             <select
               name="kind"
               required
-              className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+              className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
             >
               {momenten.map((m) => (
                 <option key={m.waarde} value={m.waarde}>
@@ -102,7 +102,7 @@ export function StartCollecte({ leden }: { leden: Lid[] }) {
             name="titel"
             placeholder="Titel, bv. 'Verjaardag van opa'"
             required
-            className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+            className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           />
 
           <div>
@@ -111,18 +111,18 @@ export function StartCollecte({ leden }: { leden: Lid[] }) {
               name="occurs_on"
               type="date"
               required
-              className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+              className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
             />
           </div>
 
           {resultaat && !resultaat.ok && (
-            <p className="text-sm text-terracotta">{resultaat.fout}</p>
+            <p className="text-terracotta font-semibold">{resultaat.fout}</p>
           )}
 
           <button
             type="submit"
             disabled={bezig}
-            className="w-full rounded-full bg-terracotta py-2.5 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+            className="fk-btn fk-btn-primary fk-btn-full"
           >
             {bezig ? "Bezig…" : "Collecte openen"}
           </button>

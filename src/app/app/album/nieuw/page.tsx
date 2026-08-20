@@ -32,16 +32,16 @@ export default async function NieuwePagina() {
   }))
 
   return (
-    <main className="min-h-screen max-w-md mx-auto px-5 py-10">
-      <Link href="/app/album" className="text-sm text-inkt-zacht hover:text-inkt">
+    <main className="max-w-md mx-auto px-5 py-8">
+      <Link href="/app/album" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug naar het album
       </Link>
 
-      <header className="mt-4 mb-6">
-        <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
+      <header className="mt-3 mb-6">
+        <p className="text-terracotta font-extrabold tracking-[0.2em] text-xs">
           NIEUWE HERINNERING
         </p>
-        <h1 className="text-2xl font-bold text-inkt mt-1">Deel een moment</h1>
+        <h1 className="text-3xl font-black text-inkt mt-1">Deel een moment 📷</h1>
       </header>
 
       <Uploader networkId={mij.network_id} familie={familie} />

@@ -39,37 +39,37 @@ export function FamilielidToevoegen() {
   }
 
   return (
-    <div className="bg-oppervlak rounded-2xl border border-rand p-5">
+    <div className="fk-card">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-inkt">Familielid toevoegen</h3>
+        <h3 className="font-black text-inkt text-lg">Familielid toevoegen</h3>
         <button
           onClick={() => setOpen(false)}
-          className="text-inkt-zacht text-sm hover:text-inkt"
+          className="text-inkt-zacht font-bold hover:text-inkt"
         >
           Sluiten
         </button>
       </div>
 
-      <form ref={formRef} action={actie} className="space-y-3">
+      <form ref={formRef} action={actie} className="space-y-4">
         <div className="flex gap-2">
           <input
             name="voornaam"
             placeholder="Voornaam"
             required
-            className="flex-1 rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+            className="flex-1 rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           />
           <input
             name="achternaam"
             placeholder="Achternaam"
             required
-            className="flex-1 rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+            className="flex-1 rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           />
         </div>
 
         <input
           name="stad"
           placeholder="Stad (optioneel)"
-          className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
         />
 
         <div>
@@ -96,10 +96,10 @@ export function FamilielidToevoegen() {
         </div>
 
         {resultaat && !resultaat.ok && (
-          <p className="text-sm text-terracotta">{resultaat.fout}</p>
+          <p className="text-terracotta font-semibold">{resultaat.fout}</p>
         )}
         {resultaat?.ok && (
-          <p className="text-sm text-groen">
+          <p className="text-groen font-semibold">
             {resultaat.naam} staat nu op jullie familiekaart.
           </p>
         )}
@@ -107,7 +107,7 @@ export function FamilielidToevoegen() {
         <button
           type="submit"
           disabled={bezig}
-          className="w-full rounded-full bg-terracotta py-2.5 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+          className="fk-btn fk-btn-primary fk-btn-full"
         >
           {bezig ? "Bezig…" : "Toevoegen aan familie"}
         </button>

@@ -29,16 +29,16 @@ export default async function AlbumPagina() {
   const ontdekkingen = (suggesties ?? []).slice(0, 3)
 
   return (
-    <main className="min-h-screen max-w-2xl mx-auto px-5 py-10">
-      <Link href="/app" className="text-sm text-inkt-zacht hover:text-inkt">
+    <main className="max-w-md mx-auto px-5 py-8">
+      <Link href="/app" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug naar je familie
       </Link>
 
-      <header className="mt-4 mb-6">
-        <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
+      <header className="mt-3 mb-6">
+        <p className="text-terracotta font-extrabold tracking-[0.2em] text-xs">
           FAMILIEALBUM
         </p>
-        <h1 className="text-2xl font-bold text-inkt mt-1">Ons Familiealbum</h1>
+        <h1 className="text-3xl font-black text-inkt mt-1">Ons album 📷</h1>
       </header>
 
       <Link
@@ -51,33 +51,28 @@ export default async function AlbumPagina() {
       {/* Ontdeklaag — samen op de foto, nog niet verbonden op de kaart. */}
       {ontdekkingen.length > 0 && (
         <section className="mb-6">
-          <h2 className="text-sm font-semibold text-inkt-zacht uppercase tracking-wide mb-2">
-            Ontdek een verbinding
-          </h2>
-          <ul className="space-y-2">
+          <h2 className="text-lg font-black text-inkt mb-3">Ontdek een verbinding</h2>
+          <ul className="space-y-3">
             {ontdekkingen.map((s) => (
-              <li
-                key={`${s.a_id}-${s.b_id}`}
-                className="rounded-xl border border-blauw/40 bg-oppervlak p-4"
-              >
+              <li key={`${s.a_id}-${s.b_id}`} className="fk-card">
                 <p className="text-inkt leading-snug">
                   <Link
                     href={`/app/persoon/${s.a_id}`}
-                    className="font-medium text-terracotta hover:underline"
+                    className="font-bold text-terracotta hover:underline"
                   >
                     {s.a_naam}
                   </Link>{" "}
                   en{" "}
                   <Link
                     href={`/app/persoon/${s.b_id}`}
-                    className="font-medium text-terracotta hover:underline"
+                    className="font-bold text-terracotta hover:underline"
                   >
                     {s.b_naam}
                   </Link>{" "}
                   staan samen op {s.samen} {s.samen === 1 ? "foto" : "foto's"}, maar
                   zijn nog niet verbonden op de kaart.
                 </p>
-                <p className="text-xs text-inkt-zacht mt-1">
+                <p className="text-sm text-inkt-zacht mt-1">
                   Hoe kennen zij elkaar? Breng hun band in kaart.
                 </p>
               </li>

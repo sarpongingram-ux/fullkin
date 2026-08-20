@@ -171,7 +171,7 @@ export function Uploader({
           value={zoek}
           onChange={(e) => setZoek(e.target.value)}
           placeholder="Zoek familielid…"
-          className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt text-sm outline-none focus:border-terracotta mb-2"
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base text-sm outline-none focus:border-terracotta mb-2"
         />
         <div className="flex flex-wrap gap-1.5">
           {zichtbaar
@@ -193,14 +193,14 @@ export function Uploader({
         value={titel}
         onChange={(e) => setTitel(e.target.value)}
         placeholder="Titel (optioneel)"
-        className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+        className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
       />
       <textarea
         value={verhaal}
         onChange={(e) => setVerhaal(e.target.value)}
         placeholder="Het verhaal erbij (optioneel)"
         rows={2}
-        className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta resize-none"
+        className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta resize-none"
       />
       <div className="flex gap-2">
         <div className="flex-1">
@@ -209,7 +209,7 @@ export function Uploader({
             type="date"
             value={datum}
             onChange={(e) => setDatum(e.target.value)}
-            className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt text-sm outline-none focus:border-terracotta"
+            className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base text-sm outline-none focus:border-terracotta"
           />
         </div>
         <div className="flex-1">
@@ -218,19 +218,19 @@ export function Uploader({
             value={locatie}
             onChange={(e) => setLocatie(e.target.value)}
             placeholder="Locatie"
-            className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt text-sm outline-none focus:border-terracotta"
+            className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base text-sm outline-none focus:border-terracotta"
           />
         </div>
       </div>
 
-      {fout && <p className="text-sm text-terracotta">{fout}</p>}
+      {fout && <p className="text-terracotta font-semibold">{fout}</p>}
 
       <button
         onClick={delen}
         disabled={bezig || !bestand}
-        className="w-full rounded-full bg-terracotta py-3 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+        className="fk-btn fk-btn-primary fk-btn-full"
       >
-        {bezig ? "Bezig…" : "Deel met de familie"}
+        {bezig ? "Bezig…" : "💛 Deel met de familie"}
       </button>
     </div>
   )

@@ -40,17 +40,17 @@ export default async function UitbetalingPagina({
   const isReady = acc?.status === "ready"
 
   return (
-    <main className="min-h-screen max-w-md mx-auto px-5 py-10">
-      <Link href="/app" className="text-sm text-inkt-zacht hover:text-inkt">
+    <main className="max-w-md mx-auto px-5 py-8 space-y-6">
+      <Link href="/app" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug naar je familie
       </Link>
 
-      <header className="mt-4 mb-6">
-        <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
+      <header>
+        <p className="text-terracotta font-extrabold tracking-[0.2em] text-xs">
           UITBETALING
         </p>
-        <h1 className="text-2xl font-bold text-inkt mt-1">
-          Ontvang geld, {mij?.first_name}
+        <h1 className="text-3xl font-black text-inkt mt-1">
+          Ontvang geld, {mij?.first_name} 💸
         </h1>
         <p className="text-inkt-zacht mt-2">
           Koppel één keer je uitbetaling. Dan komt geld dat je familie voor jou
@@ -59,18 +59,18 @@ export default async function UitbetalingPagina({
       </header>
 
       {isReady ? (
-        <section className="bg-groen/10 border border-groen/40 rounded-2xl p-6 text-center">
-          <p className="text-4xl mb-2">✓</p>
-          <p className="font-semibold text-groen">Je uitbetaling is gekoppeld</p>
-          <p className="text-sm text-inkt-zacht mt-1">
+        <section className="fk-card text-center" style={{ background: "rgba(21,128,61,0.08)" }}>
+          <p className="text-5xl mb-2">✅</p>
+          <p className="font-black text-groen text-lg">Je uitbetaling is gekoppeld</p>
+          <p className="text-inkt-zacht mt-1">
             Collectes en dromen worden nu direct aan jou uitbetaald
             {acc?.country ? ` (${acc.country})` : ""}.
           </p>
         </section>
       ) : (
-        <section className="bg-oppervlak rounded-2xl border border-rand p-6">
+        <section className="fk-card">
           {acc?.status === "onboarding" && (
-            <p className="text-sm text-goud mb-3">
+            <p className="text-goud font-semibold mb-3">
               Je koppeling is begonnen maar nog niet af. Maak 'm af om geld te
               kunnen ontvangen.
             </p>
@@ -79,11 +79,9 @@ export default async function UitbetalingPagina({
         </section>
       )}
 
-      <div className="mt-6 rounded-xl bg-klei/40 border border-rand p-4">
-        <p className="text-sm text-inkt">
-          <strong>Waar gaat mijn geld heen?</strong>
-        </p>
-        <p className="text-sm text-inkt-zacht mt-1">
+      <div className="fk-card">
+        <p className="font-black text-inkt">Waar gaat mijn geld heen? 🤔</p>
+        <p className="text-inkt-zacht mt-1">
           Van elke bijdrage gaat 95% direct naar de ontvanger en 5% naar Fullkin
           (Family Keeper, rollen, de Familie Pot en het platform). Fullkin houdt
           jouw geld nooit vast.

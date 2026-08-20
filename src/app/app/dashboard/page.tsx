@@ -119,39 +119,39 @@ export default async function Dashboard() {
   const abonnementGedekt = d.cofounder_verdienste_cents >= ABONNEMENT_CENTS
 
   return (
-    <main className="min-h-screen max-w-2xl mx-auto px-5 py-10">
-      <Link href="/app" className="text-sm text-inkt-zacht hover:text-inkt">
+    <main className="max-w-md mx-auto px-5 py-8 space-y-4">
+      <Link href="/app" className="text-inkt-zacht font-bold hover:text-inkt">
         ← Terug naar je familie
       </Link>
 
-      <header className="mt-4 mb-6">
-        <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
+      <header>
+        <p className="text-terracotta font-extrabold tracking-[0.2em] text-xs">
           FAMILY KEEPER DASHBOARD
         </p>
-        <h1 className="text-2xl font-bold text-inkt mt-1">
-          Dag {mij.first_name}. Dit is jullie familie.
+        <h1 className="text-3xl font-black text-inkt mt-1">
+          Dag {mij.first_name} 📊
         </h1>
       </header>
 
       {/* Netwerksterkte — één getal bovenaan. */}
-      <section className="bg-inkt text-white rounded-2xl p-6 mb-4 flex items-center justify-between">
+      <section className="fk-card-dark flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide opacity-70">
+          <p className="text-sm uppercase tracking-wide opacity-70 font-bold">
             Netwerksterkte
           </p>
           <p className="text-sm opacity-70 mt-1 max-w-[12rem]">
             Verbinding, economie, dromen en groei in één getal.
           </p>
         </div>
-        <div className="text-right">
-          <span className="text-5xl font-bold text-goud">{d.netwerksterkte}</span>
+        <div className="text-right shrink-0">
+          <span className="fk-amount text-goud">{d.netwerksterkte}</span>
           <span className="text-xl opacity-60">/100</span>
         </div>
       </section>
 
       {/* Blok 1 — Netwerk Nu */}
-      <section className="bg-oppervlak rounded-2xl border border-rand p-5 mb-4">
-        <h2 className="font-semibold text-inkt mb-3">Netwerk nu</h2>
+      <section className="fk-card">
+        <h2 className="font-black text-inkt text-lg mb-3">Netwerk nu</h2>
         <div className="grid grid-cols-3 gap-3 text-center">
           <div>
             <p className="text-2xl font-bold text-groen">{d.leden_deelnemend}</p>
@@ -172,8 +172,8 @@ export default async function Dashboard() {
       </section>
 
       {/* Blok 2 — Economie */}
-      <section className="bg-oppervlak rounded-2xl border border-rand p-5 mb-4">
-        <h2 className="font-semibold text-inkt mb-3">Economie</h2>
+      <section className="fk-card">
+        <h2 className="font-black text-inkt text-lg mb-3">Economie</h2>
         <dl className="space-y-2 text-sm">
           <Rij label="Volume dit jaar" waarde={euro(d.volume_jaar_cents)} />
           <Rij label="Volume totaal" waarde={euro(d.volume_totaal_cents)} />
@@ -195,8 +195,8 @@ export default async function Dashboard() {
       </section>
 
       {/* Blok 3 — Potentie */}
-      <section className="bg-oppervlak rounded-2xl border border-rand p-5 mb-4">
-        <h2 className="font-semibold text-inkt mb-1">Potentie</h2>
+      <section className="fk-card">
+        <h2 className="font-black text-inkt text-lg mb-1">Potentie</h2>
         <p className="text-sm text-inkt-zacht mb-3">
           Wat jullie economie wordt naarmate de familie groeit.
         </p>
@@ -216,8 +216,8 @@ export default async function Dashboard() {
       </section>
 
       {/* Blok 4 — Fullkin suggereert */}
-      <section className="bg-oppervlak rounded-2xl border border-rand p-5 mb-4">
-        <h2 className="font-semibold text-inkt mb-3">Fullkin suggereert</h2>
+      <section className="fk-card">
+        <h2 className="font-black text-inkt text-lg mb-3">Fullkin suggereert</h2>
         <ul className="space-y-2">
           {suggesties.map((s, i) => (
             <li key={i} className="border-t border-rand pt-2">
