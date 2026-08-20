@@ -54,45 +54,46 @@ export default function Inloggen() {
     <main className="min-h-screen flex items-center justify-center px-6">
       <form
         onSubmit={verstuur}
-        className="w-full max-w-sm bg-oppervlak rounded-2xl border border-rand p-8 shadow-sm"
+        className="w-full max-w-sm fk-card-white"
+        style={{ padding: 28 }}
       >
-        <p className="text-terracotta font-semibold tracking-[0.3em] text-xs text-center mb-2">
+        <p className="text-terracotta font-extrabold tracking-[0.3em] text-xs text-center mb-2">
           FULLKIN
         </p>
-        <h1 className="text-xl font-bold text-center text-inkt mb-6">
-          {registreren ? "Begin bij je familie" : "Welkom terug bij je familie"}
+        <h1 className="text-2xl font-black text-center text-inkt mb-6">
+          {registreren ? "Begin bij je familie" : "Welkom terug"}
         </h1>
 
-        <label className="block text-sm text-inkt-zacht mb-1">E-mail</label>
+        <label className="block text-sm text-inkt-zacht mb-1 font-semibold">E-mail</label>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 mb-4 text-inkt outline-none focus:border-terracotta"
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 mb-4 text-inkt text-base outline-none focus:border-terracotta"
           required
         />
 
-        <label className="block text-sm text-inkt-zacht mb-1">Wachtwoord</label>
+        <label className="block text-sm text-inkt-zacht mb-1 font-semibold">Wachtwoord</label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           minLength={6}
-          className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 mb-2 text-inkt outline-none focus:border-terracotta"
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 mb-2 text-inkt text-base outline-none focus:border-terracotta"
           required
         />
         {registreren ? (
-          <p className="text-xs text-inkt-zacht mb-4">Minimaal 6 tekens.</p>
+          <p className="text-sm text-inkt-zacht mb-4">Minimaal 6 tekens.</p>
         ) : (
           <div className="mb-4" />
         )}
 
-        {error && <p className="text-terracotta text-sm mb-4">{error}</p>}
+        {error && <p className="text-terracotta font-semibold mb-4">{error}</p>}
 
         <button
           type="submit"
           disabled={bezig}
-          className="w-full rounded-full bg-terracotta py-3 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+          className="fk-btn fk-btn-primary fk-btn-full"
         >
           {bezig ? "Bezig…" : registreren ? "Account aanmaken" : "Inloggen"}
         </button>
@@ -103,7 +104,7 @@ export default function Inloggen() {
             setRegistreren((r) => !r)
             setError(null)
           }}
-          className="mt-5 w-full text-center text-sm text-inkt-zacht hover:text-terracotta transition"
+          className="mt-5 w-full text-center font-bold text-inkt-zacht hover:text-terracotta transition"
         >
           {registreren
             ? "Heb je al een account? Log in"

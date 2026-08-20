@@ -9,6 +9,9 @@ import {
   plaatsUpdate,
 } from "../../business-acties"
 
+const invoer =
+  "w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
+
 // ---- Stemhok -------------------------------------------------------------
 
 export function Stemhok({
@@ -39,11 +42,9 @@ export function Stemhok({
 
   if (goedgekeurd) {
     return (
-      <div className="bg-groen/10 border border-groen/40 rounded-2xl p-5 mb-4 text-center">
-        <p className="font-semibold text-groen">
-          Goedgekeurd door de familie ✓
-        </p>
-        <p className="text-sm text-inkt-zacht mt-1">
+      <div className="fk-card text-center" style={{ background: "rgba(21,128,61,0.08)" }}>
+        <p className="font-black text-groen text-lg">Goedgekeurd door de familie ✅</p>
+        <p className="text-inkt-zacht mt-1">
           {ja} van {actief} actieve leden stemden voor.
         </p>
       </div>
@@ -51,43 +52,45 @@ export function Stemhok({
   }
 
   return (
-    <div className="bg-oppervlak rounded-2xl border border-rand p-5 mb-4">
-      <h2 className="font-semibold text-inkt mb-1">Familie-stemming</h2>
+    <div className="fk-card">
+      <h2 className="font-black text-inkt text-lg mb-1">Familie-stemming</h2>
       <p className="text-sm text-inkt-zacht mb-3">
         60% van de actieve leden moet akkoord zijn om de collecte te openen.
       </p>
-      <div className="h-2.5 rounded-full bg-klei overflow-hidden mb-1.5">
-        <div className="h-full rounded-full bg-terracotta" style={{ width: `${pct}%` }} />
+      <div className="fk-progress mb-2" style={{ height: 12 }}>
+        <span style={{ width: `${pct}%`, background: "var(--terracotta)" }} />
       </div>
-      <p className="text-sm text-inkt-zacht mb-4">
+      <p className="text-sm text-inkt-zacht mb-4 font-semibold">
         {ja} voor · {nodig} nodig (van {actief} actieve leden)
       </p>
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <button
           onClick={() => doeStem(true)}
           disabled={bezig}
-          className={`flex-1 rounded-full py-2.5 font-medium transition disabled:opacity-60 ${
-            mijnStem === true
-              ? "bg-groen text-white"
-              : "border border-groen text-groen hover:bg-groen/10"
+          className={`fk-btn flex-1 disabled:opacity-60 ${
+            mijnStem === true ? "text-white" : "bg-white"
           }`}
+          style={
+            mijnStem === true
+              ? { background: "var(--groen)" }
+              : { border: "2px solid var(--groen)", color: "var(--groen)" }
+          }
         >
           Voor
         </button>
         <button
           onClick={() => doeStem(false)}
           disabled={bezig}
-          className={`flex-1 rounded-full py-2.5 font-medium transition disabled:opacity-60 ${
-            mijnStem === false
-              ? "bg-inkt text-white"
-              : "border border-rand text-inkt-zacht hover:bg-klei/40"
+          className={`fk-btn flex-1 disabled:opacity-60 ${
+            mijnStem === false ? "bg-inkt text-white" : "bg-white text-inkt-zacht"
           }`}
+          style={mijnStem === false ? {} : { border: "2px solid var(--rand)" }}
         >
           Tegen
         </button>
       </div>
       {mijnStem !== null && (
-        <p className="text-xs text-inkt-zacht mt-2 text-center">
+        <p className="text-sm text-inkt-zacht mt-2 text-center">
           Je stemde {mijnStem ? "voor" : "tegen"}. Je kunt dit wijzigen.
         </p>
       )}
@@ -127,30 +130,28 @@ export function Vragen({
   }
 
   return (
-    <section className="bg-oppervlak rounded-2xl border border-rand p-5 mb-4">
-      <h2 className="font-semibold text-inkt mb-3">Vragenronde</h2>
+    <section className="fk-card">
+      <h2 className="font-black text-inkt text-lg mb-3">Vragenronde</h2>
 
       <ul className="space-y-3 mb-4">
         {vragen.map((v) => (
           <li key={v.id} className="border-t border-rand pt-3">
-            <p className="text-sm text-inkt">
-              <span className="text-inkt-zacht">{v.askerNaam}:</span> {v.question}
+            <p className="text-inkt">
+              <span className="text-inkt-zacht font-semibold">{v.askerNaam}:</span> {v.question}
             </p>
             {v.answer ? (
-              <p className="text-sm text-groen mt-1 pl-3 border-l-2 border-groen/40">
+              <p className="text-groen mt-1 pl-3 border-l-2 border-groen/40">
                 {v.answer}
               </p>
             ) : isEigenaar ? (
               <Antwoorden businessId={businessId} questionId={v.id} />
             ) : (
-              <p className="text-xs text-inkt-zacht mt-1 italic">
-                Nog geen antwoord
-              </p>
+              <p className="text-sm text-inkt-zacht mt-1 italic">Nog geen antwoord</p>
             )}
           </li>
         ))}
         {vragen.length === 0 && (
-          <li className="text-sm text-inkt-zacht">Nog geen vragen gesteld.</li>
+          <li className="text-inkt-zacht">Nog geen vragen gesteld.</li>
         )}
       </ul>
 
@@ -159,12 +160,12 @@ export function Vragen({
           value={nieuw}
           onChange={(e) => setNieuw(e.target.value)}
           placeholder="Stel een vraag…"
-          className="flex-1 rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt text-sm outline-none focus:border-terracotta"
+          className={`flex-1 ${invoer}`}
         />
         <button
           onClick={vraagStellen}
           disabled={bezig}
-          className="rounded-full bg-terracotta px-4 py-2 text-white text-sm font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+          className="rounded-2xl bg-terracotta px-5 text-white font-bold hover:bg-terracotta-diep transition active:scale-95 disabled:opacity-60"
         >
           Vraag
         </button>
@@ -189,7 +190,7 @@ function Antwoorden({
         value={antwoord}
         onChange={(e) => setAntwoord(e.target.value)}
         placeholder="Beantwoord…"
-        className="flex-1 rounded-lg border border-rand bg-achtergrond px-3 py-1.5 text-inkt text-sm outline-none focus:border-terracotta"
+        className={`flex-1 ${invoer}`}
       />
       <button
         onClick={() =>
@@ -200,7 +201,8 @@ function Antwoorden({
           })
         }
         disabled={bezig}
-        className="rounded-full border border-groen text-groen px-3 py-1.5 text-sm hover:bg-groen/10 transition disabled:opacity-60"
+        className="rounded-2xl px-4 font-bold transition active:scale-95 disabled:opacity-60"
+        style={{ border: "2px solid var(--groen)", color: "var(--groen)" }}
       >
         Antwoord
       </button>
@@ -231,21 +233,21 @@ export function Updates({
   const [bezig, start] = useTransition()
 
   return (
-    <section className="bg-oppervlak rounded-2xl border border-rand p-5 mb-4">
-      <h2 className="font-semibold text-inkt mb-3">Maandelijkse updates</h2>
+    <section className="fk-card">
+      <h2 className="font-black text-inkt text-lg mb-3">Maandelijkse updates</h2>
 
       <ul className="space-y-3 mb-4">
         {updates.map((u) => (
           <li key={u.id} className="border-t border-rand pt-3">
             {u.metric && (
-              <p className="text-lg font-semibold text-terracotta">{u.metric}</p>
+              <p className="text-xl font-black text-terracotta">{u.metric}</p>
             )}
-            {u.note && <p className="text-sm text-inkt">{u.note}</p>}
-            <p className="text-xs text-inkt-zacht mt-1">{u.datum}</p>
+            {u.note && <p className="text-inkt">{u.note}</p>}
+            <p className="text-sm text-inkt-zacht mt-1">{u.datum}</p>
           </li>
         ))}
         {updates.length === 0 && (
-          <li className="text-sm text-inkt-zacht">Nog geen updates.</li>
+          <li className="text-inkt-zacht">Nog geen updates.</li>
         )}
       </ul>
 
@@ -257,22 +259,14 @@ export function Updates({
               router.refresh()
             })
           }
-          className="space-y-2"
+          className="space-y-3"
         >
-          <input
-            name="metric"
-            placeholder="Eén getal (bv. '40 kippen')"
-            className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt text-sm outline-none focus:border-terracotta"
-          />
-          <input
-            name="note"
-            placeholder="Korte notitie (optioneel)"
-            className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt text-sm outline-none focus:border-terracotta"
-          />
+          <input name="metric" placeholder="Eén getal (bv. '40 kippen')" className={invoer} />
+          <input name="note" placeholder="Korte notitie (optioneel)" className={invoer} />
           <button
             type="submit"
             disabled={bezig}
-            className="w-full rounded-full bg-terracotta py-2 text-white text-sm font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+            className="fk-btn fk-btn-primary fk-btn-full"
           >
             Update plaatsen
           </button>

@@ -84,18 +84,18 @@ export function Claimen({
         <button
           onClick={ingelogdClaimen}
           disabled={bezig}
-          className="w-full rounded-full bg-terracotta py-3 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+          className="fk-btn fk-btn-primary fk-btn-full"
         >
           {bezig ? "Bezig…" : `Claim mijn plek als ${voornaam}`}
         </button>
-        {fout && <p className="text-terracotta text-sm mt-3">{fout}</p>}
+        {fout && <p className="text-terracotta font-semibold mt-3">{fout}</p>}
       </div>
     )
   }
 
   return (
     <form onSubmit={aanmakenEnClaimen} className="space-y-3">
-      <p className="text-sm text-inkt-zacht">
+      <p className="text-inkt-zacht font-semibold">
         Maak je account om binnen te komen:
       </p>
       <input
@@ -104,7 +104,7 @@ export function Claimen({
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Je e-mail"
         required
-        className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+        className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
       />
       <input
         type="password"
@@ -113,13 +113,13 @@ export function Claimen({
         placeholder="Kies een wachtwoord"
         required
         minLength={8}
-        className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+        className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
       />
-      {fout && <p className="text-terracotta text-sm">{fout}</p>}
+      {fout && <p className="text-terracotta font-semibold">{fout}</p>}
       <button
         type="submit"
         disabled={bezig}
-        className="w-full rounded-full bg-terracotta py-3 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+        className="fk-btn fk-btn-primary fk-btn-full"
       >
         {bezig ? "Bezig…" : "Binnenkomen bij mijn familie"}
       </button>

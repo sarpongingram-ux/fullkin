@@ -14,10 +14,7 @@ export function StartFamilie() {
   )
 
   return (
-    <form
-      action={actie}
-      className="bg-oppervlak rounded-2xl border border-rand p-6 space-y-4"
-    >
+    <form action={actie} className="fk-card-white space-y-4" style={{ padding: 24 }}>
       <div>
         <label className="block text-sm text-inkt-zacht mb-1">
           Naam van de familie
@@ -26,7 +23,7 @@ export function StartFamilie() {
           name="familienaam"
           required
           placeholder="Bijv. Familie Sarpong"
-          className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
         />
       </div>
 
@@ -37,7 +34,7 @@ export function StartFamilie() {
         <input
           name="land"
           placeholder="Bijv. Ghana"
-          className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
         />
       </div>
 
@@ -48,28 +45,28 @@ export function StartFamilie() {
             name="voornaam"
             required
             placeholder="Voornaam"
-            className="flex-1 rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+            className="flex-1 rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           />
           <input
             name="achternaam"
             required
             placeholder="Achternaam"
-            className="flex-1 rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+            className="flex-1 rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           />
         </div>
         <input
           name="stad"
           placeholder="Woonplaats (optioneel)"
-          className="w-full mt-2 rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+          className="w-full mt-2 rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
         />
       </div>
 
-      {res && !res.ok && <p className="text-sm text-terracotta">{res.fout}</p>}
+      {res && !res.ok && <p className="text-terracotta font-semibold">{res.fout}</p>}
 
       <button
         type="submit"
         disabled={bezig}
-        className="w-full rounded-full bg-terracotta py-3 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
+        className="fk-btn fk-btn-primary fk-btn-full"
       >
         {bezig ? "Bezig…" : "Start mijn familie"}
       </button>

@@ -20,7 +20,7 @@ export default async function StartPagina() {
           <p className="text-terracotta font-semibold tracking-[0.3em] text-xs">
             FULLKIN
           </p>
-          <h1 className="text-2xl font-bold text-inkt mt-2">Start je familie</h1>
+          <h1 className="text-3xl font-black text-inkt mt-2">Start je familie 🌱</h1>
           <p className="text-sm text-inkt-zacht mt-2 leading-relaxed">
             Je maakt de familie aan en bent meteen de eerste — de Family Keeper.
             Daarna nodig je de rest uit.

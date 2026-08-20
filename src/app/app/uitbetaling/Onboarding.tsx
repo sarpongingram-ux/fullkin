@@ -13,13 +13,13 @@ export function Onboarding({ nieuw }: { nieuw: boolean }) {
   return (
     <form action={actie} className="space-y-3">
       <div>
-        <label className="block text-sm text-inkt-zacht mb-1">
+        <label className="block text-sm text-inkt-zacht mb-1 font-semibold">
           In welk land ontvang je geld?
         </label>
         <select
           name="land"
           defaultValue="NL"
-          className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
         >
           {UITBETAAL_LANDEN.map((l) => (
             <option key={l.code} value={l.code}>

@@ -21,7 +21,7 @@ export default async function Welkom({
   if (!preview) {
     return (
       <Kader>
-        <h1 className="text-xl font-bold text-inkt mb-2">
+        <h1 className="text-2xl font-black text-inkt mb-2">
           Uitnodiging niet gevonden
         </h1>
         <p className="text-inkt-zacht text-sm">
@@ -35,7 +35,7 @@ export default async function Welkom({
   if (preview.status !== "open" || preview.expired) {
     return (
       <Kader>
-        <h1 className="text-xl font-bold text-inkt mb-2">
+        <h1 className="text-2xl font-black text-inkt mb-2">
           Deze uitnodiging is niet meer geldig
         </h1>
         <p className="text-inkt-zacht text-sm">
@@ -50,11 +50,11 @@ export default async function Welkom({
 
   return (
     <Kader>
-      <p className="text-terracotta font-semibold tracking-[0.25em] text-xs">
+      <p className="text-terracotta font-extrabold tracking-[0.2em] text-xs">
         FULLKIN
       </p>
-      <h1 className="text-2xl font-bold text-inkt mt-2 leading-snug">
-        Welkom bij {preview.network_name}, {preview.person_first_name}.
+      <h1 className="text-2xl font-black text-inkt mt-2 leading-snug">
+        Welkom bij {preview.network_name}, {preview.person_first_name}. 👋
       </h1>
       <p className="text-inkt-zacht mt-3">
         {preview.inviter_name} heeft jou toegevoegd aan de familiekaart. Jouw
@@ -79,7 +79,7 @@ export default async function Welkom({
 function Kader({ children }: { children: React.ReactNode }) {
   return (
     <main className="min-h-screen flex items-center justify-center px-6">
-      <div className="w-full max-w-sm bg-oppervlak rounded-2xl border border-rand p-8 shadow-sm">
+      <div className="w-full max-w-sm fk-card-white" style={{ padding: 28 }}>
         {children}
       </div>
     </main>

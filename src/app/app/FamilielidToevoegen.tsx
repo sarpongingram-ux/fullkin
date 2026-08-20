@@ -80,7 +80,7 @@ export function FamilielidToevoegen() {
             {relaties.map((r, i) => (
               <label
                 key={r.waarde}
-                className="flex items-center gap-2 rounded-lg border border-rand bg-achtergrond px-3 py-2 cursor-pointer has-checked:border-terracotta has-checked:bg-klei/40"
+                className="flex items-center gap-2 rounded-xl border-2 border-rand bg-white px-3 py-2.5 cursor-pointer font-semibold text-inkt has-checked:border-terracotta has-checked:bg-klei"
               >
                 <input
                   type="radio"
