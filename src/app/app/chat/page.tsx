@@ -41,7 +41,7 @@ export default async function ChatPagina() {
     await Promise.all([
       supabase
         .from("chat_messages")
-        .select("id, sender_id, message_text, message_type, created_at")
+        .select("id, sender_id, message_text, message_type, reference_id, created_at")
         .eq("room_id", room.id)
         .order("created_at", { ascending: false })
         .limit(50),
@@ -70,6 +70,17 @@ export default async function ChatPagina() {
 
   const berichten = ((recent ?? []) as ChatBericht[]).slice().reverse()
 
+  // Voor wie mag je een collecte starten: je directe familie.
+  const collecteKandidaten = (relaties ?? [])
+    .filter((r) =>
+      ["ouder", "kind", "partner", "broer of zus"].includes(r.label as string),
+    )
+    .map((r) => ({
+      id: r.person_id as string,
+      naam: `${r.first_name} ${r.last_name}`,
+      label: r.label as string,
+    }))
+
   return (
     <ChatRoom
       roomId={room.id}
@@ -78,6 +89,7 @@ export default async function ChatPagina() {
       aantalLeden={count ?? (personen ?? []).length}
       directory={directory}
       initieel={berichten}
+      collecteKandidaten={collecteKandidaten}
     />
   )
 }
