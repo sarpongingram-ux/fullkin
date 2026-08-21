@@ -164,6 +164,17 @@ export async function uploadProfielfoto(
   if (!session?.access_token) {
     return { ok: false, fout: "Je sessie is verlopen. Log opnieuw in." }
   }
+  // TIJDELIJKE DIAGNOSE: laat zien wat er in het meegestuurde token zit.
+  let diag = "onleesbaar"
+  try {
+    const payload = JSON.parse(
+      Buffer.from(session.access_token.split(".")[1], "base64").toString(),
+    )
+    const now = Math.floor(Date.now() / 1000)
+    diag = `role=${payload.role} verlopen=${payload.exp < now} (exp-now=${payload.exp - now}s) aud=${payload.aud}`
+  } catch {
+    diag = "kon token niet lezen"
+  }
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL!
   const uploadRes = await fetch(
     `${base}/storage/v1/object/avatars/${pad}`,
@@ -179,8 +190,10 @@ export async function uploadProfielfoto(
     },
   )
   if (!uploadRes.ok) {
-    const tekst = await uploadRes.text().catch(() => "")
-    return { ok: false, fout: "Uploaden mislukt: " + (tekst || uploadRes.status) }
+    return {
+      ok: false,
+      fout: `Upload ${uploadRes.status} · token: ${diag}`,
+    }
   }
 
   const fotoUrl = `${base}/storage/v1/object/public/avatars/${pad}`
