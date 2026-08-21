@@ -79,11 +79,18 @@ export function FamilielidToevoegen({
           />
         </div>
 
-        <input
-          name="stad"
-          placeholder="Stad (optioneel)"
-          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
-        />
+        <div className="flex gap-2">
+          <input
+            name="stad"
+            placeholder="Stad (optioneel)"
+            className="flex-1 rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
+          />
+          <input
+            name="land"
+            placeholder="Land (optioneel)"
+            className="flex-1 rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
+          />
+        </div>
 
         <div>
           <p className="text-sm text-inkt-zacht mb-2 font-semibold">

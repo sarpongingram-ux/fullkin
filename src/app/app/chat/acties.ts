@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { revalidatePath } from "next/cache"
 import type { Enums } from "@/lib/types/database"
 
 export type ChatBericht = {
@@ -64,6 +65,38 @@ export async function haalNieuweBerichten(
     .order("created_at", { ascending: true })
     .limit(200)
   return (data ?? []) as ChatBericht[]
+}
+
+// Word lid van een takchat (handmatig toetreden aan een andere tak).
+export async function neemDeelAanTak(
+  roomId: string,
+): Promise<{ ok: boolean }> {
+  const supabase = await createClient()
+  const { data: meId } = await supabase.rpc("me")
+  if (!meId) return { ok: false }
+  const { error } = await supabase
+    .from("chat_members")
+    .upsert(
+      { room_id: roomId, person_id: meId, joined_at: new Date().toISOString() },
+      { onConflict: "room_id,person_id", ignoreDuplicates: true },
+    )
+  revalidatePath("/app/chat")
+  return { ok: !error }
+}
+
+// Markeert een chatruimte als gelezen (voor de ongelezen-stip in het overzicht).
+export async function markeerGelezen(roomId: string): Promise<void> {
+  const supabase = await createClient()
+  const { data: meId } = await supabase.rpc("me")
+  if (!meId) return
+  await supabase.from("chat_members").upsert(
+    {
+      room_id: roomId,
+      person_id: meId,
+      last_read_at: new Date().toISOString(),
+    },
+    { onConflict: "room_id,person_id" },
+  )
 }
 
 // Momenten waarvoor je een collecte kunt starten (life_event_kind).

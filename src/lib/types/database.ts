@@ -469,6 +469,7 @@ export type Database = {
       }
       chat_rooms: {
         Row: {
+          country: string | null
           created_at: string
           id: string
           name: string | null
@@ -476,6 +477,7 @@ export type Database = {
           type: Database["public"]["Enums"]["chat_room_type"]
         }
         Insert: {
+          country?: string | null
           created_at?: string
           id?: string
           name?: string | null
@@ -483,6 +485,7 @@ export type Database = {
           type?: Database["public"]["Enums"]["chat_room_type"]
         }
         Update: {
+          country?: string | null
           created_at?: string
           id?: string
           name?: string | null
@@ -1677,6 +1680,7 @@ export type Database = {
         }[]
       }
       draai_rad: { Args: never; Returns: string }
+      ensure_tak_chats: { Args: never; Returns: undefined }
       family_dreams: {
         Args: never
         Returns: {
@@ -1741,6 +1745,7 @@ export type Database = {
           status: Database["public"]["Enums"]["invite_status"]
         }[]
       }
+      kan_bij_room: { Args: { p_room: string }; Returns: boolean }
       komende_verjaardagen: {
         Args: never
         Returns: {

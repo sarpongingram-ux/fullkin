@@ -1,9 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { ChatRoom, type Directory } from "./ChatRoom"
-import type { ChatBericht } from "./acties"
+import { ChatOverzicht, type RoomKaart } from "./ChatOverzicht"
 
-export default async function ChatPagina() {
+export default async function ChatOverzichtPagina() {
   const supabase = await createClient()
   const {
     data: { user },
@@ -15,81 +14,79 @@ export default async function ChatPagina() {
 
   const { data: mij } = await supabase
     .from("persons")
-    .select("network_id")
+    .select("network_id, country")
     .eq("id", meId)
     .single()
   if (!mij) redirect("/app")
 
-  // De familiechat van dit netwerk.
-  const { data: room } = await supabase
-    .from("chat_rooms")
-    .select("id, name")
-    .eq("network_id", mij.network_id)
-    .eq("type", "familie")
-    .single()
+  // Zorg dat er voor elk woonland een takchat bestaat.
+  await supabase.rpc("ensure_tak_chats")
 
-  if (!room) {
-    return (
-      <main className="max-w-md mx-auto px-5 py-8">
-        <p className="text-inkt-zacht">De familiechat is nog niet klaar.</p>
-      </main>
-    )
-  }
+  const [{ data: rooms }, { data: leden }] = await Promise.all([
+    supabase
+      .from("chat_rooms")
+      .select("id, type, name, country, created_at")
+      .eq("network_id", mij.network_id)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("chat_members")
+      .select("room_id, last_read_at")
+      .eq("person_id", meId),
+  ])
 
-  // Laatste berichten (nieuwste 50), plus wie-is-wie voor foto's en relaties.
-  const [{ data: recent }, { data: personen }, { data: relaties }, { count }] =
-    await Promise.all([
-      supabase
-        .from("chat_messages")
-        .select("id, sender_id, message_text, message_type, reference_id, created_at")
-        .eq("room_id", room.id)
-        .order("created_at", { ascending: false })
-        .limit(50),
-      supabase
-        .from("persons")
-        .select("id, first_name, photo_url")
-        .eq("network_id", mij.network_id),
-      supabase.rpc("family_map", { me: meId }),
-      supabase
-        .from("persons")
-        .select("id", { count: "exact", head: true })
-        .eq("network_id", mij.network_id),
-    ])
-
-  const relatieVan = new Map(
-    (relaties ?? []).map((r) => [r.person_id, r.label as string]),
+  const lidVan = new Map(
+    (leden ?? []).map((m) => [m.room_id, m.last_read_at as string | null]),
   )
-  const directory: Directory = {}
-  for (const p of personen ?? []) {
-    directory[p.id] = {
-      voornaam: p.first_name,
-      photoUrl: p.photo_url,
-      relatie: p.id === meId ? "jij" : relatieVan.get(p.id) ?? "familielid",
+  const roomIds = (rooms ?? []).map((r) => r.id)
+
+  // Laatste bericht per ruimte (RLS geeft alleen ruimtes die je mag zien).
+  const { data: berichten } = roomIds.length
+    ? await supabase
+        .from("chat_messages")
+        .select("room_id, message_text, message_type, created_at")
+        .in("room_id", roomIds)
+        .order("created_at", { ascending: false })
+        .limit(300)
+    : { data: [] }
+  const laatste = new Map<
+    string,
+    { tekst: string | null; type: string; tijd: string }
+  >()
+  for (const b of berichten ?? []) {
+    if (!laatste.has(b.room_id)) {
+      laatste.set(b.room_id, {
+        tekst: b.message_text,
+        type: b.message_type,
+        tijd: b.created_at,
+      })
     }
   }
 
-  const berichten = ((recent ?? []) as ChatBericht[]).slice().reverse()
+  const kaarten: RoomKaart[] = (rooms ?? []).map((r) => {
+    const last = laatste.get(r.id) ?? null
+    const gelezen = lidVan.get(r.id) ?? null
+    const toegang =
+      r.type === "familie" ||
+      lidVan.has(r.id) ||
+      (r.type === "tak" && !!r.country && r.country === mij.country)
+    const ongelezen =
+      !!last && !!gelezen && new Date(last.tijd) > new Date(gelezen)
+    return {
+      id: r.id,
+      type: r.type,
+      naam: r.name ?? "Chat",
+      laatsteTekst: last
+        ? last.type === "collecte_link"
+          ? "❤️ Collecte gedeeld"
+          : last.type === "systeem"
+            ? last.tekst
+            : last.tekst
+        : null,
+      laatsteTijd: last?.tijd ?? null,
+      toegang,
+      ongelezen,
+    }
+  })
 
-  // Voor wie mag je een collecte starten: je directe familie.
-  const collecteKandidaten = (relaties ?? [])
-    .filter((r) =>
-      ["ouder", "kind", "partner", "broer of zus"].includes(r.label as string),
-    )
-    .map((r) => ({
-      id: r.person_id as string,
-      naam: `${r.first_name} ${r.last_name}`,
-      label: r.label as string,
-    }))
-
-  return (
-    <ChatRoom
-      roomId={room.id}
-      meId={meId}
-      groepsnaam={room.name ?? "Familiechat"}
-      aantalLeden={count ?? (personen ?? []).length}
-      directory={directory}
-      initieel={berichten}
-      collecteKandidaten={collecteKandidaten}
-    />
-  )
+  return <ChatOverzicht kaarten={kaarten} />
 }

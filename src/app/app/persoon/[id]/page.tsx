@@ -7,6 +7,7 @@ import { OverlijdenKnop } from "./OverlijdenKnop"
 import { NaamAanpassen } from "./NaamAanpassen"
 import { OuderKoppelen } from "./OuderKoppelen"
 import { ProfielFoto } from "./ProfielFoto"
+import { WoonplaatsKnop } from "./WoonplaatsKnop"
 
 function leeftijd(bornOn: string | null): number | null {
   if (!bornOn) return null
@@ -206,6 +207,16 @@ export default async function PersoonPagina({
           kindId={p.id}
           voornaam={p.first_name}
           kandidaten={ouderKandidaten}
+        />
+      )}
+
+      {/* Woonplaats + woonland (bepaalt de takchat). */}
+      {kanRelatieBeheren && (
+        <WoonplaatsKnop
+          personId={p.id}
+          voornaam={p.first_name}
+          stad={p.city}
+          land={p.country}
         />
       )}
 

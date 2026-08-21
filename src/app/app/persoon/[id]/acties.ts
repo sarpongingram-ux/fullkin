@@ -213,6 +213,32 @@ export async function verwijderProfielfoto(
   return { ok: true }
 }
 
+// Zet woonplaats en woonland. Het woonland bepaalt bij welke takchat iemand
+// automatisch hoort. RLS bepaalt wie het mag (persoon zelf/beheerder/Keeper).
+export async function stelWoonplaats(
+  personId: string,
+  stad: string,
+  land: string,
+): Promise<KindResultaat> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from("persons")
+    .update({
+      city: stad.trim() || null,
+      country: land.trim() || null,
+    })
+    .eq("id", personId)
+  if (error) {
+    return {
+      ok: false,
+      fout: "Kon dit niet opslaan. Alleen de persoon zelf, de beheerder of de Family Keeper kan dit.",
+    }
+  }
+  revalidatePath(`/app/persoon/${personId}`)
+  revalidatePath("/app/chat")
+  return { ok: true }
+}
+
 // Past de naam van een familielid aan. Handig om een nog "Onbekende" (automatisch
 // aangemaakte gedeelde ouder) alsnog een naam te geven. RLS bepaalt wie het mag.
 export async function stelNaam(

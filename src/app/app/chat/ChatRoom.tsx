@@ -7,6 +7,7 @@ import {
   stuurBericht,
   haalNieuweBerichten,
   startCollecteVanuitChat,
+  markeerGelezen,
   type ChatBericht,
 } from "./acties"
 
@@ -117,6 +118,11 @@ export function ChatRoom({
     bodemRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
   }, [berichten])
 
+  // Markeer de ruimte als gelezen bij openen.
+  useEffect(() => {
+    markeerGelezen(roomId)
+  }, [roomId])
+
   async function verstuur() {
     const t = tekst.trim()
     if (!t || bezig) return
@@ -132,7 +138,7 @@ export function ChatRoom({
     <div className="max-w-md mx-auto">
       {/* Kop */}
       <header className="sticky top-0 z-20 bg-white border-b border-rand px-4 py-3 flex items-center gap-3">
-        <Link href="/app/familie" className="text-inkt-zacht font-bold hover:text-inkt">
+        <Link href="/app/chat" className="text-inkt-zacht font-bold hover:text-inkt">
           ←
         </Link>
         <div

@@ -22,6 +22,7 @@ export async function voegFamilielidToe(
   const voornaam = String(formData.get("voornaam") ?? "").trim()
   const achternaam = String(formData.get("achternaam") ?? "").trim()
   const stad = String(formData.get("stad") ?? "").trim() || null
+  const land = String(formData.get("land") ?? "").trim() || null
   const relatie = String(formData.get("relatie") ?? "") as RelatieKeuze
   const ankerRaw = String(formData.get("verwant_aan") ?? "").trim()
   const geboortedatum = String(formData.get("geboortedatum") ?? "").trim() || null
@@ -89,6 +90,7 @@ export async function voegFamilielidToe(
       first_name: voornaam,
       last_name: achternaam,
       city: stad,
+      country: land,
       born_on: geboortedatum,
       // Een kind is een profiel dat de toevoeger beheert (geen eigen account,
       // geen verplichtingen). Het kind kan het later zelf overnemen.
