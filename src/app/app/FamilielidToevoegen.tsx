@@ -121,9 +121,22 @@ export function FamilielidToevoegen({
               </option>
             ))}
           </select>
-          <p className="text-xs text-inkt-zacht mt-1">
-            Zo bouw je de hele familie op: je opa is bijv. de ouder van je ouder.
-          </p>
+          <div className="text-xs text-inkt-zacht mt-2 rounded-xl bg-oppervlak p-3 space-y-1">
+            <p className="font-bold text-inkt">Verdere familie toevoegen:</p>
+            <p>
+              Je <b>oom/tante</b> = <b>Broer of zus</b> van je vader of moeder
+            </p>
+            <p>
+              Je <b>neef/nicht</b> = <b>Kind</b> van je oom of tante
+            </p>
+            <p>
+              Je <b>opa/oma</b> = <b>Ouder</b> van je vader of moeder
+            </p>
+            <p className="italic pt-1">
+              Voeg de tussenpersoon eerst toe (bijv. je vader), kies 'm daarna bij
+              &quot;van&quot;.
+            </p>
+          </div>
         </div>
 
         <div>
