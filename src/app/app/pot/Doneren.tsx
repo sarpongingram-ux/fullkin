@@ -49,7 +49,7 @@ export function Doneren() {
             className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           />
           <p className="text-sm text-inkt-zacht mt-2">
-            Je donatie is altijd anoniem. Niemand ziet wie of hoeveel — alleen
+            Je donatie is altijd anoniem. Niemand ziet wie of hoeveel. Alleen
             de pot groeit.
           </p>
         </div>

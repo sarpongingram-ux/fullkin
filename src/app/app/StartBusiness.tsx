@@ -84,7 +84,7 @@ export function StartBusiness() {
           disabled={bezig}
           className="w-full rounded-full bg-terracotta py-2.5 text-white font-medium hover:bg-terracotta-diep transition disabled:opacity-60"
         >
-          {bezig ? "Bezig…" : "Indienen — de familie stemt"}
+          {bezig ? "Bezig…" : "Indienen. De familie stemt."}
         </button>
       </form>
     </section>

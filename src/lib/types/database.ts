@@ -1,5 +1,5 @@
 // Gegenereerd uit de Supabase-database (supabase gen types).
-// Niet met de hand bewerken — hergenereer na een migratie.
+// Niet met de hand bewerken, hergenereer na een migratie.
 export type Json =
   | string
   | number

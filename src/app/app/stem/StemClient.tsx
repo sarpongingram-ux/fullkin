@@ -9,7 +9,7 @@ type Lid = { id: string; naam: string }
 const invoer =
   "w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
 
-// Nomineren — één familielid, één zin waarom.
+// Nomineren, één familielid, één zin waarom.
 export function Nomineren({ roundId, leden }: { roundId: string; leden: Lid[] }) {
   const router = useRouter()
   const [bezig, start] = useTransition()
@@ -129,7 +129,7 @@ export function StemPaneel({
   )
 }
 
-// Family Keeper sluit de stemming — de meest gekozen persoon wint.
+// Family Keeper sluit de stemming, de meest gekozen persoon wint.
 export function SluitKnop({ roundId }: { roundId: string }) {
   const router = useRouter()
   const [bezig, start] = useTransition()

@@ -56,7 +56,7 @@ export default async function WalletPagina() {
         <h1 className="text-3xl font-black text-inkt mt-1">Jouw geld 💰</h1>
       </header>
 
-      {/* Groot centraal bedrag — Cash App-stijl */}
+      {/* Groot centraal bedrag, Cash App-stijl */}
       <section className="fk-card-dark text-center fk-pop">
         <p className="text-sm font-bold opacity-70">Voor jou opgehaald</p>
         <p className="fk-amount mt-2">{euro(opgehaald)}</p>
@@ -80,7 +80,7 @@ export default async function WalletPagina() {
         </div>
       </section>
 
-      {/* Droomvoortgang — Duolingo-stijl */}
+      {/* Droomvoortgang, Duolingo-stijl */}
       <section id="droom">
         <MijnDroom
           huidigeTitel={mijnDroom?.title ?? null}
@@ -95,7 +95,7 @@ export default async function WalletPagina() {
           <div>
             <p className="font-bold text-inkt">De familiepot 🌍</p>
             <p className="text-inkt-zacht text-sm">
-              Samen opgebouwd — voor wie het nodig heeft
+              Samen opgebouwd, voor wie het nodig heeft
             </p>
           </div>
           <p className="fk-stat-num text-goud">{euro(potSaldo, 0)}</p>
@@ -116,7 +116,7 @@ export default async function WalletPagina() {
               <div className="min-w-0">
                 <p className="font-bold text-inkt truncate">{c.title}</p>
                 <p className="text-inkt-zacht">
-                  Voor {naamVan.get(c.beneficiary_id) ?? "familie"} — draag bij
+                  Voor {naamVan.get(c.beneficiary_id) ?? "familie"}. Draag bij.
                 </p>
               </div>
             </Link>

@@ -9,9 +9,9 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Fullkin — jouw familie, dichtbij",
+  title: "Fullkin",
   description:
-    "Fullkin brengt je familie samen: verbinding, herinneringen en samen dromen waarmaken.",
+    "Eén plek voor je hele familie. Blijf verbonden, bewaar de momenten en bouw samen aan iets groots.",
 };
 
 export default function RootLayout({

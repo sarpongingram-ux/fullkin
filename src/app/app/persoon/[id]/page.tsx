@@ -60,7 +60,7 @@ export default async function PersoonPagina({
 
   const droom = (dromen ?? []).find((d) => d.person_id === id)
 
-  // Herinneringen met deze persoon (album, chronologisch — oudste eerst).
+  // Herinneringen met deze persoon (album, chronologisch, oudste eerst).
   const { data: tags } = await supabase
     .from("album_tags")
     .select("album_item_id")
@@ -112,7 +112,7 @@ export default async function PersoonPagina({
         </div>
       </header>
 
-      {/* De leesbare route — hoe jullie verbonden zijn */}
+      {/* De leesbare route, hoe jullie verbonden zijn */}
       {!ikZelf && route && (
         <p className="fk-card text-inkt">{route}</p>
       )}

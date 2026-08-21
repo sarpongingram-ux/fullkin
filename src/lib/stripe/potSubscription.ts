@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service"
 import type Stripe from "stripe"
 
 // Handelt de terugkeer van een abonnements-checkout af: legt het abonnement vast
-// en boekt de eerste maandbetaling in het grootboek. Idempotent — het abonnement
+// en boekt de eerste maandbetaling in het grootboek. Idempotent, het abonnement
 // via zijn Stripe-id, de boeking via de factuur-id (dezelfde ref als de webhook).
 export async function settlePotSubscriptionFromSession(
   sessionId: string,

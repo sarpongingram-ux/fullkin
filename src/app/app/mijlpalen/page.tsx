@@ -102,7 +102,7 @@ export default async function MijlpalenPagina() {
         </p>
       </header>
 
-      {/* Binnenkort jarig — automatisch uit de geboortedata. */}
+      {/* Binnenkort jarig, automatisch uit de geboortedata. */}
       {jarigen.length > 0 && (
         <section className="mb-6">
           <h2 className="text-lg font-black text-inkt mb-3">
@@ -215,7 +215,7 @@ export default async function MijlpalenPagina() {
           <p className="text-5xl mb-3">🎈</p>
           <p className="font-black text-inkt text-lg">Nog geen mijlpalen</p>
           <p className="text-inkt-zacht mt-1">
-            Voeg een verjaardag, geboorte of afstuderen toe — de familie viert mee.
+            Voeg een verjaardag, geboorte of afstuderen toe. De familie viert mee.
           </p>
         </div>
       )}

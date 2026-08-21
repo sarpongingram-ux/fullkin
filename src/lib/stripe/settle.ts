@@ -5,7 +5,7 @@ import { createServiceClient } from "@/lib/supabase/service"
 //
 // Wordt aangeroepen wanneer de betaler terugkeert van Stripe (success_url).
 // We vragen de sessie op bij Stripe (met de secret key) en rekenen alleen af
-// als de betaling écht 'paid' is — de gebruiker kan dit niet vervalsen.
+// als de betaling écht 'paid' is, de gebruiker kan dit niet vervalsen.
 // Idempotent: settle_contribution doet niets bij een al afgerekende bijdrage.
 //
 // Draait naast de webhook: dit is de directe route (meteen na betalen), de

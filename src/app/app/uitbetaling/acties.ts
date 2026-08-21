@@ -36,7 +36,7 @@ export async function startUitbetaling(
     return {
       ok: false,
       fout:
-        "Uitbetaling naar dit land loopt via Flutterwave (mobile money). Die koppeling komt binnenkort — ontvangers in Stripe-landen (NL, EU, VK) kunnen nu al.",
+        "Uitbetaling naar dit land loopt via Flutterwave (mobile money). Die koppeling komt binnenkort, ontvangers in Stripe-landen (NL, EU, VK) kunnen nu al.",
     }
   }
 
@@ -114,9 +114,9 @@ export async function ververUitbetaalStatus(): Promise<void> {
         .eq("provider", "stripe")
     }
   } catch {
-    // Stripe onbereikbaar of account verwijderd — status ongewijzigd laten.
+    // Stripe onbereikbaar of account verwijderd, status ongewijzigd laten.
   }
-  // Let op: geen revalidatePath hier — deze functie draait tijdens het renderen
+  // Let op: geen revalidatePath hier, deze functie draait tijdens het renderen
   // van de pagina (vanuit de server component), en dan is revalidatePath niet
   // toegestaan. De pagina leest de status direct hierna zelf vers in.
 }

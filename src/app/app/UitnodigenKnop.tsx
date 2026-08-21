@@ -32,7 +32,7 @@ export function UitnodigenKnop({
   }
 
   const bericht = link
-    ? `Hoi ${voornaam}! ${uitnodigerVoornaam} heeft jou toegevoegd aan ${familieNaam} op Fullkin — de plek waar onze familie samenkomt. Jouw plek staat al klaar. Open 'm hier: ${link}`
+    ? `Hoi ${voornaam}! ${uitnodigerVoornaam} heeft jou toegevoegd aan ${familieNaam} op Fullkin, de plek waar onze familie samenkomt. Jouw plek staat al klaar. Open 'm hier: ${link}`
     : ""
 
   const whatsappLink = `https://wa.me/?text=${encodeURIComponent(bericht)}`

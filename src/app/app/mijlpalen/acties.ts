@@ -9,7 +9,7 @@ export type MijlpaalResultaat =
   | { ok: true }
   | { ok: false; fout: string }
 
-// Registreert een mijlpaal voor een familielid — zonder dat er meteen een
+// Registreert een mijlpaal voor een familielid, zonder dat er meteen een
 // collecte aan vast hoeft te zitten. De persoon zelf krijgt een warme melding.
 export async function voegMijlpaalToe(
   _v: MijlpaalResultaat | null,

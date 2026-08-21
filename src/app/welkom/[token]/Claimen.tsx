@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 
 // De uitgenodigde claimt zijn gereserveerde plek. Als hij nog geen account
-// heeft, maakt hij er hier een — en claimt daarna direct via het token.
+// heeft, maakt hij er hier een, en claimt daarna direct via het token.
 export function Claimen({
   token,
   alIngelogd,

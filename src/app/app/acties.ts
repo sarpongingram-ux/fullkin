@@ -14,7 +14,7 @@ export type ToevoegResultaat =
 //
 // De gebruiker kiest een menselijke relatie. Wij vertalen die naar de enige
 // twee soorten die de database kent: ouder-kind en partner. Een broer of zus
-// wordt gekoppeld via de gedeelde ouder(s) — precies zoals in het echt.
+// wordt gekoppeld via de gedeelde ouder(s), precies zoals in het echt.
 export async function voegFamilielidToe(
   _vorige: ToevoegResultaat | null,
   formData: FormData,

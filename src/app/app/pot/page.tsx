@@ -89,7 +89,7 @@ export default async function PotPagina({
         <h1 className="text-3xl font-black text-inkt mt-1">De familiepot 🌍</h1>
       </header>
 
-      {/* Het saldo — groot, Cash App-stijl. */}
+      {/* Het saldo, groot, Cash App-stijl. */}
       <section className="fk-card-dark text-center">
         <p className="text-sm font-bold opacity-70">Huidig saldo</p>
         <p className="fk-amount mt-2 text-goud">{euro(p.saldo_cents, 0)}</p>
@@ -98,7 +98,7 @@ export default async function PotPagina({
         </p>
       </section>
 
-      {/* Bronnen — geaggregeerd, nooit individuele bedragen. */}
+      {/* Bronnen, geaggregeerd, nooit individuele bedragen. */}
       <section className="fk-card">
         <h2 className="font-black text-inkt mb-3 text-lg">Waar komt het vandaan</h2>
         <dl className="space-y-3">
@@ -119,13 +119,13 @@ export default async function PotPagina({
           {p.uitgekeerd_cents > 0 && (
             <div className="flex justify-between border-t border-rand pt-3">
               <dt className="text-inkt-zacht font-semibold">Uitgekeerd</dt>
-              <dd className="text-inkt font-bold">− {euro(p.uitgekeerd_cents)}</dd>
+              <dd className="text-inkt font-bold">-{euro(p.uitgekeerd_cents)}</dd>
             </div>
           )}
         </dl>
       </section>
 
-      {/* Maandelijkse bijdrage — €3 suggestie, zelf te bepalen. */}
+      {/* Maandelijkse bijdrage, €3 suggestie, zelf te bepalen. */}
       <Maandbijdrage
         mijnBedragCents={mijnSub?.amount_cents ?? null}
         ledenAantal={maand.leden}
@@ -135,9 +135,8 @@ export default async function PotPagina({
       <Doneren />
 
       <p className="text-center text-sm text-inkt-zacht leading-relaxed px-4">
-        De pot is altijd groter dan verwacht. €3 per lid per maand, 1% van elke
-        transactie, en vrije donaties — samen bouwen jullie iets op dat groter is
-        dan ieder van jullie alleen.
+        €3 per lid per maand, 1% van elke transactie, en vrije donaties. Zo bouwen
+        jullie samen iets op dat groter is dan ieder van jullie alleen.
       </p>
     </main>
   )

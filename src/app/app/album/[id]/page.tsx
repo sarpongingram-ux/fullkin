@@ -88,7 +88,7 @@ export default async function HerinneringPagina({
         ← Terug naar het album
       </Link>
 
-      {/* De herinnering, groot — foto, video of geluid */}
+      {/* De herinnering, groot, foto, video of geluid */}
       <div
         className="mt-4 rounded-3xl overflow-hidden bg-klei"
         style={{ boxShadow: "var(--schaduw)" }}

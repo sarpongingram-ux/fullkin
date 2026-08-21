@@ -24,7 +24,7 @@ export function Onboarding({ nieuw }: { nieuw: boolean }) {
           {UITBETAAL_LANDEN.map((l) => (
             <option key={l.code} value={l.code}>
               {l.naam}
-              {l.provider === "flutterwave" ? " (mobile money — binnenkort)" : ""}
+              {l.provider === "flutterwave" ? " (mobile money, binnenkort)" : ""}
             </option>
           ))}
         </select>

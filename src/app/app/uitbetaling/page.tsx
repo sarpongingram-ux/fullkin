@@ -54,7 +54,7 @@ export default async function UitbetalingPagina({
         </h1>
         <p className="text-inkt-zacht mt-2">
           Koppel één keer je uitbetaling. Dan komt geld dat je familie voor jou
-          ophaalt direct bij jou terecht — niet bij Fullkin.
+          ophaalt direct bij jou terecht. Niet bij Fullkin.
         </p>
       </header>
 

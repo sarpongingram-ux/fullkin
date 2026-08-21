@@ -121,7 +121,7 @@ export function FamilieKaart({
         {cta.tekst}
       </Link>
 
-      {/* Familiemomenten — als kaarten, niet als lijst */}
+      {/* Familiemomenten, als kaarten, niet als lijst */}
       <section className="space-y-3">
         <h2 className="text-lg font-black text-inkt">Wat er speelt</h2>
 
@@ -139,8 +139,8 @@ export function FamilieKaart({
                 {komendeVerjaardag.dagen_tot === 0
                   ? "Vandaag! Vier mee."
                   : komendeVerjaardag.dagen_tot === 1
-                    ? "Morgen al — vier mee."
-                    : `Over ${komendeVerjaardag.dagen_tot} dagen — vier mee.`}
+                    ? "Morgen al. Vier mee."
+                    : `Over ${komendeVerjaardag.dagen_tot} dagen. Vier mee.`}
               </p>
             </div>
           </Link>
@@ -156,7 +156,7 @@ export function FamilieKaart({
             <div className="min-w-0">
               <p className="font-bold text-inkt truncate">{c.title}</p>
               <p className="text-inkt-zacht">
-                Een collecte voor {c.voornaam} — draag bij
+                Collecte voor {c.voornaam}. Draag bij.
               </p>
             </div>
           </Link>
@@ -178,7 +178,7 @@ export function FamilieKaart({
                 <div className="min-w-0 flex-1">
                   <p className="font-bold text-inkt truncate">{d.title}</p>
                   <p className="text-inkt-zacht">
-                    De droom van {d.first_name} — help mee
+                    De droom van {d.first_name}. Help mee.
                   </p>
                 </div>
               </div>

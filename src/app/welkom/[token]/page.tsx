@@ -9,7 +9,7 @@ export default async function Welkom({
   const { token } = await params
   const supabase = await createClient()
 
-  // invite_preview is callable door anon — werkt ook zonder inloggen.
+  // invite_preview is callable door anon, werkt ook zonder inloggen.
   const { data: preview } = await supabase
     .rpc("invite_preview", { invite_token: token })
     .single()
@@ -58,7 +58,7 @@ export default async function Welkom({
       </h1>
       <p className="text-inkt-zacht mt-3">
         {preview.inviter_name} heeft jou toegevoegd aan de familiekaart. Jouw
-        plek staat al klaar — je hoeft alleen nog binnen te komen.
+        plek staat al klaar. Kom binnen.
       </p>
 
       <div className="mt-6">
@@ -69,8 +69,8 @@ export default async function Welkom({
         />
       </div>
 
-      <p className="mt-8 text-center text-xs text-inkt-zacht italic">
-        Ubuntu. Ik ben volledig omdat wij compleet zijn.
+      <p className="mt-8 text-center text-sm text-inkt-zacht font-semibold">
+        Welkom thuis.
       </p>
     </Kader>
   )

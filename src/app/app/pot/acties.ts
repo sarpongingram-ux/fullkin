@@ -12,7 +12,7 @@ export type DonatieResultaat =
   | { ok: false; fout: string }
 
 // Vrije, anonieme donatie aan de Familie Pot. Een donatie heeft geen enkele
-// ontvanger — het gaat naar de collectieve pot — dus dit is een gewone betaling
+// ontvanger, het gaat naar de collectieve pot, dus dit is een gewone betaling
 // naar het platform, die op de Pot-ledger als 'donatie' wordt geboekt.
 export async function doneerAanPot(
   _v: DonatieResultaat | null,

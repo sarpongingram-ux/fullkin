@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
-  Fullkin — look & feel: Cash App × Duolingo.
+  Fullkin, look & feel: Cash App × Duolingo.
   Wit en licht, veel ademruimte, grote ronde knoppen, grote vette getallen,
   warm en uitnodigend. Nooit koud of technisch.
 
@@ -55,7 +55,7 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
-   Herbruikbare bouwstenen — Cash App × Duolingo
+   Herbruikbare bouwstenen, Cash App × Duolingo
    --------------------------------------------------------------------------- */
 
 /* Knoppen: groot, breed, ronde hoeken, minimaal 56px hoog. */
@@ -121,7 +121,7 @@ body {
   box-shadow: var(--schaduw-diep);
 }
 
-/* Grote bedragen — extra groot en vet, altijd leesbaar zonder bril. */
+/* Grote bedragen, extra groot en vet, altijd leesbaar zonder bril. */
 .fk-amount {
   font-weight: 900;
   font-size: 3.25rem;
@@ -151,7 +151,7 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
-   Animaties — subtiel en snel (<300ms), nooit storend
+   Animaties, subtiel en snel (<300ms), nooit storend
    --------------------------------------------------------------------------- */
 @keyframes fk-pop {
   0% { transform: scale(0.8); opacity: 0; }
@@ -173,7 +173,7 @@ body {
 }
 .fk-heart { animation: fk-heart 0.28s ease-out both; }
 
-/* Confetti — valt en dwarrelt, ruimt zichzelf op na de animatie. */
+/* Confetti, valt en dwarrelt, ruimt zichzelf op na de animatie. */
 .fk-confetti-root {
   position: fixed;
   inset: 0;

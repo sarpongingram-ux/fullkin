@@ -100,7 +100,7 @@ export function Uploader({
 
   return (
     <div className="space-y-5">
-      {/* Media kiezen — foto, video of geluid */}
+      {/* Media kiezen, foto, video of geluid */}
       <div>
         {voorbeeld ? (
           soort === "video" ? (

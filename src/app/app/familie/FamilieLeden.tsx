@@ -72,7 +72,7 @@ export function FamilieLeden({
           <p className="text-5xl mb-3">👋</p>
           <p className="font-black text-inkt text-lg">Jouw familie wacht op jou</p>
           <p className="text-inkt-zacht mt-1">
-            Nodig je eerste familielid uit — het duurt 30 seconden.
+            Nodig je eerste familielid uit. Duurt 30 seconden.
           </p>
         </div>
       ) : (

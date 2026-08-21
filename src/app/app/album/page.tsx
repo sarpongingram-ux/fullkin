@@ -48,7 +48,7 @@ export default async function AlbumPagina() {
         📷 Deel een herinnering
       </Link>
 
-      {/* Ontdeklaag — samen op de foto, nog niet verbonden op de kaart. */}
+      {/* Ontdeklaag, samen op de foto, nog niet verbonden op de kaart. */}
       {ontdekkingen.length > 0 && (
         <section className="mb-6">
           <h2 className="text-lg font-black text-inkt mb-3">Ontdek een verbinding</h2>

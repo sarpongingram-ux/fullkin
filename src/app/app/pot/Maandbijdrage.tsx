@@ -135,7 +135,7 @@ export function Maandbijdrage({
             ))}
           </div>
           <p className="text-sm text-inkt-zacht mt-2">
-            €3 is de suggestie, maar jij bepaalt. Je bijdrage is anoniem — de pot
+            €3 is de suggestie, maar jij bepaalt. Je bijdrage is anoniem: de pot
             groeit, niemand ziet wie hoeveel geeft. Maandelijks opzegbaar.
           </p>
         </div>

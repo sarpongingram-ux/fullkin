@@ -49,7 +49,7 @@ export function Bijdragen({
             className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
           />
           <p className="text-sm text-inkt-zacht mt-2">
-            Suggestie: €{suggestie}. Geef wat je wil — je bedrag blijft geheim.
+            Suggestie: €{suggestie}. Geef wat je wil, je bedrag blijft geheim.
           </p>
         </div>
 

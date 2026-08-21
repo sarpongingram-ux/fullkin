@@ -82,7 +82,7 @@ export default async function Dashboard() {
     naam: `${l.first_name} ${l.last_name}`,
   }))
 
-  // Blok 3 — Potentie: projecteer op basis van volume per lid.
+  // Blok 3, Potentie: projecteer op basis van volume per lid.
   const volumePerLid =
     d.leden_totaal > 0 ? d.volume_totaal_cents / d.leden_totaal : 0
   const projectie = [200, 300, 500].map((n) => {
@@ -94,7 +94,7 @@ export default async function Dashboard() {
     }
   })
 
-  // Blok 4 — Fullkin suggereert: acties geordend op impact.
+  // Blok 4, Fullkin suggereert: acties geordend op impact.
   const suggesties: { titel: string; effect: string }[] = []
   if (d.leden_onbekend > 0)
     suggesties.push({
@@ -104,7 +104,7 @@ export default async function Dashboard() {
   if (d.leden_sluimerend > 0)
     suggesties.push({
       titel: `Activeer ${d.leden_sluimerend} sluimerend ${d.leden_sluimerend === 1 ? "lid" : "leden"}`,
-      effect: "Zij dragen nog niet bij — een collecte trekt ze erin",
+      effect: "Zij dragen nog niet bij. Een collecte trekt ze erin.",
     })
   if (d.dromen_actief < d.leden_deelnemend)
     suggesties.push({
@@ -133,7 +133,7 @@ export default async function Dashboard() {
         </h1>
       </header>
 
-      {/* Netwerksterkte — één getal bovenaan. */}
+      {/* Netwerksterkte, één getal bovenaan. */}
       <section className="fk-card-dark flex items-center justify-between">
         <div>
           <p className="text-sm uppercase tracking-wide opacity-70 font-bold">
@@ -149,7 +149,7 @@ export default async function Dashboard() {
         </div>
       </section>
 
-      {/* Blok 1 — Netwerk Nu */}
+      {/* Blok 1, Netwerk Nu */}
       <section className="fk-card">
         <h2 className="font-black text-inkt text-lg mb-3">Netwerk nu</h2>
         <div className="grid grid-cols-3 gap-3 text-center">
@@ -171,7 +171,7 @@ export default async function Dashboard() {
         </p>
       </section>
 
-      {/* Blok 2 — Economie */}
+      {/* Blok 2, Economie */}
       <section className="fk-card">
         <h2 className="font-black text-inkt text-lg mb-3">Economie</h2>
         <dl className="space-y-2 text-sm">
@@ -194,7 +194,7 @@ export default async function Dashboard() {
         </p>
       </section>
 
-      {/* Blok 3 — Potentie */}
+      {/* Blok 3, Potentie */}
       <section className="fk-card">
         <h2 className="font-black text-inkt text-lg mb-1">Potentie</h2>
         <p className="text-sm text-inkt-zacht mb-3">
@@ -215,7 +215,7 @@ export default async function Dashboard() {
         </div>
       </section>
 
-      {/* Blok 4 — Fullkin suggereert */}
+      {/* Blok 4, Fullkin suggereert */}
       <section className="fk-card">
         <h2 className="font-black text-inkt text-lg mb-3">Fullkin suggereert</h2>
         <ul className="space-y-2">

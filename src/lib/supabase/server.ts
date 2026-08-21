@@ -22,7 +22,7 @@ export async function createClient() {
               cookieStore.set(name, value, options),
             )
           } catch {
-            // setAll aangeroepen vanuit een Server Component — mag genegeerd
+            // setAll aangeroepen vanuit een Server Component, mag genegeerd
             // worden zolang er middleware is die de sessie ververst.
           }
         },

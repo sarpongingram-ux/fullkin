@@ -1,7 +1,7 @@
 // Kiest de uitbetaalprovider op basis van het land van de ontvanger.
 //
 // Stripe Connect dekt EU/VK. Voor Afrika (en andere landen die Stripe niet
-// uitbetaalt) is Flutterwave nodig — die laag komt later, maar de keuze zit
+// uitbetaalt) is Flutterwave nodig, die laag komt later, maar de keuze zit
 // hier al zodat de rest van de app provider-onafhankelijk is.
 
 export type PayoutProvider = "stripe" | "flutterwave"

@@ -37,7 +37,7 @@ export async function beslisRad(
 
   // Bij zelf houden of gunnen gaat er echt geld naar de ontvanger: een Stripe-
   // transfer van de platform-balans naar hun gekoppelde account. Eerst
-  // controleren, dan overmaken, dan pas de beslissing vastleggen — zo blijven
+  // controleren, dan overmaken, dan pas de beslissing vastleggen, zo blijven
   // grootboek en werkelijkheid consistent.
   let transferId: string | null = null
   if (choice === "zelf" || choice === "gunnen") {

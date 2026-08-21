@@ -88,7 +88,7 @@ export default async function CollectiePagina({
         </p>
       </header>
 
-      {/* Het totaal is het feest — dat mag iedereen zien. */}
+      {/* Het totaal is het feest, dat mag iedereen zien. */}
       <section className="fk-card-dark text-center">
         <p className="fk-amount text-goud">{euro(total)}</p>
         <p className="text-sm opacity-70 mt-2">
@@ -96,7 +96,7 @@ export default async function CollectiePagina({
         </p>
       </section>
 
-      {/* Bijdragen — alleen als je niet de begunstigde bent en nog niet gaf. */}
+      {/* Bijdragen, alleen als je niet de begunstigde bent en nog niet gaf. */}
       {collectie.status === "open" && !isBegunstigde && !alBijgedragen && (
         <Bijdragen
           collectieId={id}
@@ -111,7 +111,7 @@ export default async function CollectiePagina({
         </div>
       )}
 
-      {/* Wie gaf — namen, nooit bedragen. Dit is de wet uit sectie 7.1. */}
+      {/* Wie gaf, namen, nooit bedragen. Dit is de wet uit sectie 7.1. */}
       <section>
         <h2 className="text-lg font-black text-inkt mb-3">Wie heeft bijgedragen</h2>
         <ul className="space-y-3">

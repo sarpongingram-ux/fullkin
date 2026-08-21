@@ -60,7 +60,7 @@ export function MijnDroom({
         </div>
         <p className="text-base text-inkt-zacht mt-2 font-semibold">
           {euro(opgehaaldCents)} van {euro(huidigStreefCents!)} · {pct}%
-          {pct >= 100 && " — bereikt! 🎉"}
+          {pct >= 100 && ". Bereikt! 🎉"}
         </p>
       </section>
     )

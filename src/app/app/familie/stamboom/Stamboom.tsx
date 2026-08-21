@@ -212,7 +212,7 @@ export function Stamboom({
         <p className="text-5xl mb-3">🌱</p>
         <p className="font-black text-inkt text-lg">De boom moet nog groeien</p>
         <p className="text-inkt-zacht mt-1">
-          Voeg familieleden toe en leg vast wie wiens ouder is — dan verschijnt
+          Voeg familieleden toe en leg vast wie wiens ouder is. Dan verschijnt
           hier jullie stamboom.
         </p>
       </div>
@@ -342,7 +342,7 @@ export function Stamboom({
       </div>
 
       <p className="text-center text-sm text-inkt-zacht mt-3 px-4">
-        Jullie familie in één beeld — {personen.length} mensen over{" "}
+        Jullie familie in één beeld. {personen.length} mensen over{" "}
         {model.generaties} generaties. Elke familie is uniek. 🌳
       </p>
     </>

@@ -32,7 +32,7 @@ export async function maakUitnodiging(
     return { ok: false, fout: "Dit familielid is al actief." }
   }
 
-  // Bestaat er al een open uitnodiging? Hergebruik die dan — geen dubbele.
+  // Bestaat er al een open uitnodiging? Hergebruik die dan, geen dubbele.
   const { data: bestaand } = await supabase
     .from("invites")
     .select("token")

@@ -149,7 +149,7 @@ export default async function RadPagina() {
 
       <p className="text-center text-sm text-inkt-zacht leading-relaxed px-4">
         Alleen wie meedoet in de familie draait mee. Hoe meer je bijdraagt, hoe
-        groter je kans — volledig transparant.
+        groter je kans. Volledig transparant.
       </p>
     </main>
   )
