@@ -75,12 +75,8 @@ export async function voegFamilielidToe(
       .eq("kind", "parent")
       .eq("to_person", ankerId)
     ouderIds = (ouders ?? []).map((r) => r.from_person)
-    if (ouderIds.length === 0) {
-      return {
-        ok: false,
-        fout: `Voeg eerst een ouder van ${anker.first_name} toe. Een broer of zus verbindt via de gedeelde ouder.`,
-      }
-    }
+    // Geen bekende ouder? Dan maken we straks een gedeelde (nog onbekende) ouder
+    // aan, zodat de broer/zus-relatie klopt. Zie hieronder.
   }
 
   // De persoon aanmaken.
@@ -97,6 +93,33 @@ export async function voegFamilielidToe(
     .single()
   if (persoonFout || !nieuw) {
     return { ok: false, fout: "Kon het familielid niet opslaan." }
+  }
+
+  // Broer of zus zonder bekende ouder: maak een gedeelde (nog onbekende) ouder
+  // aan en koppel het anker daaraan. Zo klopt de broer/zus-relatie en kun je de
+  // bredere familie opbouwen. Deze ouder kun je later invullen.
+  if (relatie === "broer_zus" && ouderIds.length === 0) {
+    const { data: placeholder } = await supabase
+      .from("persons")
+      .insert({
+        network_id,
+        first_name: "Onbekende",
+        last_name: achternaam,
+        created_by: user.id,
+      })
+      .select("id")
+      .single()
+    if (placeholder) {
+      await supabase.from("relationships").insert({
+        network_id,
+        kind: "parent",
+        origin,
+        from_person: placeholder.id,
+        to_person: ankerId,
+        created_by: user.id,
+      })
+      ouderIds = [placeholder.id]
+    }
   }
 
   // De relatie-edges bepalen en aanmaken.
