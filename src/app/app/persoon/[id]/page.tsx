@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { tekenFotoUrls } from "@/lib/album/urls"
 import { KindBeheer } from "./KindBeheer"
+import { OverlijdenKnop } from "./OverlijdenKnop"
 
 function leeftijd(bornOn: string | null): number | null {
   if (!bornOn) return null
@@ -49,7 +50,7 @@ export default async function PersoonPagina({
   const { data: p } = await supabase
     .from("persons")
     .select(
-      "id, first_name, last_name, city, country, photo_url, claimed_by, managed_by, born_on, network_id",
+      "id, first_name, last_name, city, country, photo_url, claimed_by, managed_by, born_on, died_on, network_id",
     )
     .eq("id", id)
     .single()
@@ -73,6 +74,9 @@ export default async function PersoonPagina({
   const kanBeheren =
     !ikZelf && !p.claimed_by && (!!isKeeper || p.managed_by === meId)
   const isKind = p.managed_by != null && (leeftijd(p.born_on) ?? 0) < 16
+  // Overlijden vastleggen mag de Family Keeper of beheerder, voor elk familielid
+  // behalve jezelf.
+  const kanMarkeren = !ikZelf && (!!isKeeper || p.managed_by === meId)
 
   // Relatie t.o.v. mij + leesbare route.
   const [{ data: label }, { data: route }, { data: dromen }] = await Promise.all([
@@ -147,6 +151,15 @@ export default async function PersoonPagina({
           voornaam={p.first_name}
           bornOn={p.born_on}
           isKind={isKind}
+        />
+      )}
+
+      {/* Overlijden vastleggen. */}
+      {kanMarkeren && (
+        <OverlijdenKnop
+          personId={p.id}
+          voornaam={p.first_name}
+          diedOn={p.died_on}
         />
       )}
 

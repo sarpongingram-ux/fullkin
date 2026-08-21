@@ -34,3 +34,25 @@ export async function stelKindStatus(
   revalidatePath("/app/familie")
   return { ok: true }
 }
+
+// Legt vast dat een familielid is overleden (of maakt dat ongedaan). De datum
+// is optioneel. RLS bepaalt wie het mag (Family Keeper of beheerder).
+export async function stelOverlijden(
+  personId: string,
+  overledenOp: string | null,
+): Promise<KindResultaat> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from("persons")
+    .update({ died_on: overledenOp })
+    .eq("id", personId)
+  if (error) {
+    return {
+      ok: false,
+      fout: "Kon dit niet opslaan. Alleen de Family Keeper of de beheerder kan dit wijzigen.",
+    }
+  }
+  revalidatePath(`/app/persoon/${personId}`)
+  revalidatePath("/app/familie")
+  return { ok: true }
+}

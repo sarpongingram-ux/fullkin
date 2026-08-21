@@ -31,18 +31,22 @@ export default async function FamiliePagina() {
       mij
         ? supabase.rpc("has_role", { net: mij.network_id, r: "co_founder" })
         : Promise.resolve({ data: false }),
-      supabase.from("persons").select("id, managed_by, born_on"),
+      supabase.from("persons").select("id, managed_by, born_on, died_on"),
     ])
 
-  // managed_by + born_on staan niet in family_map (zit in een RLS-policy), dus
-  // apart ophalen en samenvoegen. Zo weten we welke leden beheerde kinderen zijn.
+  // managed_by/born_on/died_on staan niet in family_map (zit in een RLS-policy),
+  // dus apart ophalen en samenvoegen.
   const extraMap = new Map(
-    (extra ?? []).map((p) => [p.id, { managed_by: p.managed_by, born_on: p.born_on }]),
+    (extra ?? []).map((p) => [
+      p.id,
+      { managed_by: p.managed_by, born_on: p.born_on, died_on: p.died_on },
+    ]),
   )
   const ledenVerrijkt = (leden ?? []).map((l) => ({
     ...l,
     managed_by: extraMap.get(l.person_id)?.managed_by ?? null,
     born_on: extraMap.get(l.person_id)?.born_on ?? null,
+    died_on: extraMap.get(l.person_id)?.died_on ?? null,
   }))
 
   return (
