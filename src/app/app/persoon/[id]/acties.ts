@@ -164,36 +164,22 @@ export async function uploadProfielfoto(
   if (!session?.access_token) {
     return { ok: false, fout: "Je sessie is verlopen. Log opnieuw in." }
   }
-  // TIJDELIJKE DIAGNOSE: laat zien wat er in het meegestuurde token zit.
-  let diag = "onleesbaar"
-  try {
-    const payload = JSON.parse(
-      Buffer.from(session.access_token.split(".")[1], "base64").toString(),
-    )
-    const now = Math.floor(Date.now() / 1000)
-    diag = `role=${payload.role} verlopen=${payload.exp < now} (exp-now=${payload.exp - now}s) aud=${payload.aud}`
-  } catch {
-    diag = "kon token niet lezen"
-  }
+  // Het pad is altijd een nieuwe UUID, dus een gewone insert (zonder upsert)
+  // volstaat — en die valt netjes onder de insert-policy voor geauthenticeerde
+  // gebruikers.
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const uploadRes = await fetch(
-    `${base}/storage/v1/object/avatars/${pad}`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        "Content-Type": file.type,
-        "x-upsert": "true",
-      },
-      body: bytes,
+  const uploadRes = await fetch(`${base}/storage/v1/object/avatars/${pad}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      "Content-Type": file.type,
     },
-  )
+    body: bytes,
+  })
   if (!uploadRes.ok) {
-    return {
-      ok: false,
-      fout: `Upload ${uploadRes.status} · token: ${diag}`,
-    }
+    const body = await uploadRes.text().catch(() => "")
+    return { ok: false, fout: "Uploaden mislukt: " + (body || uploadRes.status) }
   }
 
   const fotoUrl = `${base}/storage/v1/object/public/avatars/${pad}`
