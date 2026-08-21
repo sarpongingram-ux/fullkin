@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 
 type Persoon = {
@@ -17,15 +17,20 @@ type Relatie = {
   to_person: string
 }
 
-const VIEW = 1000 // viewBox is -500..500
-const MAX_R = 430 // buitenste ring; marge voor labels
-const START = -Math.PI / 2 // bovenaan beginnen
-const ROOT = "__wortel__"
+// Layout-maten (in SVG-eenheden).
+const COL = 140 // horizontale ruimte per persoon-kolom
+const ROW = 168 // verticale ruimte per generatie
+const AV = 22 // straal avatar
+const COUPLE = 38 // halve afstand tussen partners
+const PAD = 70 // marge rond de tekening
 
+function initialen(voor: string, achter: string) {
+  return ((voor[0] ?? "") + (achter[0] ?? "")).toUpperCase()
+}
 function lerp(a: number, b: number, t: number) {
   return Math.round(a + (b - a) * t)
 }
-// Kleur per generatie: van goud (hart) naar blauw (buitenrand).
+// Kleur per generatie: goud (oudste) → blauw (jongste).
 function genKleur(t: number) {
   const g = [201, 151, 43]
   const b = [27, 79, 216]
@@ -44,7 +49,6 @@ export function Stamboom({
   familieNaam: string
 }) {
   const router = useRouter()
-  const scrollRef = useRef<HTMLDivElement>(null)
   const [zoom, setZoom] = useState(1)
 
   const model = useMemo(() => {
@@ -63,34 +67,34 @@ export function Stamboom({
       }
     }
 
-    // Eenheden: alleenstaand of een koppel.
-    const eenheidVan = new Map<string, string>()
-    const eenheden = new Map<string, string[]>()
+    // Eenheden: alleenstaand of een koppel. De eerste persoon is de "drager".
+    const unitLeden = new Map<string, string[]>()
+    const unitVan = new Map<string, string>()
     const gezien = new Set<string>()
     for (const p of personen) {
       if (gezien.has(p.id)) continue
       const partner = partnerVan.get(p.id)
       if (partner && byId.has(partner) && !gezien.has(partner)) {
-        eenheden.set(p.id, [p.id, partner])
-        eenheidVan.set(p.id, p.id)
-        eenheidVan.set(partner, p.id)
+        unitLeden.set(p.id, [p.id, partner])
+        unitVan.set(p.id, p.id)
+        unitVan.set(partner, p.id)
         gezien.add(p.id).add(partner)
       } else {
-        eenheden.set(p.id, [p.id])
-        eenheidVan.set(p.id, p.id)
+        unitLeden.set(p.id, [p.id])
+        unitVan.set(p.id, p.id)
         gezien.add(p.id)
       }
     }
 
-    // Ouder-eenheid + kinderen per eenheid.
-    const ouderEenheid = new Map<string, string>()
+    // Primaire ouder-eenheid (voor de boomstructuur) + kinderen per eenheid.
+    const ouderUnit = new Map<string, string>()
     const kinderen = new Map<string, string[]>()
-    for (const [uid, leden] of eenheden) {
+    for (const [uid, leden] of unitLeden) {
       const ouders = oudersVan.get(leden[0])
       if (ouders?.length) {
-        const pe = eenheidVan.get(ouders[0])
+        const pe = unitVan.get(ouders[0])
         if (pe && pe !== uid) {
-          ouderEenheid.set(uid, pe)
+          ouderUnit.set(uid, pe)
           const l = kinderen.get(pe) ?? []
           l.push(uid)
           kinderen.set(pe, l)
@@ -98,112 +102,133 @@ export function Stamboom({
       }
     }
 
-    // Virtuele wortel in het hart: verbindt alle stamouders.
-    const stamouders = [...eenheden.keys()].filter((u) => !ouderEenheid.has(u))
-    kinderen.set(ROOT, stamouders)
+    const geboorte = (uid: string) => byId.get(unitLeden.get(uid)![0])?.born_on ?? "9999"
+    const naam = (uid: string) => byId.get(unitLeden.get(uid)![0])?.first_name ?? ""
+    const sorteer = (a: string, b: string) =>
+      geboorte(a).localeCompare(geboorte(b)) || naam(a).localeCompare(naam(b))
 
-    const geboorte = (uid: string) => byId.get(eenheden.get(uid)![0])?.born_on ?? ""
-    const sorteer = (a: string, b: string) => geboorte(a).localeCompare(geboorte(b))
+    // Stamouders (geen ouder-eenheid) = wortels van het bos.
+    const wortels = [...unitLeden.keys()]
+      .filter((u) => !ouderUnit.has(u))
+      .sort(sorteer)
 
-    // Aantal bladeren (voor de hoekverdeling).
-    const bladeren = new Map<string, number>()
-    const telBladeren = (u: string): number => {
-      if (bladeren.has(u)) return bladeren.get(u)!
-      const ch = kinderen.get(u) ?? []
-      const n = ch.length ? ch.reduce((s, c) => s + telBladeren(c), 0) : 1
-      bladeren.set(u, n)
-      return n
+    // Rij (generatie) = diepte in het bos, vanaf de wortels.
+    const rij = new Map<string, number>()
+    const zetRij = (u: string, d: number) => {
+      rij.set(u, d)
+      for (const c of (kinderen.get(u) ?? []).slice().sort(sorteer)) zetRij(c, d + 1)
     }
-    telBladeren(ROOT)
+    for (const w of wortels) zetRij(w, 0)
+    for (const u of unitLeden.keys()) if (!rij.has(u)) rij.set(u, 0)
 
-    // Diepte (ringnummer).
-    const diepte = new Map<string, number>([[ROOT, 0]])
-    const bepaalDiepte = (u: string): number => {
-      if (diepte.has(u)) return diepte.get(u)!
-      const pe = ouderEenheid.get(u)
-      const d = pe != null ? bepaalDiepte(pe) + 1 : 1
-      diepte.set(u, d)
-      return d
-    }
-    for (const u of eenheden.keys()) bepaalDiepte(u)
-    const maxDiepte = Math.max(1, ...diepte.values())
-    const ring = MAX_R / maxDiepte
-
-    // Hoektoewijzing (radiale tidy tree).
-    const hoek = new Map<string, number>()
-    const wijsHoek = (u: string, a0: number, a1: number) => {
-      hoek.set(u, (a0 + a1) / 2)
+    // Horizontale plaatsing: nette "tidy tree". Bladeren krijgen oplopende
+    // kolommen, ouders komen precies boven het midden van hun kinderen.
+    const kolom = new Map<string, number>()
+    let cursor = 0
+    const plaats = (u: string) => {
       const ch = (kinderen.get(u) ?? []).slice().sort(sorteer)
-      const totaal = ch.reduce((s, c) => s + telBladeren(c), 0) || 1
-      let a = a0
-      for (const c of ch) {
-        const span = ((a1 - a0) * telBladeren(c)) / totaal
-        wijsHoek(c, a, a + span)
-        a += span
+      if (ch.length === 0) {
+        kolom.set(u, cursor)
+        cursor += 1
+        return
       }
+      for (const c of ch) plaats(c)
+      const eerste = kolom.get(ch[0])!
+      const laatste = kolom.get(ch[ch.length - 1])!
+      kolom.set(u, (eerste + laatste) / 2)
     }
-    wijsHoek(ROOT, START, START + Math.PI * 2)
+    for (const w of wortels) {
+      plaats(w)
+      cursor += 1 // ruimte tussen aparte stamtakken
+    }
 
-    // Posities per persoon.
-    type Node = { id: string; persoon: Persoon; r: number; deg: number; diepte: number }
+    // Persoon-posities.
+    type Node = {
+      id: string
+      persoon: Persoon
+      x: number
+      y: number
+      rij: number
+    }
     const nodes: Node[] = []
-    for (const [uid, leden] of eenheden) {
-      const baseHoek = hoek.get(uid)!
-      const r = diepte.get(uid)! * ring
+    const posVan = new Map<string, { x: number; y: number }>()
+    const centerVan = new Map<string, { x: number; y: number }>()
+    for (const [uid, leden] of unitLeden) {
+      const cx = kolom.get(uid)! * COL
+      const cy = rij.get(uid)! * ROW
+      centerVan.set(uid, { x: cx, y: cy })
       leden.forEach((pid, i) => {
-        const dθ = leden.length === 2 ? (i === 0 ? -0.035 : 0.035) : 0
-        const θ = baseHoek + dθ
-        nodes.push({
-          id: pid,
-          persoon: byId.get(pid)!,
-          r: Math.round(r * 100) / 100,
-          deg: Math.round(((θ * 180) / Math.PI) * 1000) / 1000,
-          diepte: diepte.get(uid)!,
-        })
+        const x =
+          leden.length === 2 ? (i === 0 ? cx - COUPLE : cx + COUPLE) : cx
+        posVan.set(pid, { x, y: cy })
+        nodes.push({ id: pid, persoon: byId.get(pid)!, x, y: cy, rij: rij.get(uid)! })
       })
     }
 
-    // Verbindingslijnen (radiale bezier). Afronden zodat server- en client-
-    // render exact dezelfde padstrings geven (geen hydration-mismatch).
-    const rnd = (n: number) => Math.round(n * 100) / 100
-    const pt = (r: number, θ: number) => [rnd(r * Math.cos(θ)), rnd(r * Math.sin(θ))]
+    // Verbindingslijnen (rechte "elleboog"-lijnen ouder → kind).
     const lijnen: string[] = []
-    for (const [kind, ouder] of ouderEenheid) {
-      const r1 = diepte.get(kind)! * ring
-      const θ1 = hoek.get(kind)!
-      const dOuder = diepte.get(ouder)!
-      const r0 = dOuder * ring
-      const θ0 = dOuder === 0 ? θ1 : hoek.get(ouder)!
-      const rc = (r0 + r1) / 2
-      const [x0, y0] = pt(r0, θ0)
-      const [cx1, cy1] = pt(rc, θ0)
-      const [cx2, cy2] = pt(rc, θ1)
-      const [x1, y1] = pt(r1, θ1)
-      lijnen.push(`M${x0},${y0} C${cx1},${cy1} ${cx2},${cy2} ${x1},${y1}`)
-    }
-    // Stamouders vanuit het hart.
-    for (const s of stamouders) {
-      const r1 = diepte.get(s)! * ring
-      const θ1 = hoek.get(s)!
-      const [x1, y1] = pt(r1, θ1)
-      const [cx, cy] = pt(r1 / 2, θ1)
-      lijnen.push(`M0,0 C${cx},${cy} ${cx},${cy} ${x1},${y1}`)
+    for (const [kindU, pu] of ouderUnit) {
+      const p = centerVan.get(pu)!
+      const k = centerVan.get(kindU)!
+      const py = p.y + AV
+      const ky = k.y - AV
+      const midY = (py + ky) / 2
+      lijnen.push(`M${p.x},${py} L${p.x},${midY} L${k.x},${midY} L${k.x},${ky}`)
     }
 
-    // Partnerboogjes.
-    const partnerBogen: string[] = []
-    for (const [, leden] of eenheden) {
-      if (leden.length === 2) {
-        const uid = eenheidVan.get(leden[0])!
-        const r = diepte.get(uid)! * ring
-        const [x0, y0] = pt(r, hoek.get(uid)! - 0.035)
-        const [x1, y1] = pt(r, hoek.get(uid)! + 0.035)
-        partnerBogen.push(`M${x0},${y0} A${r},${r} 0 0 1 ${x1},${y1}`)
+    // Tweede ouder (samengestelde gezinnen: bv. een opvoedvader). Lichte,
+    // gestippelde lijn van die ouder naar het kind, zodat de band zichtbaar is.
+    const extraLijnen: string[] = []
+    for (const [uid, leden] of unitLeden) {
+      const ouders = oudersVan.get(leden[0]) ?? []
+      const primair = ouders[0]
+      const primU = primair ? unitVan.get(primair) : undefined
+      for (const q of ouders.slice(1)) {
+        if (!posVan.has(q)) continue
+        if (unitVan.get(q) === primU) continue // al gedekt door partnerlijn
+        const a = posVan.get(q)!
+        const k = centerVan.get(uid)!
+        const midY = (a.y + AV + (k.y - AV)) / 2
+        extraLijnen.push(
+          `M${a.x},${a.y + AV} L${a.x},${midY} L${k.x},${midY} L${k.x},${k.y - AV}`,
+        )
       }
     }
 
-    const generaties = maxDiepte
-    return { nodes, lijnen, partnerBogen, ring, generaties, maxDiepte }
+    // Partnerbalkjes.
+    const partnerLijnen: string[] = []
+    for (const [, leden] of unitLeden) {
+      if (leden.length === 2) {
+        const a = posVan.get(leden[0])!
+        const b = posVan.get(leden[1])!
+        partnerLijnen.push(`M${a.x + AV},${a.y} L${b.x - AV},${b.y}`)
+      }
+    }
+
+    // Bounding box.
+    let minX = 0,
+      maxX = 0,
+      maxRij = 0
+    for (const n of nodes) {
+      minX = Math.min(minX, n.x)
+      maxX = Math.max(maxX, n.x)
+      maxRij = Math.max(maxRij, n.rij)
+    }
+    const vb = {
+      x: minX - PAD,
+      y: -PAD,
+      w: maxX - minX + PAD * 2,
+      h: maxRij * ROW + PAD * 2,
+    }
+
+    return {
+      nodes,
+      lijnen,
+      extraLijnen,
+      partnerLijnen,
+      vb,
+      generaties: maxRij + 1,
+    }
   }, [personen, relaties])
 
   if (model.nodes.length === 0) {
@@ -219,110 +244,154 @@ export function Stamboom({
     )
   }
 
-  const medR = Math.min(model.ring * 0.72, 78)
+  const gMax = Math.max(1, model.generaties - 1)
 
   return (
     <>
       <div
-        ref={scrollRef}
         className="fk-card p-2 overflow-auto"
         style={{ maxHeight: "78vh" }}
       >
         <svg
-          viewBox={`${-VIEW / 2} ${-VIEW / 2} ${VIEW} ${VIEW}`}
-          style={{ width: `${zoom * 100}%`, display: "block", margin: "0 auto" }}
+          viewBox={`${model.vb.x} ${model.vb.y} ${model.vb.w} ${model.vb.h}`}
+          style={{
+            width: `${zoom * 100}%`,
+            display: "block",
+            margin: "0 auto",
+          }}
         >
-          {/* Verbindingslijnen */}
-          <g fill="none" stroke="var(--rand)" strokeWidth={2}>
+          {/* Zachte generatiebanden om het oog te leiden. */}
+          {Array.from({ length: model.generaties }).map((_, g) =>
+            g % 2 === 1 ? (
+              <rect
+                key={`band-${g}`}
+                x={model.vb.x}
+                y={g * ROW - ROW / 2}
+                width={model.vb.w}
+                height={ROW}
+                fill="var(--oppervlak)"
+                opacity={0.7}
+              />
+            ) : null,
+          )}
+
+          {/* Verbindingslijnen ouder → kind. */}
+          <g fill="none" stroke="var(--rand)" strokeWidth={2.5} strokeLinejoin="round">
             {model.lijnen.map((d, i) => (
-              <path key={i} d={d} />
+              <path key={`l-${i}`} d={d} />
             ))}
           </g>
-          {/* Partnerboogjes */}
-          <g fill="none" stroke="var(--goud)" strokeWidth={3}>
-            {model.partnerBogen.map((d, i) => (
-              <path key={i} d={d} />
+          {/* Tweede-ouder-lijnen (bv. opvoedouder). */}
+          <g
+            fill="none"
+            stroke="var(--inkt-zacht)"
+            strokeWidth={2}
+            strokeDasharray="5 5"
+            strokeLinejoin="round"
+            opacity={0.6}
+          >
+            {model.extraLijnen.map((d, i) => (
+              <path key={`e-${i}`} d={d} />
+            ))}
+          </g>
+          {/* Partnerbalkjes. */}
+          <g fill="none" stroke="var(--goud)" strokeWidth={3.5}>
+            {model.partnerLijnen.map((d, i) => (
+              <path key={`p-${i}`} d={d} />
             ))}
           </g>
 
-          {/* Personen */}
+          {/* Personen. */}
           {model.nodes.map((n) => {
             const isIk = n.id === meId
             const overleden = !!n.persoon.died_on
-            const nodeR = Math.max(5, 12 - n.diepte * 1.4) + (isIk ? 3 : 0)
-            const degN = ((n.deg % 360) + 360) % 360
-            const flip = degN > 90 && degN < 270
-            const font = Math.max(9, 15 - n.diepte * 1.1)
+            const kleur = overleden
+              ? "var(--inkt-zacht)"
+              : genKleur(n.rij / gMax)
+            const clip = `foto-${n.id}`
             return (
-              <g key={n.id} transform={`rotate(${n.deg})`}>
-                <g transform={`translate(${n.r},0)`}>
-                  <circle
-                    r={nodeR}
-                    fill={overleden ? "var(--inkt-zacht)" : genKleur(model.maxDiepte ? n.diepte / model.maxDiepte : 0)}
-                    stroke={isIk ? "var(--goud)" : "#ffffff"}
-                    strokeWidth={isIk ? 3.5 : 1.5}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => router.push(`/app/persoon/${n.id}`)}
+              <g
+                key={n.id}
+                transform={`translate(${n.x},${n.y})`}
+                style={{ cursor: "pointer" }}
+                onClick={() => router.push(`/app/persoon/${n.id}`)}
+              >
+                {n.persoon.photo_url && (
+                  <clipPath id={clip}>
+                    <circle r={AV} />
+                  </clipPath>
+                )}
+                <circle
+                  r={AV}
+                  fill="#ffffff"
+                  stroke={isIk ? "var(--goud)" : kleur}
+                  strokeWidth={isIk ? 4 : 3}
+                  opacity={overleden ? 0.85 : 1}
+                />
+                {n.persoon.photo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <image
+                    href={n.persoon.photo_url}
+                    x={-AV}
+                    y={-AV}
+                    width={AV * 2}
+                    height={AV * 2}
+                    clipPath={`url(#${clip})`}
+                    preserveAspectRatio="xMidYMid slice"
                   />
-                  <g transform={flip ? "rotate(180)" : undefined}>
-                    <text
-                      x={flip ? -(nodeR + 5) : nodeR + 5}
-                      textAnchor={flip ? "end" : "start"}
-                      dominantBaseline="central"
-                      fontSize={font}
-                      fontWeight={isIk ? 900 : 700}
-                      fill={isIk ? "var(--terracotta)" : "var(--inkt)"}
-                      style={{ cursor: "pointer" }}
-                      onClick={() => router.push(`/app/persoon/${n.id}`)}
-                    >
-                      {isIk ? "Jij" : n.persoon.first_name}
-                    </text>
-                  </g>
-                </g>
+                ) : (
+                  <text
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fontSize={AV * 0.72}
+                    fontWeight={800}
+                    fill={overleden ? "var(--inkt-zacht)" : kleur}
+                  >
+                    {initialen(n.persoon.first_name, n.persoon.last_name)}
+                  </text>
+                )}
+                {overleden && (
+                  <text
+                    y={-AV - 6}
+                    textAnchor="middle"
+                    fontSize={16}
+                  >
+                    🕯️
+                  </text>
+                )}
+                <text
+                  y={AV + 17}
+                  textAnchor="middle"
+                  fontSize={15}
+                  fontWeight={isIk ? 900 : 700}
+                  fill={isIk ? "var(--terracotta)" : "var(--inkt)"}
+                >
+                  {isIk ? "Jij" : n.persoon.first_name}
+                </text>
               </g>
             )
           })}
-
-          {/* Medaillon in het hart */}
-          <circle r={medR} fill="var(--inkt)" />
-          <text
-            y={-medR * 0.12}
-            textAnchor="middle"
-            fontSize={medR * 0.34}
-            fontWeight={900}
-            fill="#ffffff"
-          >
-            {familieNaam.length > 14 ? familieNaam.slice(0, 13) + "…" : familieNaam}
-          </text>
-          <text
-            y={medR * 0.42}
-            textAnchor="middle"
-            fontSize={medR * 0.26}
-            fontWeight={700}
-            fill="var(--goud)"
-          >
-            {personen.length} · {model.generaties} gen.
-          </text>
         </svg>
       </div>
 
-      {/* Zoom */}
+      {/* Legenda + zoom. */}
       <div className="flex items-center justify-between mt-3">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-inkt-zacht font-semibold">
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full" style={{ background: "var(--goud)" }} />
-            oudste
+            oudste gen.
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full" style={{ background: "var(--terracotta)" }} />
             jongste
           </span>
           <span>🕯️ overleden</span>
+          <span>- - opvoed/stief</span>
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => setZoom((z) => Math.max(1, Math.round((z - 0.5) * 10) / 10))}
-            disabled={zoom <= 1}
+            onClick={() => setZoom((z) => Math.max(0.5, Math.round((z - 0.5) * 10) / 10))}
+            disabled={zoom <= 0.5}
             aria-label="Uitzoomen"
             className="w-11 h-11 rounded-full bg-white text-inkt text-2xl font-black flex items-center justify-center disabled:opacity-40 active:scale-95 transition"
             style={{ boxShadow: "var(--schaduw)" }}
@@ -330,8 +399,8 @@ export function Stamboom({
             −
           </button>
           <button
-            onClick={() => setZoom((z) => Math.min(3, Math.round((z + 0.5) * 10) / 10))}
-            disabled={zoom >= 3}
+            onClick={() => setZoom((z) => Math.min(4, Math.round((z + 0.5) * 10) / 10))}
+            disabled={zoom >= 4}
             aria-label="Inzoomen"
             className="w-11 h-11 rounded-full bg-white text-inkt text-2xl font-black flex items-center justify-center disabled:opacity-40 active:scale-95 transition"
             style={{ boxShadow: "var(--schaduw)" }}
@@ -342,8 +411,9 @@ export function Stamboom({
       </div>
 
       <p className="text-center text-sm text-inkt-zacht mt-3 px-4">
-        Jullie familie in één beeld. {personen.length} mensen over{" "}
-        {model.generaties} generaties. Elke familie is uniek. 🌳
+        {familieNaam} · {personen.length} mensen over {model.generaties}{" "}
+        {model.generaties === 1 ? "generatie" : "generaties"}. Tik op iemand voor
+        meer. 🌳
       </p>
     </>
   )
