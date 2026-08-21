@@ -5,6 +5,11 @@ import { Bijdragen } from "./Bijdragen"
 import { settleFromSession } from "@/lib/stripe/settle"
 import { Confetti } from "@/components/Confetti"
 
+// Onder dit aantal gevers tonen we het totaal niet: anders is iemands eigen
+// bedrag af te leiden. Vanaf 3 kan niemand (ook een mede-gever niet) nog een
+// individueel bedrag terugrekenen.
+const TOTAAL_DREMPEL = 3
+
 function euro(cents: number) {
   return new Intl.NumberFormat("nl-NL", {
     style: "currency",
@@ -88,12 +93,28 @@ export default async function CollectiePagina({
         </p>
       </header>
 
-      {/* Het totaal is het feest, dat mag iedereen zien. */}
+      {/* Het totaal is het feest — maar pas zichtbaar zodra genoeg familieleden
+          hebben bijgedragen. Anders kun je uit het totaal iemands eigen bedrag
+          afleiden (bij 1 gever is het totaal zijn bedrag; bij 2 kan de één de
+          ander uitrekenen). Vanaf 3 gevers is dat niet meer mogelijk. */}
       <section className="fk-card-dark text-center">
-        <p className="fk-amount text-goud">{euro(total)}</p>
-        <p className="text-sm opacity-70 mt-2">
-          bijeengebracht door {aantal} {aantal === 1 ? "familielid" : "familieleden"}
-        </p>
+        {aantal >= TOTAAL_DREMPEL ? (
+          <>
+            <p className="fk-amount text-goud">{euro(total)}</p>
+            <p className="text-sm opacity-70 mt-2">
+              bijeengebracht door {aantal} familieleden
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="fk-amount text-goud">€ •••</p>
+            <p className="text-sm opacity-70 mt-2 leading-relaxed">
+              {aantal === 0
+                ? "Nog geen bijdragen — wees de eerste 💛"
+                : `${aantal} ${aantal === 1 ? "familielid heeft" : "familieleden hebben"} al bijgedragen. Het totaal verschijnt zodra meer familie meedoet — zo blijft ieders bedrag privé.`}
+            </p>
+          </>
+        )}
       </section>
 
       {/* Bijdragen, alleen als je niet de begunstigde bent en nog niet gaf. */}
