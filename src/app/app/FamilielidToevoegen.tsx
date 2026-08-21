@@ -4,14 +4,27 @@ import { useActionState, useEffect, useRef, useState } from "react"
 import { voegFamilielidToe, type ToevoegResultaat } from "./acties"
 
 const relaties = [
-  { waarde: "ouder", label: "Mijn ouder" },
-  { waarde: "kind", label: "Mijn kind" },
-  { waarde: "partner", label: "Mijn partner" },
-  { waarde: "broer_zus", label: "Mijn broer of zus" },
+  { waarde: "ouder", label: "Ouder" },
+  { waarde: "kind", label: "Kind" },
+  { waarde: "partner", label: "Partner" },
+  { waarde: "broer_zus", label: "Broer of zus" },
 ] as const
 
-export function FamilielidToevoegen() {
+type Lid = { id: string; naam: string }
+
+export function FamilielidToevoegen({
+  meId,
+  leden,
+}: {
+  meId: string
+  leden: Lid[]
+}) {
   const [open, setOpen] = useState(false)
+  // Anker-opties: jij bovenaan (standaard), daarna de rest van de familie.
+  const ankers: Lid[] = [
+    { id: meId, naam: "jou" },
+    ...leden.filter((l) => l.id !== meId),
+  ]
   const formRef = useRef<HTMLFormElement>(null)
   const [resultaat, actie, bezig] = useActionState<
     ToevoegResultaat | null,
@@ -73,8 +86,8 @@ export function FamilielidToevoegen() {
         />
 
         <div>
-          <p className="text-sm text-inkt-zacht mb-2">
-            Hoe is deze persoon met jou verbonden?
+          <p className="text-sm text-inkt-zacht mb-2 font-semibold">
+            Deze persoon is de…
           </p>
           <div className="grid grid-cols-2 gap-2">
             {relaties.map((r, i) => (
@@ -93,6 +106,24 @@ export function FamilielidToevoegen() {
               </label>
             ))}
           </div>
+        </div>
+
+        <div>
+          <p className="text-sm text-inkt-zacht mb-1 font-semibold">…van</p>
+          <select
+            name="verwant_aan"
+            defaultValue={meId}
+            className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
+          >
+            {ankers.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.naam}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-inkt-zacht mt-1">
+            Zo bouw je de hele familie op: je opa is bijv. de ouder van je ouder.
+          </p>
         </div>
 
         {resultaat && !resultaat.ok && (

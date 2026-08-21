@@ -23,6 +23,7 @@ export async function voegFamilielidToe(
   const achternaam = String(formData.get("achternaam") ?? "").trim()
   const stad = String(formData.get("stad") ?? "").trim() || null
   const relatie = String(formData.get("relatie") ?? "") as RelatieKeuze
+  const ankerRaw = String(formData.get("verwant_aan") ?? "").trim()
   const origin = (String(formData.get("origin") ?? "biological") ||
     "biological") as Enums<"relationship_origin">
 
@@ -30,7 +31,7 @@ export async function voegFamilielidToe(
     return { ok: false, fout: "Vul een voor- en achternaam in." }
   }
   if (!["ouder", "kind", "partner", "broer_zus"].includes(relatie)) {
-    return { ok: false, fout: "Kies hoe dit familielid met je verbonden is." }
+    return { ok: false, fout: "Kies hoe dit familielid verbonden is." }
   }
 
   const supabase = await createClient()
@@ -50,7 +51,20 @@ export async function voegFamilielidToe(
   if (!mij) return { ok: false, fout: "Je profiel is niet gevonden." }
   const network_id = mij.network_id
 
-  // Voor een broer of zus hebben we minstens één ouder van jou nodig. Dit
+  // Het nieuwe lid wordt gekoppeld aan een "anker": standaard jij, maar het mag
+  // ook een ander familielid zijn (zo bouw je de bredere familie op). Het anker
+  // moet in jouw netwerk zitten.
+  const ankerId = ankerRaw || meId
+  const { data: anker } = await supabase
+    .from("persons")
+    .select("id, first_name, network_id")
+    .eq("id", ankerId)
+    .single()
+  if (!anker || anker.network_id !== network_id) {
+    return { ok: false, fout: "Kies een geldig familielid om aan te koppelen." }
+  }
+
+  // Voor een broer of zus hebben we minstens één ouder van het anker nodig. Dit
   // controleren we vóór we iemand aanmaken, zodat er geen los familielid
   // ontstaat als het niet kan.
   let ouderIds: string[] = []
@@ -59,13 +73,12 @@ export async function voegFamilielidToe(
       .from("relationships")
       .select("from_person")
       .eq("kind", "parent")
-      .eq("to_person", meId)
+      .eq("to_person", ankerId)
     ouderIds = (ouders ?? []).map((r) => r.from_person)
     if (ouderIds.length === 0) {
       return {
         ok: false,
-        fout:
-          "Voeg eerst een ouder toe. Een broer of zus verbindt via jullie gedeelde ouder.",
+        fout: `Voeg eerst een ouder van ${anker.first_name} toe. Een broer of zus verbindt via de gedeelde ouder.`,
       }
     }
   }
@@ -95,12 +108,12 @@ export async function voegFamilielidToe(
   const edges: Edge[] = []
 
   if (relatie === "ouder") {
-    edges.push({ kind: "parent", from_person: nieuw.id, to_person: meId })
+    edges.push({ kind: "parent", from_person: nieuw.id, to_person: ankerId })
   } else if (relatie === "kind") {
-    edges.push({ kind: "parent", from_person: meId, to_person: nieuw.id })
+    edges.push({ kind: "parent", from_person: ankerId, to_person: nieuw.id })
   } else if (relatie === "partner") {
     // partner_normalised: from_person < to_person
-    const [a, b] = [meId, nieuw.id].sort()
+    const [a, b] = [ankerId, nieuw.id].sort()
     edges.push({ kind: "partner", from_person: a, to_person: b })
   } else if (relatie === "broer_zus") {
     // Zelfde ouder(s) als ik → automatisch broer of zus op de kaart.

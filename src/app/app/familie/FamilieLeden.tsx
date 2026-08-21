@@ -30,16 +30,22 @@ function initialen(voor: string, achter: string) {
 }
 
 export function FamilieLeden({
+  meId,
   voornaam,
   familieNaam,
   leden,
   isFamilyKeeper,
 }: {
+  meId: string
   voornaam: string
   familieNaam: string
   leden: Lid[]
   isFamilyKeeper: boolean
 }) {
+  const ledenVoorAnker = leden.map((l) => ({
+    id: l.person_id,
+    naam: `${l.first_name} ${l.last_name}`,
+  }))
   return (
     <main className="max-w-md mx-auto px-5 py-8 space-y-6">
       <header>
@@ -57,7 +63,7 @@ export function FamilieLeden({
         <Link href="/app/familie/stamboom" className="fk-btn fk-btn-full block bg-inkt text-white">
           🌳 Bekijk de stamboom
         </Link>
-        <FamilielidToevoegen />
+        <FamilielidToevoegen meId={meId} leden={ledenVoorAnker} />
         <StartCollecte leden={leden} />
         {isFamilyKeeper && (
           <Link href="/app/dashboard" className="fk-btn fk-btn-secondary fk-btn-full">

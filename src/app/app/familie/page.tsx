@@ -35,6 +35,7 @@ export default async function FamiliePagina() {
 
   return (
     <FamilieLeden
+      meId={meId}
       voornaam={mij?.first_name ?? "familielid"}
       familieNaam={netwerk?.name ?? "je familie"}
       leden={leden ?? []}
