@@ -170,7 +170,6 @@ export default async function PersoonPagina({
       {kanRelatieBeheren && (
         <ProfielFoto
           personId={p.id}
-          networkId={p.network_id}
           voornaam={p.first_name}
           heeftFoto={!!p.photo_url}
         />

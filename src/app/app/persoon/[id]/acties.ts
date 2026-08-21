@@ -113,28 +113,81 @@ export async function stelKindStatus(
   return { ok: true }
 }
 
-// Zet (of verwijdert) de profielfoto van een familielid. De client uploadt de
-// foto naar de publieke avatars-bucket en stuurt hier de definitieve URL door.
-// RLS bepaalt wie mag: de persoon zelf, de beheerder of de Family Keeper.
-export async function stelProfielfoto(
-  personId: string,
-  fotoUrl: string | null,
-): Promise<KindResultaat> {
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from("persons")
-    .update({ photo_url: fotoUrl })
-    .eq("id", personId)
-  if (error) {
-    return {
-      ok: false,
-      fout: "Kon de foto niet opslaan. Alleen de persoon zelf, de beheerder of de Family Keeper kan dit.",
-    }
-  }
+const AVATAR_MAX = 10 * 1024 * 1024
+
+function vernieuwProfiel(personId: string) {
   revalidatePath(`/app/persoon/${personId}`)
   revalidatePath("/app/familie")
   revalidatePath("/app/familie/stamboom")
   revalidatePath("/app")
+}
+
+// Uploadt een profielfoto en koppelt 'm aan de persoon. De upload loopt via de
+// server (met jouw ingelogde sessie), zodat storage-RLS altijd klopt — anders
+// dan een client-upload die soms als anonieme gebruiker binnenkomt.
+export async function uploadProfielfoto(
+  formData: FormData,
+): Promise<KindResultaat> {
+  const personId = String(formData.get("personId") ?? "")
+  const file = formData.get("foto")
+  if (!personId) return { ok: false, fout: "Onbekende persoon." }
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, fout: "Kies een afbeelding." }
+  }
+  if (!file.type.startsWith("image/")) {
+    return { ok: false, fout: "Dit is geen afbeelding." }
+  }
+  if (file.size > AVATAR_MAX) {
+    return { ok: false, fout: "Deze foto is groter dan 10MB." }
+  }
+
+  const supabase = await createClient()
+  const { data: persoon } = await supabase
+    .from("persons")
+    .select("network_id")
+    .eq("id", personId)
+    .single()
+  if (!persoon) return { ok: false, fout: "Persoon niet gevonden." }
+
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase()
+  const pad = `${persoon.network_id}/${personId}-${crypto.randomUUID()}.${ext}`
+  const bytes = new Uint8Array(await file.arrayBuffer())
+
+  const { error: uploadFout } = await supabase.storage
+    .from("avatars")
+    .upload(pad, bytes, { contentType: file.type, upsert: true })
+  if (uploadFout) {
+    return { ok: false, fout: "Uploaden mislukt: " + uploadFout.message }
+  }
+
+  const { data: pub } = supabase.storage.from("avatars").getPublicUrl(pad)
+  const { error } = await supabase
+    .from("persons")
+    .update({ photo_url: pub.publicUrl })
+    .eq("id", personId)
+  if (error) {
+    return {
+      ok: false,
+      fout: "Foto geüpload, maar niet opgeslagen. Alleen de persoon zelf, de beheerder of de Family Keeper kan dit.",
+    }
+  }
+  vernieuwProfiel(personId)
+  return { ok: true }
+}
+
+// Verwijdert de profielfoto (zet 'm terug op initialen).
+export async function verwijderProfielfoto(
+  personId: string,
+): Promise<KindResultaat> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from("persons")
+    .update({ photo_url: null })
+    .eq("id", personId)
+  if (error) {
+    return { ok: false, fout: "Kon de foto niet verwijderen." }
+  }
+  vernieuwProfiel(personId)
   return { ok: true }
 }
 
