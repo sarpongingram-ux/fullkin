@@ -1,9 +1,8 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
-import { createClient as createBareClient } from "@supabase/supabase-js"
 import { revalidatePath } from "next/cache"
-import type { Database, Enums } from "@/lib/types/database"
+import type { Enums } from "@/lib/types/database"
 
 export type KindResultaat = { ok: true } | { ok: false; fout: string }
 
@@ -154,34 +153,40 @@ export async function uploadProfielfoto(
   const pad = `${persoon.network_id}/${personId}-${crypto.randomUUID()}.${ext}`
   const bytes = new Uint8Array(await file.arrayBuffer())
 
-  // De storage-client van @supabase/ssr draagt bij SSR jouw token niet mee, dus
-  // komt de upload als anon binnen en weigert RLS 'm. Een los meegegeven
-  // Authorization-header wordt door supabase-js overschreven; de juiste manier
-  // is de accessToken-optie, die de client voor élke call (ook storage) gebruikt.
+  // De storage-client van @supabase/ssr (en zelfs de accessToken-optie) draagt
+  // jouw token bij SSR niet mee, waardoor de upload als anon binnenkomt en RLS
+  // 'm weigert. We doen de upload daarom met een directe HTTP-call, waarin we
+  // jouw sessie-token zelf in de Authorization-header zetten. Zo komt de upload
+  // gegarandeerd geauthenticeerd binnen.
   const {
     data: { session },
   } = await supabase.auth.getSession()
   if (!session?.access_token) {
     return { ok: false, fout: "Je sessie is verlopen. Log opnieuw in." }
   }
-  const token = session.access_token
-  const opslag = createBareClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { accessToken: async () => token },
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const uploadRes = await fetch(
+    `${base}/storage/v1/object/avatars/${pad}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        "Content-Type": file.type,
+        "x-upsert": "true",
+      },
+      body: bytes,
+    },
   )
-
-  const { error: uploadFout } = await opslag.storage
-    .from("avatars")
-    .upload(pad, bytes, { contentType: file.type, upsert: true })
-  if (uploadFout) {
-    return { ok: false, fout: "Uploaden mislukt: " + uploadFout.message }
+  if (!uploadRes.ok) {
+    const tekst = await uploadRes.text().catch(() => "")
+    return { ok: false, fout: "Uploaden mislukt: " + (tekst || uploadRes.status) }
   }
 
-  const { data: pub } = supabase.storage.from("avatars").getPublicUrl(pad)
+  const fotoUrl = `${base}/storage/v1/object/public/avatars/${pad}`
   const { error } = await supabase
     .from("persons")
-    .update({ photo_url: pub.publicUrl })
+    .update({ photo_url: fotoUrl })
     .eq("id", personId)
   if (error) {
     return {
