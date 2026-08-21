@@ -107,6 +107,16 @@ export default async function ChatRuimtePagina({
       label: r.label as string,
     }))
 
+  // Een moment kan over iedereen in de familie gaan (of over jou).
+  const momentKandidaten = [
+    { id: meId, naam: "Jij", label: "jij" },
+    ...(relaties ?? []).map((r) => ({
+      id: r.person_id as string,
+      naam: `${r.first_name} ${r.last_name}`,
+      label: r.label as string,
+    })),
+  ]
+
   const berichten = ((recent ?? []) as ChatBericht[]).slice().reverse()
 
   // Signeer de foto's in de zichtbare berichten (privé-bucket).
@@ -152,6 +162,7 @@ export default async function ChatRuimtePagina({
       directory={directory}
       initieel={berichten}
       collecteKandidaten={collecteKandidaten}
+      momentKandidaten={momentKandidaten}
       subtitel={subtitel}
       fotoUrls={fotoUrls}
     />

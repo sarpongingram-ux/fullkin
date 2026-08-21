@@ -105,9 +105,11 @@ export default async function ChatOverzichtPagina() {
       laatsteTekst: last
         ? last.type === "collecte_link"
           ? "❤️ Collecte gedeeld"
-          : last.type === "foto"
-            ? "📷 Foto"
-            : last.tekst
+          : last.type === "moment"
+            ? "🎉 Familiemoment"
+            : last.type === "foto"
+              ? "📷 Foto"
+              : last.tekst
         : null,
       laatsteTijd: last?.tijd ?? null,
       toegang,

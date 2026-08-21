@@ -7,6 +7,7 @@ import {
   stuurBericht,
   haalNieuweBerichten,
   startCollecteVanuitChat,
+  deelMoment,
   markeerGelezen,
   deelFoto,
   tekenChatFoto,
@@ -46,6 +47,7 @@ export function ChatRoom({
   directory,
   initieel,
   collecteKandidaten,
+  momentKandidaten,
   subtitel,
   fotoUrls: fotoUrlsInit,
 }: {
@@ -56,6 +58,7 @@ export function ChatRoom({
   directory: Directory
   initieel: ChatBericht[]
   collecteKandidaten: Kandidaat[]
+  momentKandidaten: Kandidaat[]
   subtitel?: string
   fotoUrls: Record<string, string>
 }) {
@@ -63,6 +66,7 @@ export function ChatRoom({
   const [tekst, setTekst] = useState("")
   const [bezig, setBezig] = useState(false)
   const [collecteOpen, setCollecteOpen] = useState(false)
+  const [momentOpen, setMomentOpen] = useState(false)
   const [fotoUrls, setFotoUrls] = useState<Record<string, string>>(fotoUrlsInit)
   const [fotoBezig, setFotoBezig] = useState(false)
   const fotoInputRef = useRef<HTMLInputElement>(null)
@@ -232,6 +236,31 @@ export function ChatRoom({
               </div>
             )
           }
+          if (m.message_type === "moment") {
+            const wie = m.sender_id ? directory[m.sender_id] : null
+            return (
+              <div key={m.id} className="flex justify-center my-1">
+                <div
+                  className="w-full max-w-[94%] rounded-3xl p-5 text-center text-white"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, var(--terracotta), var(--goud))",
+                  }}
+                >
+                  <p className="text-4xl mb-1">🎉</p>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] opacity-90">
+                    Familiemoment
+                  </p>
+                  <p className="text-xl font-black mt-1">{m.message_text}</p>
+                  {wie && (
+                    <p className="text-sm opacity-90 mt-1">
+                      gedeeld door {wie.voornaam}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )
+          }
           if (m.message_type === "foto") {
             const ik = m.sender_id === meId
             const wie = m.sender_id ? directory[m.sender_id] : null
@@ -370,6 +399,16 @@ export function ChatRoom({
           </button>
           <button
             type="button"
+            onClick={() => setMomentOpen(true)}
+            disabled={momentKandidaten.length === 0}
+            title="Deel een moment"
+            aria-label="Deel een moment"
+            className="w-10 h-10 rounded-full text-xl flex items-center justify-center disabled:opacity-30 active:scale-90 transition"
+          >
+            🎉
+          </button>
+          <button
+            type="button"
             onClick={() => setCollecteOpen(true)}
             disabled={collecteKandidaten.length === 0}
             title="Start een collecte"
@@ -414,6 +453,114 @@ export function ChatRoom({
           onSluit={() => setCollecteOpen(false)}
         />
       )}
+
+      {/* Familiemoment delen */}
+      {momentOpen && (
+        <MomentSheet
+          roomId={roomId}
+          kandidaten={momentKandidaten}
+          onKlaar={(bericht) => {
+            voegToe([bericht])
+            setMomentOpen(false)
+          }}
+          onSluit={() => setMomentOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+function MomentSheet({
+  roomId,
+  kandidaten,
+  onKlaar,
+  onSluit,
+}: {
+  roomId: string
+  kandidaten: Kandidaat[]
+  onKlaar: (bericht: ChatBericht) => void
+  onSluit: () => void
+}) {
+  const [personId, setPersonId] = useState(kandidaten[0]?.id ?? "")
+  const [kind, setKind] = useState<string>(momenten[0].waarde)
+  const [titel, setTitel] = useState("")
+  const [datum, setDatum] = useState("")
+  const [bezig, setBezig] = useState(false)
+  const [fout, setFout] = useState<string | null>(null)
+
+  async function deel() {
+    if (!personId || !titel.trim() || !datum) {
+      setFout("Vul alle velden in.")
+      return
+    }
+    setFout(null)
+    setBezig(true)
+    const res = await deelMoment({ roomId, personId, kind, titel, datum })
+    setBezig(false)
+    if (res.ok) onKlaar(res.bericht)
+    else setFout(res.fout)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-inkt/40 px-4">
+      <div className="w-full max-w-md bg-white rounded-3xl p-5 mb-24 sm:mb-0">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-black text-inkt text-lg">🎉 Deel een moment</h3>
+          <button onClick={onSluit} className="text-inkt-zacht font-bold hover:text-inkt">
+            Sluiten
+          </button>
+        </div>
+
+        <label className="block text-sm text-inkt-zacht mb-1 font-semibold">Over wie?</label>
+        <select
+          value={personId}
+          onChange={(e) => setPersonId(e.target.value)}
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta mb-3"
+        >
+          {kandidaten.map((k) => (
+            <option key={k.id} value={k.id}>
+              {k.naam}
+            </option>
+          ))}
+        </select>
+
+        <label className="block text-sm text-inkt-zacht mb-1 font-semibold">Welk moment?</label>
+        <select
+          value={kind}
+          onChange={(e) => setKind(e.target.value)}
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta mb-3"
+        >
+          {momenten.map((m) => (
+            <option key={m.waarde} value={m.waarde}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+
+        <input
+          value={titel}
+          onChange={(e) => setTitel(e.target.value)}
+          placeholder="Bijv. 'Geboorte van kleine Kwame'"
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta mb-3"
+        />
+        <label className="block text-sm text-inkt-zacht mb-1 font-semibold">Wanneer?</label>
+        <input
+          type="date"
+          value={datum}
+          onChange={(e) => setDatum(e.target.value)}
+          className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta mb-3"
+        />
+
+        {fout && <p className="text-terracotta font-semibold mb-2">{fout}</p>}
+
+        <button
+          onClick={deel}
+          disabled={bezig}
+          className="fk-btn fk-btn-primary fk-btn-full"
+        >
+          {bezig ? "Bezig…" : "Delen met de familie"}
+        </button>
+      </div>
     </div>
   )
 }

@@ -221,6 +221,64 @@ export type CollecteResultaat =
   | { ok: true; collectieId: string; bericht: ChatBericht }
   | { ok: false; fout: string }
 
+export type MomentInvoer = {
+  roomId: string
+  personId: string
+  kind: string
+  titel: string
+  datum: string
+}
+
+// Deelt een familiemoment (geboorte, huwelijk, afstuderen…) als speciaal
+// bericht in de chat. Legt het ook vast als life event (Levenslijn/album).
+export async function deelMoment(
+  input: MomentInvoer,
+): Promise<StuurResultaat> {
+  const titel = input.titel.trim()
+  if (!input.personId || !input.kind || !titel || !input.datum) {
+    return { ok: false, fout: "Vul alle velden in." }
+  }
+  const supabase = await createClient()
+  const { data: meId } = await supabase.rpc("me")
+  if (!meId) return { ok: false, fout: "Je bent niet ingelogd." }
+  const { data: mij } = await supabase
+    .from("persons")
+    .select("network_id")
+    .eq("id", meId)
+    .single()
+  if (!mij) return { ok: false, fout: "Je profiel is niet gevonden." }
+
+  const { data: event, error: eventFout } = await supabase
+    .from("life_events")
+    .insert({
+      network_id: mij.network_id,
+      person_id: input.personId,
+      kind: input.kind as Enums<"life_event_kind">,
+      title: titel,
+      occurs_on: input.datum,
+      created_by: meId,
+    })
+    .select("id")
+    .single()
+  if (eventFout || !event) {
+    return { ok: false, fout: "Kon het moment niet opslaan." }
+  }
+
+  const { data: msg, error } = await supabase
+    .from("chat_messages")
+    .insert({
+      room_id: input.roomId,
+      sender_id: meId,
+      message_text: titel,
+      message_type: "moment",
+      reference_id: event.id,
+    })
+    .select(BERICHT_KOLOMMEN)
+    .single()
+  if (error || !msg) return { ok: false, fout: "Kon het moment niet delen." }
+  return { ok: true, bericht: msg as ChatBericht }
+}
+
 // Start een collecte én plaatst meteen een collecte-kaartje in de familiechat.
 export async function startCollecteVanuitChat(
   input: CollecteInvoer,
