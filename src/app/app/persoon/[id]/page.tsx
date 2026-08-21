@@ -2,6 +2,17 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { tekenFotoUrls } from "@/lib/album/urls"
+import { KindBeheer } from "./KindBeheer"
+
+function leeftijd(bornOn: string | null): number | null {
+  if (!bornOn) return null
+  const d = new Date(bornOn)
+  const nu = new Date()
+  let jr = nu.getFullYear() - d.getFullYear()
+  const m = nu.getMonth() - d.getMonth()
+  if (m < 0 || (m === 0 && nu.getDate() < d.getDate())) jr--
+  return jr
+}
 
 function euro(cents: number) {
   return new Intl.NumberFormat("nl-NL", {
@@ -37,7 +48,9 @@ export default async function PersoonPagina({
 
   const { data: p } = await supabase
     .from("persons")
-    .select("id, first_name, last_name, city, country, photo_url")
+    .select(
+      "id, first_name, last_name, city, country, photo_url, claimed_by, managed_by, born_on, network_id",
+    )
     .eq("id", id)
     .single()
 
@@ -50,6 +63,16 @@ export default async function PersoonPagina({
   }
 
   const ikZelf = id === meId
+
+  // Mag de kijker dit profiel als kind beheren? De Family Keeper, of degene die
+  // het al beheert. Alleen voor niet-geclaimde profielen (geen eigen account).
+  const { data: isKeeper } = await supabase.rpc("has_role", {
+    net: p.network_id,
+    r: "co_founder",
+  })
+  const kanBeheren =
+    !ikZelf && !p.claimed_by && (!!isKeeper || p.managed_by === meId)
+  const isKind = p.managed_by != null && (leeftijd(p.born_on) ?? 0) < 16
 
   // Relatie t.o.v. mij + leesbare route.
   const [{ data: label }, { data: route }, { data: dromen }] = await Promise.all([
@@ -115,6 +138,16 @@ export default async function PersoonPagina({
       {/* De leesbare route, hoe jullie verbonden zijn */}
       {!ikZelf && route && (
         <p className="fk-card text-inkt">{route}</p>
+      )}
+
+      {/* Kind-beheer: markeer als kind onder 16 (of haal weg). */}
+      {kanBeheren && (
+        <KindBeheer
+          personId={p.id}
+          voornaam={p.first_name}
+          bornOn={p.born_on}
+          isKind={isKind}
+        />
       )}
 
       {/* Hun droom */}
