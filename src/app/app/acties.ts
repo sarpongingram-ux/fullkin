@@ -24,6 +24,8 @@ export async function voegFamilielidToe(
   const stad = String(formData.get("stad") ?? "").trim() || null
   const relatie = String(formData.get("relatie") ?? "") as RelatieKeuze
   const ankerRaw = String(formData.get("verwant_aan") ?? "").trim()
+  const geboortedatum = String(formData.get("geboortedatum") ?? "").trim() || null
+  const isKind = formData.get("is_kind") === "on"
   const origin = (String(formData.get("origin") ?? "biological") ||
     "biological") as Enums<"relationship_origin">
 
@@ -87,6 +89,10 @@ export async function voegFamilielidToe(
       first_name: voornaam,
       last_name: achternaam,
       city: stad,
+      born_on: geboortedatum,
+      // Een kind is een profiel dat de toevoeger beheert (geen eigen account,
+      // geen verplichtingen). Het kind kan het later zelf overnemen.
+      managed_by: isKind ? meId : null,
       created_by: user.id,
     })
     .select("id")

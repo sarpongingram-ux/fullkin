@@ -18,7 +18,7 @@ export default async function FamiliePagina() {
     .eq("id", meId)
     .single()
 
-  const [{ data: leden }, { data: netwerk }, { data: isKeeper }] =
+  const [{ data: leden }, { data: netwerk }, { data: isKeeper }, { data: extra }] =
     await Promise.all([
       supabase.rpc("family_map", { me: meId }),
       mij
@@ -31,14 +31,26 @@ export default async function FamiliePagina() {
       mij
         ? supabase.rpc("has_role", { net: mij.network_id, r: "co_founder" })
         : Promise.resolve({ data: false }),
+      supabase.from("persons").select("id, managed_by, born_on"),
     ])
+
+  // managed_by + born_on staan niet in family_map (zit in een RLS-policy), dus
+  // apart ophalen en samenvoegen. Zo weten we welke leden beheerde kinderen zijn.
+  const extraMap = new Map(
+    (extra ?? []).map((p) => [p.id, { managed_by: p.managed_by, born_on: p.born_on }]),
+  )
+  const ledenVerrijkt = (leden ?? []).map((l) => ({
+    ...l,
+    managed_by: extraMap.get(l.person_id)?.managed_by ?? null,
+    born_on: extraMap.get(l.person_id)?.born_on ?? null,
+  }))
 
   return (
     <FamilieLeden
       meId={meId}
       voornaam={mij?.first_name ?? "familielid"}
       familieNaam={netwerk?.name ?? "je familie"}
-      leden={leden ?? []}
+      leden={ledenVerrijkt}
       isFamilyKeeper={!!isKeeper}
     />
   )

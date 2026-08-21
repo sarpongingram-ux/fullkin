@@ -17,6 +17,18 @@ type Lid = {
   label: string
   status: Enums<"contact_status">
   last_contact: string | null
+  managed_by: string | null
+  born_on: string | null
+}
+
+function leeftijd(bornOn: string | null): number | null {
+  if (!bornOn) return null
+  const d = new Date(bornOn)
+  const nu = new Date()
+  let jr = nu.getFullYear() - d.getFullYear()
+  const m = nu.getMonth() - d.getMonth()
+  if (m < 0 || (m === 0 && nu.getDate() < d.getDate())) jr--
+  return jr
 }
 
 const statusKleur: Record<Enums<"contact_status">, string> = {
@@ -83,7 +95,14 @@ export function FamilieLeden({
         </div>
       ) : (
         <ul className="space-y-3">
-          {leden.map((lid) => (
+          {leden.map((lid) => {
+            const jr = leeftijd(lid.born_on)
+            // Beheerd kind onder de 16: geen uitnodiging, alleen een label.
+            const beheerdKind =
+              !lid.is_claimed &&
+              lid.managed_by != null &&
+              (jr == null || jr < 16)
+            return (
             <li key={lid.person_id} className="fk-card">
               <div className="flex items-center gap-3">
                 <Link
@@ -114,15 +133,21 @@ export function FamilieLeden({
                     {lid.label}
                     {lid.city ? ` · ${lid.city}` : ""}
                   </p>
-                  {!lid.is_claimed && (
-                    <div className="mt-2">
-                      <UitnodigenKnop
-                        personId={lid.person_id}
-                        voornaam={lid.first_name}
-                        familieNaam={familieNaam}
-                        uitnodigerVoornaam={voornaam}
-                      />
-                    </div>
+                  {beheerdKind ? (
+                    <p className="mt-1 text-sm text-inkt-zacht font-semibold">
+                      👶 Kind · beheerd door jou
+                    </p>
+                  ) : (
+                    !lid.is_claimed && (
+                      <div className="mt-2">
+                        <UitnodigenKnop
+                          personId={lid.person_id}
+                          voornaam={lid.first_name}
+                          familieNaam={familieNaam}
+                          uitnodigerVoornaam={voornaam}
+                        />
+                      </div>
+                    )
                   )}
                 </div>
 
@@ -133,7 +158,8 @@ export function FamilieLeden({
                 />
               </div>
             </li>
-          ))}
+            )
+          })}
         </ul>
       )}
 

@@ -126,6 +126,33 @@ export function FamilielidToevoegen({
           </p>
         </div>
 
+        <div>
+          <label className="block text-sm text-inkt-zacht mb-1 font-semibold">
+            Geboortedatum <span className="font-normal">(optioneel)</span>
+          </label>
+          <input
+            name="geboortedatum"
+            type="date"
+            className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
+          />
+        </div>
+
+        <label className="flex items-start gap-3 rounded-2xl bg-oppervlak p-3 cursor-pointer">
+          <input
+            type="checkbox"
+            name="is_kind"
+            className="w-5 h-5 mt-0.5 accent-terracotta shrink-0"
+          />
+          <span className="text-sm text-inkt">
+            <span className="font-bold">Dit is een kind (onder 16)</span>
+            <br />
+            <span className="text-inkt-zacht">
+              Jij beheert het profiel. Geen eigen account, geen uitnodiging en
+              geen bijdragen. Vanaf 16 kan het kind zelf meedoen.
+            </span>
+          </span>
+        </label>
+
         {resultaat && !resultaat.ok && (
           <p className="text-terracotta font-semibold">{resultaat.fout}</p>
         )}
