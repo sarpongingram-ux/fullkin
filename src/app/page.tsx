@@ -1,32 +1,40 @@
-import Link from "next/link"
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
+import { Onboarding } from "./onboarding/Onboarding"
 
 export default function Home() {
-  return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-      <div className="max-w-xl">
-        <p className="text-terracotta font-extrabold tracking-[0.3em] text-sm mb-6">
-          FULLKIN
-        </p>
-        <h1 className="text-5xl sm:text-6xl font-black leading-tight text-inkt tracking-tight">
-          Your family.
-          <br />
-          Complete.
-        </h1>
-        <p className="mt-6 text-lg text-inkt-zacht leading-relaxed">
-          Eén plek voor je hele familie. Blijf verbonden, bewaar de momenten en
-          bouw samen aan iets groots.
-        </p>
+  const router = useRouter()
+  const [toon, setToon] = useState(false)
 
-        <div className="mt-10 flex flex-col gap-3 max-w-xs mx-auto">
-          <Link href="/inloggen" className="fk-btn fk-btn-primary fk-btn-full">
-            Aan de slag
-          </Link>
-        </div>
+  useEffect(() => {
+    let actief = true
+    ;(async () => {
+      // Al ingelogd? Direct de app in.
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!actief) return
+      if (user) {
+        router.replace("/app")
+        return
+      }
+      // Onboarding al gezien? Direct naar inloggen. Anders: laat 'm zien.
+      let gezien = false
+      try {
+        gezien = localStorage.getItem("fk_onboarding_gezien") === "1"
+      } catch {}
+      if (gezien) router.replace("/inloggen")
+      else setToon(true)
+    })()
+    return () => {
+      actief = false
+    }
+  }, [router])
 
-        <p className="mt-16 text-sm text-inkt-zacht font-semibold">
-          Verbinden. Bouwen. Groeien.
-        </p>
-      </div>
-    </main>
-  )
+  if (!toon) return null
+  return <Onboarding />
 }

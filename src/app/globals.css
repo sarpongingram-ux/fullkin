@@ -194,7 +194,37 @@ body {
   100% { transform: translate(var(--drift, 0px), 112vh) rotate(720deg); opacity: 0.85; }
 }
 
+/* Onboarding-animaties */
+@keyframes fk-onb-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes fk-onb-slide { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: none; } }
+@keyframes fk-onb-pop { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+@keyframes fk-onb-draw { from { stroke-dashoffset: 260; } to { stroke-dashoffset: 0; } }
+@keyframes fk-onb-coin { 0% { opacity: 0; transform: translateY(-70px) rotate(0deg); } 100% { opacity: 1; transform: translateY(0) rotate(360deg); } }
+@keyframes fk-onb-shimmer { 0% { background-position: 220% 0; } 100% { background-position: -220% 0; } }
+@keyframes fk-onb-envelope { 0% { opacity: 0; transform: translateX(-120px) translateY(-6px); } 60% { opacity: 1; } 100% { opacity: 0; transform: translateX(0) translateY(0) scale(0.4); } }
+@keyframes fk-onb-grow { from { transform: scale(0.6); } to { transform: scale(1); } }
+
+.fk-onb-screen { animation: fk-onb-slide 0.32s ease-in-out both; }
+.fk-onb-rise { animation: fk-onb-rise 0.4s ease-out both; }
+.fk-onb-pop { animation: fk-onb-pop 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+.fk-onb-line { stroke-dasharray: 260; animation: fk-onb-draw 0.5s ease-out both; }
+.fk-onb-coin { animation: fk-onb-coin 0.6s ease-out both; }
+.fk-onb-envelope { animation: fk-onb-envelope 1.1s ease-in both; }
+.fk-onb-grow { animation: fk-onb-grow 0.8s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+.fk-onb-shimmer {
+  background: linear-gradient(100deg, var(--inkt) 25%, var(--goud) 50%, var(--inkt) 75%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: fk-onb-shimmer 1.2s ease-in-out 0.3s both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fk-pop, .fk-rise, .fk-heart, .fk-progress > span { animation: none; transition: none; }
   .fk-confetti-root { display: none; }
+  .fk-onb-screen, .fk-onb-rise, .fk-onb-pop, .fk-onb-line, .fk-onb-coin,
+  .fk-onb-envelope, .fk-onb-grow, .fk-onb-shimmer { animation: none; }
+  .fk-onb-shimmer { color: var(--inkt); -webkit-text-fill-color: var(--inkt); }
+  .fk-onb-envelope { opacity: 1; }
 }
