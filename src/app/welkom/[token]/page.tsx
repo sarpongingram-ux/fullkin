@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import { Claimen } from "./Claimen"
+import { LidOnboarding } from "./LidOnboarding"
 
 export default async function Welkom({
   params,
@@ -49,30 +49,13 @@ export default async function Welkom({
   }
 
   return (
-    <Kader>
-      <p className="text-terracotta font-extrabold tracking-[0.2em] text-xs">
-        FULLKIN
-      </p>
-      <h1 className="text-2xl font-black text-inkt mt-2 leading-snug">
-        Welkom bij {preview.network_name}, {preview.person_first_name}. 👋
-      </h1>
-      <p className="text-inkt-zacht mt-3">
-        {preview.inviter_name} heeft jou toegevoegd aan de familiekaart. Jouw
-        plek staat al klaar. Kom binnen.
-      </p>
-
-      <div className="mt-6">
-        <Claimen
-          token={token}
-          alIngelogd={!!user}
-          voornaam={preview.person_first_name}
-        />
-      </div>
-
-      <p className="mt-8 text-center text-sm text-inkt-zacht font-semibold">
-        Welkom thuis.
-      </p>
-    </Kader>
+    <LidOnboarding
+      token={token}
+      alIngelogd={!!user}
+      voornaam={preview.person_first_name}
+      familieNaam={preview.network_name}
+      inviterNaam={preview.inviter_name}
+    />
   )
 }
 
