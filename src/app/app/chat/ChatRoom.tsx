@@ -8,6 +8,8 @@ import {
   haalNieuweBerichten,
   startCollecteVanuitChat,
   markeerGelezen,
+  deelFoto,
+  tekenChatFoto,
   type ChatBericht,
 } from "./acties"
 
@@ -45,6 +47,7 @@ export function ChatRoom({
   initieel,
   collecteKandidaten,
   subtitel,
+  fotoUrls: fotoUrlsInit,
 }: {
   roomId: string
   meId: string
@@ -54,13 +57,18 @@ export function ChatRoom({
   initieel: ChatBericht[]
   collecteKandidaten: Kandidaat[]
   subtitel?: string
+  fotoUrls: Record<string, string>
 }) {
   const [berichten, setBerichten] = useState<ChatBericht[]>(initieel)
   const [tekst, setTekst] = useState("")
   const [bezig, setBezig] = useState(false)
   const [collecteOpen, setCollecteOpen] = useState(false)
+  const [fotoUrls, setFotoUrls] = useState<Record<string, string>>(fotoUrlsInit)
+  const [fotoBezig, setFotoBezig] = useState(false)
+  const fotoInputRef = useRef<HTMLInputElement>(null)
   const berichtenRef = useRef<ChatBericht[]>(initieel)
   const bodemRef = useRef<HTMLDivElement>(null)
+  const gevraagd = useRef<Set<string>>(new Set())
 
   berichtenRef.current = berichten
 
@@ -125,6 +133,42 @@ export function ChatRoom({
     markeerGelezen(roomId)
   }, [roomId])
 
+  // Signeer URL's voor foto's die nog geen link hebben (bv. live binnengekomen).
+  useEffect(() => {
+    const missend = berichten.filter(
+      (m) =>
+        m.message_type === "foto" &&
+        m.message_text &&
+        !fotoUrls[m.id] &&
+        !gevraagd.current.has(m.id),
+    )
+    if (missend.length === 0) return
+    missend.forEach((m) => gevraagd.current.add(m.id))
+    ;(async () => {
+      for (const m of missend) {
+        const url = await tekenChatFoto(m.message_text as string)
+        if (url) setFotoUrls((prev) => ({ ...prev, [m.id]: url }))
+      }
+    })()
+  }, [berichten, fotoUrls])
+
+  function kiesFoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0]
+    e.target.value = ""
+    if (!f || fotoBezig) return
+    setFotoBezig(true)
+    const formData = new FormData()
+    formData.set("foto", f)
+    ;(async () => {
+      const res = await deelFoto(roomId, formData)
+      setFotoBezig(false)
+      if (res.ok) {
+        if (res.url) setFotoUrls((prev) => ({ ...prev, [res.bericht.id]: res.url }))
+        voegToe([res.bericht])
+      }
+    })()
+  }
+
   async function verstuur() {
     const t = tekst.trim()
     if (!t || bezig) return
@@ -184,6 +228,61 @@ export function ChatRoom({
                   >
                     Draag bij →
                   </Link>
+                </div>
+              </div>
+            )
+          }
+          if (m.message_type === "foto") {
+            const ik = m.sender_id === meId
+            const wie = m.sender_id ? directory[m.sender_id] : null
+            const url = fotoUrls[m.id]
+            const foto = (
+              <Link
+                href={m.reference_id ? `/app/album/${m.reference_id}` : "#"}
+                className="block rounded-3xl overflow-hidden bg-oppervlak max-w-[78%]"
+                style={{ width: 220 }}
+              >
+                {url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={url} alt="Gedeelde foto" className="w-full object-cover" />
+                ) : (
+                  <div className="h-40 flex items-center justify-center text-inkt-zacht text-sm">
+                    Foto laden…
+                  </div>
+                )}
+              </Link>
+            )
+            if (ik) {
+              return (
+                <div key={m.id} className="flex justify-end">
+                  <div>
+                    {foto}
+                    <p className="text-[11px] text-inkt-zacht mt-1 text-right">
+                      {tijd(m.created_at)}
+                    </p>
+                  </div>
+                </div>
+              )
+            }
+            return (
+              <div key={m.id} className="flex gap-2 items-end">
+                <div className="w-9 h-9 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center text-white font-black text-sm bg-inkt">
+                  {wie?.photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={wie.photoUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    (wie?.voornaam[0] ?? "?").toUpperCase()
+                  )}
+                </div>
+                <div>
+                  {wie && (
+                    <p className="text-xs mb-0.5 ml-1">
+                      <span className="font-black text-inkt">{wie.voornaam}</span>{" "}
+                      <span className="text-inkt-zacht">· jouw {wie.relatie}</span>
+                    </p>
+                  )}
+                  {foto}
+                  <p className="text-[11px] text-inkt-zacht mt-1 ml-1">{tijd(m.created_at)}</p>
                 </div>
               </div>
             )
@@ -251,7 +350,24 @@ export function ChatRoom({
         className="fixed inset-x-0 z-30 bg-white border-t border-rand"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + 60px)" }}
       >
-        <div className="max-w-md mx-auto px-3 py-2 flex items-center gap-2">
+        <div className="max-w-md mx-auto px-3 py-2 flex items-center gap-1.5">
+          <input
+            ref={fotoInputRef}
+            type="file"
+            accept="image/*"
+            onChange={kiesFoto}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fotoInputRef.current?.click()}
+            disabled={fotoBezig}
+            title="Deel een foto"
+            aria-label="Deel een foto"
+            className="w-10 h-10 rounded-full text-xl flex items-center justify-center disabled:opacity-40 active:scale-90 transition"
+          >
+            {fotoBezig ? "⏳" : "📷"}
+          </button>
           <button
             type="button"
             onClick={() => setCollecteOpen(true)}

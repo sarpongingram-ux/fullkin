@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { tekenFotoUrls } from "@/lib/album/urls"
 import type { Enums } from "@/lib/types/database"
 
 export type ChatBericht = {
@@ -78,6 +79,101 @@ export async function startDirect(
     return { ok: false, fout: "Kon het gesprek niet starten." }
   }
   return { ok: true, roomId: data as string }
+}
+
+export type FotoResultaat =
+  | { ok: true; bericht: ChatBericht; url: string }
+  | { ok: false; fout: string }
+
+// Deelt een foto in de chat én slaat 'm op in het familiealbum: één upload,
+// twee plekken. Upload loopt via de server met jouw token (storage-RLS).
+export async function deelFoto(
+  roomId: string,
+  formData: FormData,
+): Promise<FotoResultaat> {
+  const file = formData.get("foto")
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, fout: "Kies een foto." }
+  }
+  if (!file.type.startsWith("image/")) {
+    return { ok: false, fout: "Dit is geen afbeelding." }
+  }
+  if (file.size > 15 * 1024 * 1024) {
+    return { ok: false, fout: "Deze foto is groter dan 15MB." }
+  }
+
+  const supabase = await createClient()
+  const { data: meId } = await supabase.rpc("me")
+  if (!meId) return { ok: false, fout: "Je bent niet ingelogd." }
+  const { data: mij } = await supabase
+    .from("persons")
+    .select("network_id")
+    .eq("id", meId)
+    .single()
+  if (!mij) return { ok: false, fout: "Je profiel is niet gevonden." }
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session?.access_token) {
+    return { ok: false, fout: "Je sessie is verlopen. Log opnieuw in." }
+  }
+
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase()
+  const pad = `${mij.network_id}/${crypto.randomUUID()}.${ext}`
+  const bytes = new Uint8Array(await file.arrayBuffer())
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL!
+
+  const up = await fetch(`${base}/storage/v1/object/family-album/${pad}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      "Content-Type": file.type,
+    },
+    body: bytes,
+  })
+  if (!up.ok) {
+    const t = await up.text().catch(() => "")
+    return { ok: false, fout: "Uploaden mislukt: " + (t || up.status) }
+  }
+
+  // In het familiealbum plaatsen.
+  const { data: item } = await supabase
+    .from("album_items")
+    .insert({
+      network_id: mij.network_id,
+      uploaded_by: meId,
+      file_url: pad,
+      file_type: "foto",
+    })
+    .select("id")
+    .single()
+
+  // In de chat plaatsen (pad in message_text, album-item in reference_id).
+  const { data: msg, error } = await supabase
+    .from("chat_messages")
+    .insert({
+      room_id: roomId,
+      sender_id: meId,
+      message_text: pad,
+      message_type: "foto",
+      reference_id: item?.id ?? null,
+    })
+    .select(BERICHT_KOLOMMEN)
+    .single()
+  if (error || !msg) return { ok: false, fout: "Kon de foto niet delen." }
+
+  const urls = await tekenFotoUrls(supabase, [pad])
+  revalidatePath("/app/album")
+  return { ok: true, bericht: msg as ChatBericht, url: urls.get(pad) ?? "" }
+}
+
+// Tekent een kortlevende URL voor een chatfoto (voor live binnenkomende foto's).
+export async function tekenChatFoto(pad: string): Promise<string | null> {
+  const supabase = await createClient()
+  const urls = await tekenFotoUrls(supabase, [pad])
+  return urls.get(pad) ?? null
 }
 
 // Word lid van een takchat (handmatig toetreden aan een andere tak).

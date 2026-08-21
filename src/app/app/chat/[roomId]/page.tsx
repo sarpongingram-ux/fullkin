@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { ChatRoom, type Directory } from "../ChatRoom"
 import { DeelnemenKnop } from "./DeelnemenKnop"
+import { tekenFotoUrls } from "@/lib/album/urls"
 import type { ChatBericht } from "../acties"
 
 export default async function ChatRuimtePagina({
@@ -108,6 +109,21 @@ export default async function ChatRuimtePagina({
 
   const berichten = ((recent ?? []) as ChatBericht[]).slice().reverse()
 
+  // Signeer de foto's in de zichtbare berichten (privé-bucket).
+  const fotoPaden = berichten
+    .filter((m) => m.message_type === "foto" && m.message_text)
+    .map((m) => m.message_text as string)
+  const getekend = fotoPaden.length
+    ? await tekenFotoUrls(supabase, fotoPaden)
+    : new Map<string, string>()
+  const fotoUrls: Record<string, string> = {}
+  for (const m of berichten) {
+    if (m.message_type === "foto" && m.message_text) {
+      const u = getekend.get(m.message_text)
+      if (u) fotoUrls[m.id] = u
+    }
+  }
+
   // Bij een direct gesprek: naam + relatie van de ánder als kop.
   let groepsnaam = room.name ?? "Chat"
   let subtitel: string | undefined = undefined
@@ -137,6 +153,7 @@ export default async function ChatRuimtePagina({
       initieel={berichten}
       collecteKandidaten={collecteKandidaten}
       subtitel={subtitel}
+      fotoUrls={fotoUrls}
     />
   )
 }
