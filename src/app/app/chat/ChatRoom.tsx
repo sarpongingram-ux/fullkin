@@ -446,10 +446,7 @@ export function ChatRoom({
         <CollecteSheet
           roomId={roomId}
           kandidaten={collecteKandidaten}
-          onKlaar={(bericht) => {
-            voegToe([bericht])
-            setCollecteOpen(false)
-          }}
+          onGelukt={() => setCollecteOpen(false)}
           onSluit={() => setCollecteOpen(false)}
         />
       )}
@@ -568,12 +565,12 @@ function MomentSheet({
 function CollecteSheet({
   roomId,
   kandidaten,
-  onKlaar,
+  onGelukt,
   onSluit,
 }: {
   roomId: string
   kandidaten: Kandidaat[]
-  onKlaar: (bericht: ChatBericht) => void
+  onGelukt: () => void
   onSluit: () => void
 }) {
   const [beneficiaryId, setBeneficiaryId] = useState(kandidaten[0]?.id ?? "")
@@ -598,7 +595,7 @@ function CollecteSheet({
       datum,
     })
     setBezig(false)
-    if (res.ok) onKlaar(res.bericht)
+    if (res.ok) onGelukt()
     else setFout(res.fout)
   }
 

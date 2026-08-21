@@ -218,7 +218,7 @@ export type CollecteInvoer = {
 }
 
 export type CollecteResultaat =
-  | { ok: true; collectieId: string; bericht: ChatBericht }
+  | { ok: true; collectieId: string }
   | { ok: false; fout: string }
 
 export type MomentInvoer = {
@@ -344,25 +344,8 @@ export async function startCollecteVanuitChat(
     }
   }
 
-  // Collecte-kaartje in de chat plaatsen.
-  const { data: msg, error: msgFout } = await supabase
-    .from("chat_messages")
-    .insert({
-      room_id: input.roomId,
-      sender_id: meId,
-      message_text: titel,
-      message_type: "collecte_link",
-      reference_id: collectie.id,
-    })
-    .select(BERICHT_KOLOMMEN)
-    .single()
-  if (msgFout || !msg) {
-    // Collecte staat er wel, alleen het chatbericht niet.
-    return { ok: true, collectieId: collectie.id, bericht: {
-      id: collectie.id, sender_id: meId, message_text: titel,
-      message_type: "collecte_link", reference_id: collectie.id,
-      created_at: new Date().toISOString(),
-    } }
-  }
-  return { ok: true, collectieId: collectie.id, bericht: msg as ChatBericht }
+  // Het collecte-kaartje in de chat wordt automatisch geplaatst door een
+  // database-trigger (voor elke collecte, waar ook gestart). Het verschijnt via
+  // Realtime, dus we hoeven hier niets extra's te posten.
+  return { ok: true, collectieId: collectie.id }
 }
