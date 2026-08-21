@@ -5,6 +5,7 @@ import { tekenFotoUrls } from "@/lib/album/urls"
 import { KindBeheer } from "./KindBeheer"
 import { OverlijdenKnop } from "./OverlijdenKnop"
 import { NaamAanpassen } from "./NaamAanpassen"
+import { OuderKoppelen } from "./OuderKoppelen"
 
 function leeftijd(bornOn: string | null): number | null {
   if (!bornOn) return null
@@ -78,6 +79,30 @@ export default async function PersoonPagina({
   // Overlijden vastleggen mag de Family Keeper of beheerder, voor elk familielid
   // behalve jezelf.
   const kanMarkeren = !ikZelf && (!!isKeeper || p.managed_by === meId)
+  // Relaties beheren (bijv. een bestaande ouder koppelen) mag de Family Keeper,
+  // de beheerder, of je op je eigen profiel.
+  const kanRelatieBeheren = !!isKeeper || p.managed_by === meId || ikZelf
+
+  // Kandidaat-ouders: familieleden die nog geen ouder van deze persoon zijn.
+  let ouderKandidaten: { id: string; naam: string }[] = []
+  if (kanRelatieBeheren) {
+    const [{ data: netleden }, { data: ouderRels }] = await Promise.all([
+      supabase
+        .from("persons")
+        .select("id, first_name, last_name")
+        .eq("network_id", p.network_id)
+        .neq("id", p.id),
+      supabase
+        .from("relationships")
+        .select("from_person")
+        .eq("kind", "parent")
+        .eq("to_person", p.id),
+    ])
+    const ouderSet = new Set((ouderRels ?? []).map((r) => r.from_person))
+    ouderKandidaten = (netleden ?? [])
+      .filter((m) => !ouderSet.has(m.id))
+      .map((m) => ({ id: m.id, naam: `${m.first_name} ${m.last_name}` }))
+  }
 
   // Relatie t.o.v. mij + leesbare route.
   const [{ data: label }, { data: route }, { data: dromen }] = await Promise.all([
@@ -162,6 +187,15 @@ export default async function PersoonPagina({
           voornaam={p.first_name}
           bornOn={p.born_on}
           isKind={isKind}
+        />
+      )}
+
+      {/* Bestaande ouder koppelen (bijv. opvoedvader). */}
+      {kanRelatieBeheren && ouderKandidaten.length > 0 && (
+        <OuderKoppelen
+          kindId={p.id}
+          voornaam={p.first_name}
+          kandidaten={ouderKandidaten}
         />
       )}
 
