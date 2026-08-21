@@ -81,6 +81,61 @@ export async function maakHerinnering(input: {
   return { ok: true, id: item.id }
 }
 
+// Voegt (extra) getagde personen toe aan een bestaande herinnering. Handig als
+// je bij het uploaden iemand vergeten bent. Alleen nieuwe tags worden gezet en
+// die personen krijgen een melding.
+export async function voegTagsToe(
+  itemId: string,
+  personIds: string[],
+): Promise<{ ok: boolean }> {
+  const supabase = await createClient()
+  const { data: meId } = await supabase.rpc("me")
+  if (!meId) return { ok: false }
+
+  const { data: bestaand } = await supabase
+    .from("album_tags")
+    .select("person_id")
+    .eq("album_item_id", itemId)
+  const alGetagd = new Set((bestaand ?? []).map((t) => t.person_id))
+  const nieuw = [...new Set(personIds)].filter((id) => id && !alGetagd.has(id))
+  if (nieuw.length === 0) return { ok: true }
+
+  const { error } = await supabase.from("album_tags").insert(
+    nieuw.map((pid) => ({
+      album_item_id: itemId,
+      person_id: pid,
+      tagged_by: meId,
+    })),
+  )
+  if (error) return { ok: false }
+
+  for (const pid of nieuw) {
+    await supabase.rpc("meld", {
+      p_recipient: pid,
+      p_kind: "album_tag",
+      p_subject_type: "album_item",
+      p_subject_id: itemId,
+    })
+  }
+  revalidatePath(`/app/album/${itemId}`)
+  return { ok: true }
+}
+
+// Haalt één tag weg. RLS bepaalt wie mag: de tagger, de uploader of de Keeper.
+export async function verwijderTag(
+  itemId: string,
+  personId: string,
+): Promise<{ ok: boolean }> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from("album_tags")
+    .delete()
+    .eq("album_item_id", itemId)
+    .eq("person_id", personId)
+  revalidatePath(`/app/album/${itemId}`)
+  return { ok: !error }
+}
+
 // Eén reactie per persoon per item: zet of wijzig je reactie.
 export async function reageer(
   itemId: string,

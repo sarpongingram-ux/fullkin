@@ -6,6 +6,7 @@ import { KindBeheer } from "./KindBeheer"
 import { OverlijdenKnop } from "./OverlijdenKnop"
 import { NaamAanpassen } from "./NaamAanpassen"
 import { OuderKoppelen } from "./OuderKoppelen"
+import { ProfielFoto } from "./ProfielFoto"
 
 function leeftijd(bornOn: string | null): number | null {
   if (!bornOn) return null
@@ -164,6 +165,16 @@ export default async function PersoonPagina({
           </p>
         </div>
       </header>
+
+      {/* Profielfoto zetten/wijzigen. */}
+      {kanRelatieBeheren && (
+        <ProfielFoto
+          personId={p.id}
+          networkId={p.network_id}
+          voornaam={p.first_name}
+          heeftFoto={!!p.photo_url}
+        />
+      )}
 
       {/* De leesbare route, hoe jullie verbonden zijn */}
       {!ikZelf && route && (

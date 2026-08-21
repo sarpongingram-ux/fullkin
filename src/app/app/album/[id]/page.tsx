@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { tekenFotoUrls } from "@/lib/album/urls"
 import { Reacties, Opmerken } from "./Interactie"
+import { TagsBeheer } from "./TagsBeheer"
 import type { Enums } from "@/lib/types/database"
 
 function datum(iso: string | null) {
@@ -30,7 +31,7 @@ export default async function HerinneringPagina({
 
   const { data: item } = await supabase
     .from("album_items")
-    .select("id, file_url, file_type, title, memory_text, date_of_memory, location, uploaded_by")
+    .select("id, file_url, file_type, title, memory_text, date_of_memory, location, uploaded_by, network_id")
     .eq("id", id)
     .single()
 
@@ -78,6 +79,26 @@ export default async function HerinneringPagina({
 
   const urls = await tekenFotoUrls(supabase, [item.file_url])
   const fotoUrl = urls.get(item.file_url) ?? ""
+
+  // Mag de kijker namen taggen? De uploader of de Family Keeper. Zo ja, dan
+  // halen we de familielijst op voor de kiezer.
+  const { data: isKeeper } = await supabase.rpc("has_role", {
+    net: item.network_id,
+    r: "co_founder",
+  })
+  const magTaggen = item.uploaded_by === meId || !!isKeeper
+  const { data: familieRuw } = magTaggen
+    ? await supabase
+        .from("persons")
+        .select("id, first_name, last_name")
+        .eq("network_id", item.network_id)
+        .order("first_name")
+    : { data: [] }
+  const familie = (familieRuw ?? []).map((p) => ({
+    id: p.id,
+    naam: `${p.first_name} ${p.last_name}`,
+  }))
+  const getagdIds = (tags ?? []).map((t) => t.person_id)
 
   const tellingen: Record<string, number> = {}
   for (const c of counts ?? []) tellingen[c.reaction] = c.aantal
@@ -135,6 +156,13 @@ export default async function HerinneringPagina({
             </span>
           ))}
         </p>
+      )}
+
+      {/* Namen taggen/aanpassen (uploader of Family Keeper). */}
+      {magTaggen && (
+        <div className="mt-3">
+          <TagsBeheer itemId={id} familie={familie} getagdIds={getagdIds} />
+        </div>
       )}
 
       {item.memory_text && (
