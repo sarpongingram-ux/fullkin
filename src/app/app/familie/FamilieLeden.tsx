@@ -48,12 +48,14 @@ export function FamilieLeden({
   familieNaam,
   leden,
   isFamilyKeeper,
+  zelf,
 }: {
   meId: string
   voornaam: string
   familieNaam: string
   leden: Lid[]
   isFamilyKeeper: boolean
+  zelf: { achternaam: string; photoUrl: string | null }
 }) {
   const ledenVoorAnker = leden.map((l) => ({
     id: l.person_id,
@@ -70,6 +72,30 @@ export function FamilieLeden({
           {leden.length} {leden.length === 1 ? "familielid" : "familieleden"} op de kaart
         </p>
       </header>
+
+      {/* Jouw eigen profiel */}
+      <Link
+        href={`/app/persoon/${meId}`}
+        className="fk-card flex items-center gap-3 hover:bg-oppervlak transition"
+      >
+        <div
+          className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black shrink-0 overflow-hidden"
+          style={{ background: "var(--goud)" }}
+        >
+          {zelf.photoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={zelf.photoUrl} alt="" className="w-full h-full object-cover" />
+          ) : (
+            initialen(voornaam, zelf.achternaam)
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-black text-inkt">Jij · {voornaam}</p>
+          <p className="text-sm text-terracotta font-bold">
+            {zelf.photoUrl ? "Bekijk je profiel →" : "📷 Stel je profielfoto in →"}
+          </p>
+        </div>
+      </Link>
 
       {/* Acties */}
       <div className="space-y-3">

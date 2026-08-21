@@ -14,7 +14,7 @@ export default async function FamiliePagina() {
 
   const { data: mij } = await supabase
     .from("persons")
-    .select("first_name, network_id")
+    .select("first_name, last_name, photo_url, network_id")
     .eq("id", meId)
     .single()
 
@@ -56,6 +56,10 @@ export default async function FamiliePagina() {
       familieNaam={netwerk?.name ?? "je familie"}
       leden={ledenVerrijkt}
       isFamilyKeeper={!!isKeeper}
+      zelf={{
+        achternaam: mij?.last_name ?? "",
+        photoUrl: mij?.photo_url ?? null,
+      }}
     />
   )
 }
