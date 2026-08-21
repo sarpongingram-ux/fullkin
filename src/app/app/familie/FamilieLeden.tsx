@@ -19,6 +19,7 @@ type Lid = {
   last_contact: string | null
   managed_by: string | null
   born_on: string | null
+  died_on: string | null
 }
 
 function leeftijd(bornOn: string | null): number | null {
@@ -133,7 +134,11 @@ export function FamilieLeden({
                     {lid.label}
                     {lid.city ? ` · ${lid.city}` : ""}
                   </p>
-                  {beheerdKind ? (
+                  {lid.died_on ? (
+                    <p className="mt-1 text-sm text-inkt-zacht font-semibold">
+                      🕯️ In herinnering
+                    </p>
+                  ) : beheerdKind ? (
                     <p className="mt-1 text-sm text-inkt-zacht font-semibold">
                       👶 Kind · beheerd door jou
                     </p>
