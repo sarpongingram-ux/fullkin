@@ -9,9 +9,496 @@ export type Json =
   | Json[]
 
 export type Database = {
-  __InternalSupabase: { PostgrestVersion: "14.5" }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
+      album_comments: {
+        Row: {
+          album_item_id: string
+          comment_text: string
+          created_at: string
+          id: string
+          person_id: string
+        }
+        Insert: {
+          album_item_id: string
+          comment_text: string
+          created_at?: string
+          id?: string
+          person_id: string
+        }
+        Update: {
+          album_item_id?: string
+          comment_text?: string
+          created_at?: string
+          id?: string
+          person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "album_comments_album_item_id_fkey"
+            columns: ["album_item_id"]
+            isOneToOne: false
+            referencedRelation: "album_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "album_comments_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      album_items: {
+        Row: {
+          created_at: string
+          date_of_memory: string | null
+          file_type: Database["public"]["Enums"]["media_kind"]
+          file_url: string
+          id: string
+          location: string | null
+          memory_text: string | null
+          network_id: string
+          title: string | null
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          date_of_memory?: string | null
+          file_type?: Database["public"]["Enums"]["media_kind"]
+          file_url: string
+          id?: string
+          location?: string | null
+          memory_text?: string | null
+          network_id: string
+          title?: string | null
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          date_of_memory?: string | null
+          file_type?: Database["public"]["Enums"]["media_kind"]
+          file_url?: string
+          id?: string
+          location?: string | null
+          memory_text?: string | null
+          network_id?: string
+          title?: string | null
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "album_items_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "album_items_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      album_reactions: {
+        Row: {
+          album_item_id: string
+          created_at: string
+          id: string
+          person_id: string
+          reaction: Database["public"]["Enums"]["reaction_kind"]
+        }
+        Insert: {
+          album_item_id: string
+          created_at?: string
+          id?: string
+          person_id: string
+          reaction: Database["public"]["Enums"]["reaction_kind"]
+        }
+        Update: {
+          album_item_id?: string
+          created_at?: string
+          id?: string
+          person_id?: string
+          reaction?: Database["public"]["Enums"]["reaction_kind"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "album_reactions_album_item_id_fkey"
+            columns: ["album_item_id"]
+            isOneToOne: false
+            referencedRelation: "album_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "album_reactions_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      album_tags: {
+        Row: {
+          album_item_id: string
+          confirmed: boolean
+          created_at: string
+          id: string
+          person_id: string
+          tagged_by: string
+        }
+        Insert: {
+          album_item_id: string
+          confirmed?: boolean
+          created_at?: string
+          id?: string
+          person_id: string
+          tagged_by: string
+        }
+        Update: {
+          album_item_id?: string
+          confirmed?: boolean
+          created_at?: string
+          id?: string
+          person_id?: string
+          tagged_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "album_tags_album_item_id_fkey"
+            columns: ["album_item_id"]
+            isOneToOne: false
+            referencedRelation: "album_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "album_tags_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "album_tags_tagged_by_fkey"
+            columns: ["tagged_by"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_dreams: {
+        Row: {
+          approved_at: string | null
+          collection_id: string | null
+          created_at: string
+          description: string
+          expected_revenue_cents: number | null
+          give_back: string | null
+          id: string
+          name: string
+          network_id: string
+          person_id: string
+          status: Database["public"]["Enums"]["business_status"]
+          target_cents: number
+        }
+        Insert: {
+          approved_at?: string | null
+          collection_id?: string | null
+          created_at?: string
+          description: string
+          expected_revenue_cents?: number | null
+          give_back?: string | null
+          id?: string
+          name: string
+          network_id: string
+          person_id: string
+          status?: Database["public"]["Enums"]["business_status"]
+          target_cents: number
+        }
+        Update: {
+          approved_at?: string | null
+          collection_id?: string | null
+          created_at?: string
+          description?: string
+          expected_revenue_cents?: number | null
+          give_back?: string | null
+          id?: string
+          name?: string
+          network_id?: string
+          person_id?: string
+          status?: Database["public"]["Enums"]["business_status"]
+          target_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_dreams_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_dreams_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_dreams_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_questions: {
+        Row: {
+          answer: string | null
+          answered_at: string | null
+          asker_id: string
+          business_id: string
+          created_at: string
+          id: string
+          question: string
+        }
+        Insert: {
+          answer?: string | null
+          answered_at?: string | null
+          asker_id: string
+          business_id: string
+          created_at?: string
+          id?: string
+          question: string
+        }
+        Update: {
+          answer?: string | null
+          answered_at?: string | null
+          asker_id?: string
+          business_id?: string
+          created_at?: string
+          id?: string
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_questions_asker_id_fkey"
+            columns: ["asker_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_questions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_dreams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_updates: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          metric: string | null
+          note: string | null
+          photo_url: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          metric?: string | null
+          note?: string | null
+          photo_url?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          metric?: string | null
+          note?: string | null
+          photo_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_updates_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_dreams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_votes: {
+        Row: {
+          approve: boolean
+          business_id: string
+          created_at: string
+          id: string
+          voter_id: string
+        }
+        Insert: {
+          approve: boolean
+          business_id: string
+          created_at?: string
+          id?: string
+          voter_id: string
+        }
+        Update: {
+          approve?: boolean
+          business_id?: string
+          created_at?: string
+          id?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_votes_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_dreams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_votes_voter_id_fkey"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_members: {
+        Row: {
+          id: string
+          joined_at: string
+          last_read_at: string | null
+          person_id: string
+          room_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          last_read_at?: string | null
+          person_id: string
+          room_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          last_read_at?: string | null
+          person_id?: string
+          room_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_members_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_members_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "chat_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message_text: string | null
+          message_type: Database["public"]["Enums"]["chat_message_type"]
+          reference_id: string | null
+          room_id: string
+          sender_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_text?: string | null
+          message_type?: Database["public"]["Enums"]["chat_message_type"]
+          reference_id?: string | null
+          room_id: string
+          sender_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_text?: string | null
+          message_type?: Database["public"]["Enums"]["chat_message_type"]
+          reference_id?: string | null
+          room_id?: string
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "chat_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_rooms: {
+        Row: {
+          created_at: string
+          id: string
+          name: string | null
+          network_id: string
+          type: Database["public"]["Enums"]["chat_room_type"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          network_id: string
+          type?: Database["public"]["Enums"]["chat_room_type"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          network_id?: string
+          type?: Database["public"]["Enums"]["chat_room_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_rooms_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collections: {
         Row: {
           beneficiary_id: string
@@ -43,14 +530,87 @@ export type Database = {
           suggested_cents?: number
           title: string
         }
-        Update: Partial<Database["public"]["Tables"]["collections"]["Insert"]>
-        Relationships: []
+        Update: {
+          beneficiary_id?: string
+          closes_at?: string
+          created_at?: string
+          id?: string
+          life_event_id?: string | null
+          message?: string | null
+          network_id?: string
+          opens_at?: string
+          started_by?: string
+          status?: Database["public"]["Enums"]["collection_status"]
+          stripe_account_id?: string | null
+          suggested_cents?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_beneficiary_id_fkey"
+            columns: ["beneficiary_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collections_life_event_id_fkey"
+            columns: ["life_event_id"]
+            isOneToOne: false
+            referencedRelation: "life_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collections_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collections_started_by_fkey"
+            columns: ["started_by"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contact_log: {
-        Row: { id: string; occurred_at: string; person_a: string; person_b: string }
-        Insert: { id?: string; occurred_at?: string; person_a: string; person_b: string }
-        Update: Partial<Database["public"]["Tables"]["contact_log"]["Insert"]>
-        Relationships: []
+        Row: {
+          id: string
+          occurred_at: string
+          person_a: string
+          person_b: string
+        }
+        Insert: {
+          id?: string
+          occurred_at?: string
+          person_a: string
+          person_b: string
+        }
+        Update: {
+          id?: string
+          occurred_at?: string
+          person_a?: string
+          person_b?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_log_person_a_fkey"
+            columns: ["person_a"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_log_person_b_fkey"
+            columns: ["person_b"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contact_states: {
         Row: {
@@ -69,8 +629,44 @@ export type Database = {
           set_by?: string | null
           status: Database["public"]["Enums"]["contact_status"]
         }
-        Update: Partial<Database["public"]["Tables"]["contact_states"]["Insert"]>
-        Relationships: []
+        Update: {
+          changed_at?: string
+          network_id?: string
+          person_a?: string
+          person_b?: string
+          set_by?: string | null
+          status?: Database["public"]["Enums"]["contact_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_states_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_states_person_a_fkey"
+            columns: ["person_a"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_states_person_b_fkey"
+            columns: ["person_b"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_states_set_by_fkey"
+            columns: ["set_by"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contributions: {
         Row: {
@@ -99,384 +695,35 @@ export type Database = {
           status?: Database["public"]["Enums"]["contribution_status"]
           stripe_payment_intent?: string | null
         }
-        Update: Partial<Database["public"]["Tables"]["contributions"]["Insert"]>
-        Relationships: []
-      }
-      event_suggestions: {
-        Row: { kind: Database["public"]["Enums"]["life_event_kind"]; suggested_cents: number }
-        Insert: { kind: Database["public"]["Enums"]["life_event_kind"]; suggested_cents: number }
-        Update: Partial<Database["public"]["Tables"]["event_suggestions"]["Insert"]>
-        Relationships: []
-      }
-      business_dreams: {
-        Row: {
-          id: string
-          network_id: string
-          person_id: string
-          name: string
-          description: string
-          target_cents: number
-          expected_revenue_cents: number | null
-          give_back: string | null
-          status: Database["public"]["Enums"]["business_status"]
-          collection_id: string | null
-          created_at: string
-          approved_at: string | null
-        }
-        Insert: {
-          id?: string
-          network_id: string
-          person_id: string
-          name: string
-          description: string
-          target_cents: number
-          expected_revenue_cents?: number | null
-          give_back?: string | null
-          status?: Database["public"]["Enums"]["business_status"]
-          collection_id?: string | null
+        Update: {
+          amount_cents?: number
+          collection_id?: string
+          contributor_id?: string
           created_at?: string
-          approved_at?: string | null
-        }
-        Update: Partial<Database["public"]["Tables"]["business_dreams"]["Insert"]>
-        Relationships: []
-      }
-      business_questions: {
-        Row: {
-          id: string
-          business_id: string
-          asker_id: string
-          question: string
-          answer: string | null
-          answered_at: string | null
-          created_at: string
-        }
-        Insert: {
+          currency?: string
+          hide_name?: boolean
           id?: string
-          business_id: string
-          asker_id: string
-          question: string
-          answer?: string | null
-          answered_at?: string | null
-          created_at?: string
+          message?: string | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["contribution_status"]
+          stripe_payment_intent?: string | null
         }
-        Update: Partial<Database["public"]["Tables"]["business_questions"]["Insert"]>
-        Relationships: []
-      }
-      business_votes: {
-        Row: {
-          id: string
-          business_id: string
-          voter_id: string
-          approve: boolean
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          business_id: string
-          voter_id: string
-          approve: boolean
-          created_at?: string
-        }
-        Update: Partial<Database["public"]["Tables"]["business_votes"]["Insert"]>
-        Relationships: []
-      }
-      business_updates: {
-        Row: {
-          id: string
-          business_id: string
-          photo_url: string | null
-          metric: string | null
-          note: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          business_id: string
-          photo_url?: string | null
-          metric?: string | null
-          note?: string | null
-          created_at?: string
-        }
-        Update: Partial<Database["public"]["Tables"]["business_updates"]["Insert"]>
-        Relationships: []
-      }
-      rad_draws: {
-        Row: {
-          id: string
-          network_id: string
-          year: number
-          winner_person_id: string | null
-          prize_cents: number
-          status: Database["public"]["Enums"]["rad_status"]
-          choice: Database["public"]["Enums"]["rad_choice"] | null
-          recipient_person_id: string | null
-          created_at: string
-          decided_at: string | null
-          stripe_transfer_id: string | null
-        }
-        Insert: {
-          id?: string
-          network_id: string
-          year: number
-          winner_person_id?: string | null
-          prize_cents: number
-          status?: Database["public"]["Enums"]["rad_status"]
-          choice?: Database["public"]["Enums"]["rad_choice"] | null
-          recipient_person_id?: string | null
-          created_at?: string
-          decided_at?: string | null
-          stripe_transfer_id?: string | null
-        }
-        Update: Partial<Database["public"]["Tables"]["rad_draws"]["Insert"]>
-        Relationships: []
-      }
-      stem_rounds: {
-        Row: {
-          id: string
-          network_id: string
-          year: number
-          status: Database["public"]["Enums"]["stem_status"]
-          winner_person_id: string | null
-          created_at: string
-          decided_at: string | null
-        }
-        Insert: {
-          id?: string
-          network_id: string
-          year: number
-          status?: Database["public"]["Enums"]["stem_status"]
-          winner_person_id?: string | null
-          created_at?: string
-          decided_at?: string | null
-        }
-        Update: Partial<Database["public"]["Tables"]["stem_rounds"]["Insert"]>
-        Relationships: []
-      }
-      stem_nominations: {
-        Row: {
-          id: string
-          round_id: string
-          nominee_person_id: string
-          nominated_by: string
-          reason: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          round_id: string
-          nominee_person_id: string
-          nominated_by: string
-          reason: string
-          created_at?: string
-        }
-        Update: Partial<Database["public"]["Tables"]["stem_nominations"]["Insert"]>
-        Relationships: []
-      }
-      stem_votes: {
-        Row: {
-          id: string
-          round_id: string
-          nomination_id: string
-          voter_id: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          round_id: string
-          nomination_id: string
-          voter_id: string
-          created_at?: string
-        }
-        Update: Partial<Database["public"]["Tables"]["stem_votes"]["Insert"]>
-        Relationships: []
-      }
-      notifications: {
-        Row: {
-          id: string
-          network_id: string
-          recipient_person_id: string
-          actor_person_id: string | null
-          kind: Database["public"]["Enums"]["notification_kind"]
-          subject_type: string | null
-          subject_id: string | null
-          read_at: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          network_id: string
-          recipient_person_id: string
-          actor_person_id?: string | null
-          kind: Database["public"]["Enums"]["notification_kind"]
-          subject_type?: string | null
-          subject_id?: string | null
-          read_at?: string | null
-          created_at?: string
-        }
-        Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>
-        Relationships: []
-      }
-      album_items: {
-        Row: {
-          id: string
-          network_id: string
-          uploaded_by: string
-          file_url: string
-          file_type: Database["public"]["Enums"]["media_kind"]
-          title: string | null
-          memory_text: string | null
-          date_of_memory: string | null
-          location: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          network_id: string
-          uploaded_by: string
-          file_url: string
-          file_type?: Database["public"]["Enums"]["media_kind"]
-          title?: string | null
-          memory_text?: string | null
-          date_of_memory?: string | null
-          location?: string | null
-          created_at?: string
-        }
-        Update: Partial<Database["public"]["Tables"]["album_items"]["Insert"]>
-        Relationships: []
-      }
-      album_tags: {
-        Row: {
-          id: string
-          album_item_id: string
-          person_id: string
-          tagged_by: string
-          confirmed: boolean
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          album_item_id: string
-          person_id: string
-          tagged_by: string
-          confirmed?: boolean
-          created_at?: string
-        }
-        Update: Partial<Database["public"]["Tables"]["album_tags"]["Insert"]>
-        Relationships: []
-      }
-      album_reactions: {
-        Row: {
-          id: string
-          album_item_id: string
-          person_id: string
-          reaction: Database["public"]["Enums"]["reaction_kind"]
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          album_item_id: string
-          person_id: string
-          reaction: Database["public"]["Enums"]["reaction_kind"]
-          created_at?: string
-        }
-        Update: Partial<Database["public"]["Tables"]["album_reactions"]["Insert"]>
-        Relationships: []
-      }
-      album_comments: {
-        Row: {
-          id: string
-          album_item_id: string
-          person_id: string
-          comment_text: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          album_item_id: string
-          person_id: string
-          comment_text: string
-          created_at?: string
-        }
-        Update: Partial<Database["public"]["Tables"]["album_comments"]["Insert"]>
-        Relationships: []
-      }
-      pot_ledger: {
-        Row: {
-          id: string
-          network_id: string
-          kind: Database["public"]["Enums"]["pot_entry_kind"]
-          amount_cents: number
-          contribution_id: string | null
-          person_id: string | null
-          stripe_ref: string | null
-          description: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          network_id: string
-          kind: Database["public"]["Enums"]["pot_entry_kind"]
-          amount_cents: number
-          contribution_id?: string | null
-          person_id?: string | null
-          stripe_ref?: string | null
-          description?: string | null
-          created_at?: string
-        }
-        Update: Partial<Database["public"]["Tables"]["pot_ledger"]["Insert"]>
-        Relationships: []
-      }
-      pot_subscriptions: {
-        Row: {
-          id: string
-          network_id: string
-          person_id: string
-          amount_cents: number
-          stripe_subscription_id: string | null
-          stripe_customer_id: string | null
-          status: Database["public"]["Enums"]["pot_sub_status"]
-          created_at: string
-          canceled_at: string | null
-        }
-        Insert: {
-          id?: string
-          network_id: string
-          person_id: string
-          amount_cents: number
-          stripe_subscription_id?: string | null
-          stripe_customer_id?: string | null
-          status?: Database["public"]["Enums"]["pot_sub_status"]
-          created_at?: string
-          canceled_at?: string | null
-        }
-        Update: Partial<Database["public"]["Tables"]["pot_subscriptions"]["Insert"]>
-        Relationships: []
-      }
-      payout_accounts: {
-        Row: {
-          id: string
-          person_id: string
-          network_id: string
-          provider: Database["public"]["Enums"]["payout_provider"]
-          external_id: string
-          status: Database["public"]["Enums"]["payout_status"]
-          country: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          person_id: string
-          network_id: string
-          provider: Database["public"]["Enums"]["payout_provider"]
-          external_id: string
-          status?: Database["public"]["Enums"]["payout_status"]
-          country?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: Partial<Database["public"]["Tables"]["payout_accounts"]["Insert"]>
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contributions_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contributions_contributor_id_fkey"
+            columns: ["contributor_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dreams: {
         Row: {
@@ -501,13 +748,75 @@ export type Database = {
           target_cents: number
           title: string
         }
-        Update: Partial<Database["public"]["Tables"]["dreams"]["Insert"]>
+        Update: {
+          collection_id?: string | null
+          created_at?: string
+          fulfilled_at?: string | null
+          id?: string
+          network_id?: string
+          person_id?: string
+          status?: Database["public"]["Enums"]["dream_status"]
+          target_cents?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dreams_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dreams_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dreams_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_suggestions: {
+        Row: {
+          kind: Database["public"]["Enums"]["life_event_kind"]
+          suggested_cents: number
+        }
+        Insert: {
+          kind: Database["public"]["Enums"]["life_event_kind"]
+          suggested_cents: number
+        }
+        Update: {
+          kind?: Database["public"]["Enums"]["life_event_kind"]
+          suggested_cents?: number
+        }
         Relationships: []
       }
       family_networks: {
-        Row: { created_at: string; home_country: string | null; id: string; name: string }
-        Insert: { created_at?: string; home_country?: string | null; id?: string; name: string }
-        Update: Partial<Database["public"]["Tables"]["family_networks"]["Insert"]>
+        Row: {
+          created_at: string
+          home_country: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          home_country?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          home_country?: string | null
+          id?: string
+          name?: string
+        }
         Relationships: []
       }
       invites: {
@@ -539,8 +848,43 @@ export type Database = {
           status?: Database["public"]["Enums"]["invite_status"]
           token?: string
         }
-        Update: Partial<Database["public"]["Tables"]["invites"]["Insert"]>
-        Relationships: []
+        Update: {
+          accepted_at?: string | null
+          channel?: string
+          created_at?: string
+          destination?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          network_id?: string
+          person_id?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["invite_status"]
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invites_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invites_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invites_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       life_events: {
         Row: {
@@ -563,8 +907,39 @@ export type Database = {
           person_id: string
           title: string
         }
-        Update: Partial<Database["public"]["Tables"]["life_events"]["Insert"]>
-        Relationships: []
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["life_event_kind"]
+          network_id?: string
+          occurs_on?: string
+          person_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "life_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "life_events_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "life_events_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       memberships: {
         Row: {
@@ -583,8 +958,139 @@ export type Database = {
           revoked_at?: string | null
           role: Database["public"]["Enums"]["family_role"]
         }
-        Update: Partial<Database["public"]["Tables"]["memberships"]["Insert"]>
-        Relationships: []
+        Update: {
+          granted_at?: string
+          id?: string
+          network_id?: string
+          person_id?: string
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["family_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memberships_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memberships_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_person_id: string | null
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          network_id: string
+          read_at: string | null
+          recipient_person_id: string
+          subject_id: string | null
+          subject_type: string | null
+        }
+        Insert: {
+          actor_person_id?: string | null
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          network_id: string
+          read_at?: string | null
+          recipient_person_id: string
+          subject_id?: string | null
+          subject_type?: string | null
+        }
+        Update: {
+          actor_person_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["notification_kind"]
+          network_id?: string
+          read_at?: string | null
+          recipient_person_id?: string
+          subject_id?: string | null
+          subject_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_person_id_fkey"
+            columns: ["actor_person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_recipient_person_id_fkey"
+            columns: ["recipient_person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_accounts: {
+        Row: {
+          country: string | null
+          created_at: string
+          external_id: string
+          id: string
+          network_id: string
+          person_id: string
+          provider: Database["public"]["Enums"]["payout_provider"]
+          status: Database["public"]["Enums"]["payout_status"]
+          updated_at: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          external_id: string
+          id?: string
+          network_id: string
+          person_id: string
+          provider: Database["public"]["Enums"]["payout_provider"]
+          status?: Database["public"]["Enums"]["payout_status"]
+          updated_at?: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          external_id?: string
+          id?: string
+          network_id?: string
+          person_id?: string
+          provider?: Database["public"]["Enums"]["payout_provider"]
+          status?: Database["public"]["Enums"]["payout_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_accounts_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payout_accounts_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       persons: {
         Row: {
@@ -619,8 +1125,211 @@ export type Database = {
           network_id: string
           photo_url?: string | null
         }
-        Update: Partial<Database["public"]["Tables"]["persons"]["Insert"]>
-        Relationships: []
+        Update: {
+          birth_name?: string | null
+          born_on?: string | null
+          city?: string | null
+          claimed_by?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          died_on?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          managed_by?: string | null
+          network_id?: string
+          photo_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "persons_managed_by_fkey"
+            columns: ["managed_by"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "persons_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pot_ledger: {
+        Row: {
+          amount_cents: number
+          contribution_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          kind: Database["public"]["Enums"]["pot_entry_kind"]
+          network_id: string
+          person_id: string | null
+          stripe_ref: string | null
+        }
+        Insert: {
+          amount_cents: number
+          contribution_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["pot_entry_kind"]
+          network_id: string
+          person_id?: string | null
+          stripe_ref?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          contribution_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["pot_entry_kind"]
+          network_id?: string
+          person_id?: string | null
+          stripe_ref?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pot_ledger_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "contributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pot_ledger_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pot_ledger_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pot_subscriptions: {
+        Row: {
+          amount_cents: number
+          canceled_at: string | null
+          created_at: string
+          id: string
+          network_id: string
+          person_id: string
+          status: Database["public"]["Enums"]["pot_sub_status"]
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          canceled_at?: string | null
+          created_at?: string
+          id?: string
+          network_id: string
+          person_id: string
+          status?: Database["public"]["Enums"]["pot_sub_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          canceled_at?: string | null
+          created_at?: string
+          id?: string
+          network_id?: string
+          person_id?: string
+          status?: Database["public"]["Enums"]["pot_sub_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pot_subscriptions_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pot_subscriptions_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rad_draws: {
+        Row: {
+          choice: Database["public"]["Enums"]["rad_choice"] | null
+          created_at: string
+          decided_at: string | null
+          id: string
+          network_id: string
+          prize_cents: number
+          recipient_person_id: string | null
+          status: Database["public"]["Enums"]["rad_status"]
+          stripe_transfer_id: string | null
+          winner_person_id: string | null
+          year: number
+        }
+        Insert: {
+          choice?: Database["public"]["Enums"]["rad_choice"] | null
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          network_id: string
+          prize_cents: number
+          recipient_person_id?: string | null
+          status?: Database["public"]["Enums"]["rad_status"]
+          stripe_transfer_id?: string | null
+          winner_person_id?: string | null
+          year: number
+        }
+        Update: {
+          choice?: Database["public"]["Enums"]["rad_choice"] | null
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          network_id?: string
+          prize_cents?: number
+          recipient_person_id?: string | null
+          status?: Database["public"]["Enums"]["rad_status"]
+          stripe_transfer_id?: string | null
+          winner_person_id?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rad_draws_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rad_draws_recipient_person_id_fkey"
+            columns: ["recipient_person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rad_draws_winner_person_id_fkey"
+            columns: ["winner_person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       relationships: {
         Row: {
@@ -643,8 +1352,179 @@ export type Database = {
           origin?: Database["public"]["Enums"]["relationship_origin"]
           to_person: string
         }
-        Update: Partial<Database["public"]["Tables"]["relationships"]["Insert"]>
-        Relationships: []
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          from_person?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["relationship_kind"]
+          network_id?: string
+          origin?: Database["public"]["Enums"]["relationship_origin"]
+          to_person?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relationships_from_person_fkey"
+            columns: ["from_person"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relationships_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relationships_to_person_fkey"
+            columns: ["to_person"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stem_nominations: {
+        Row: {
+          created_at: string
+          id: string
+          nominated_by: string
+          nominee_person_id: string
+          reason: string
+          round_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nominated_by: string
+          nominee_person_id: string
+          reason: string
+          round_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nominated_by?: string
+          nominee_person_id?: string
+          reason?: string
+          round_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stem_nominations_nominated_by_fkey"
+            columns: ["nominated_by"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stem_nominations_nominee_person_id_fkey"
+            columns: ["nominee_person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stem_nominations_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "stem_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stem_rounds: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          id: string
+          network_id: string
+          status: Database["public"]["Enums"]["stem_status"]
+          winner_person_id: string | null
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          network_id: string
+          status?: Database["public"]["Enums"]["stem_status"]
+          winner_person_id?: string | null
+          year: number
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          network_id?: string
+          status?: Database["public"]["Enums"]["stem_status"]
+          winner_person_id?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stem_rounds_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stem_rounds_winner_person_id_fkey"
+            columns: ["winner_person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stem_votes: {
+        Row: {
+          created_at: string
+          id: string
+          nomination_id: string
+          round_id: string
+          voter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nomination_id: string
+          round_id: string
+          voter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nomination_id?: string
+          round_id?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stem_votes_nomination_id_fkey"
+            columns: ["nomination_id"]
+            isOneToOne: false
+            referencedRelation: "stem_nominations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stem_votes_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "stem_rounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stem_votes_voter_id_fkey"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transaction_splits: {
         Row: {
@@ -671,15 +1551,94 @@ export type Database = {
           platform_cents: number
           role_holder_cents: number
         }
-        Update: Partial<Database["public"]["Tables"]["transaction_splits"]["Insert"]>
-        Relationships: []
+        Update: {
+          co_founder_cents?: number
+          contribution_id?: string
+          created_at?: string
+          family_pot_cents?: number
+          gross_cents?: number
+          id?: string
+          net_cents?: number
+          network_id?: string
+          platform_cents?: number
+          role_holder_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_splits_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "contributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_splits_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
-    Views: Record<string, never>
+    Views: {
+      [_ in never]: never
+    }
     Functions: {
+      album_reaction_counts: {
+        Args: { p_item: string }
+        Returns: {
+          aantal: number
+          reaction: Database["public"]["Enums"]["reaction_kind"]
+        }[]
+      }
       ancestors_of: {
         Args: { max_depth?: number; p: string }
-        Returns: { generations: number; person_id: string }[]
+        Returns: {
+          generations: number
+          person_id: string
+        }[]
+      }
+      approve_business: { Args: { bid: string }; Returns: string }
+      beslis_rad: {
+        Args: {
+          p_choice: Database["public"]["Enums"]["rad_choice"]
+          p_draw: string
+          p_recipient: string
+          p_transfer?: string
+        }
+        Returns: undefined
+      }
+      business_tally: {
+        Args: { bid: string }
+        Returns: {
+          actief: number
+          goedgekeurd: boolean
+          ja: number
+          mijn_stem: boolean
+          nee: number
+          nodig: number
+        }[]
+      }
+      claim_invite: { Args: { invite_token: string }; Returns: string }
+      cofounder_dashboard: {
+        Args: never
+        Returns: {
+          cofounder_verdienste_cents: number
+          dromen_actief: number
+          dromen_bereikt: number
+          groei_maand: number
+          leden_deelnemend: number
+          leden_onbekend: number
+          leden_sluimerend: number
+          leden_totaal: number
+          netwerksterkte: number
+          pot_saldo_cents: number
+          rolpool_cents: number
+          volume_jaar_cents: number
+          volume_maand_cents: number
+          volume_totaal_cents: number
+        }[]
       }
       collection_contributors: {
         Args: { col: string }
@@ -695,7 +1654,10 @@ export type Database = {
       }
       collection_total: {
         Args: { col: string }
-        Returns: { contributor_count: number; total_cents: number }[]
+        Returns: {
+          contributor_count: number
+          total_cents: number
+        }[]
       }
       compute_split: {
         Args: { gross: number }
@@ -709,62 +1671,25 @@ export type Database = {
       }
       descendants_of: {
         Args: { max_depth?: number; p: string }
-        Returns: { generations: number; person_id: string }[]
-      }
-      business_tally: {
-        Args: { bid: string }
         Returns: {
-          ja: number
-          nee: number
-          actief: number
-          nodig: number
-          goedgekeurd: boolean
-          mijn_stem: boolean | null
-        }[]
-      }
-      approve_business: { Args: { bid: string }; Returns: string | null }
-      cofounder_dashboard: {
-        Args: Record<string, never>
-        Returns: {
-          leden_totaal: number
-          leden_deelnemend: number
-          leden_sluimerend: number
-          leden_onbekend: number
-          groei_maand: number
-          volume_totaal_cents: number
-          volume_maand_cents: number
-          volume_jaar_cents: number
-          cofounder_verdienste_cents: number
-          rolpool_cents: number
-          pot_saldo_cents: number
-          dromen_actief: number
-          dromen_bereikt: number
-          netwerksterkte: number
-        }[]
-      }
-      family_roles: {
-        Args: Record<string, never>
-        Returns: {
-          role: Database["public"]["Enums"]["family_role"]
-          drempel: number
-          ontgrendeld: boolean
-          houder_id: string | null
-          houder_naam: string | null
-        }[]
-      }
-      family_dreams: {
-        Args: Record<string, never>
-        Returns: {
-          dream_id: string
+          generations: number
           person_id: string
+        }[]
+      }
+      draai_rad: { Args: never; Returns: string }
+      family_dreams: {
+        Args: never
+        Returns: {
+          collection_id: string
+          dream_id: string
           first_name: string
           last_name: string
-          photo_url: string | null
-          title: string
-          target_cents: number
+          person_id: string
+          photo_url: string
           raised_cents: number
-          collection_id: string | null
           status: Database["public"]["Enums"]["dream_status"]
+          target_cents: number
+          title: string
         }[]
       }
       family_map: {
@@ -782,9 +1707,24 @@ export type Database = {
           status: Database["public"]["Enums"]["contact_status"]
         }[]
       }
+      family_roles: {
+        Args: never
+        Returns: {
+          drempel: number
+          houder_id: string
+          houder_naam: string
+          ontgrendeld: boolean
+          role: Database["public"]["Enums"]["family_role"]
+        }[]
+      }
       family_stats: {
         Args: { me: string }
-        Returns: { known: number; out_of_touch: number; silent: number; total: number }[]
+        Returns: {
+          known: number
+          out_of_touch: number
+          silent: number
+          total: number
+        }[]
       }
       has_role: {
         Args: { net: string; r: Database["public"]["Enums"]["family_role"] }
@@ -801,118 +1741,54 @@ export type Database = {
           status: Database["public"]["Enums"]["invite_status"]
         }[]
       }
-      claim_invite: { Args: { invite_token: string }; Returns: string }
-      me: { Args: Record<string, never>; Returns: string }
-      my_networks: { Args: Record<string, never>; Returns: string[] }
-      payout_ready: { Args: { p: string }; Returns: boolean }
-      album_reaction_counts: {
-        Args: { p_item: string }
+      komende_verjaardagen: {
+        Args: never
         Returns: {
-          reaction: Database["public"]["Enums"]["reaction_kind"]
-          aantal: number
-        }[]
-      }
-      rad_lootjes: {
-        Args: Record<string, never>
-        Returns: {
+          born_on: string
+          dagen_tot: number
+          naam: string
           person_id: string
-          first_name: string
-          last_name: string
-          lootjes: number
+          volgende: string
+          wordt: number
         }[]
       }
-      draai_rad: { Args: Record<string, never>; Returns: string }
-      beslis_rad: {
+      markeer_meldingen_gelezen: { Args: never; Returns: undefined }
+      me: { Args: never; Returns: string }
+      meld: {
         Args: {
-          p_draw: string
-          p_choice: Database["public"]["Enums"]["rad_choice"]
-          p_recipient: string | null
-          p_transfer?: string | null
+          p_kind: Database["public"]["Enums"]["notification_kind"]
+          p_recipient: string
+          p_subject_id: string
+          p_subject_type: string
         }
         Returns: undefined
       }
-      my_pot_summary: {
-        Args: Record<string, never>
+      mijlpalen_tijdlijn: {
+        Args: never
         Returns: {
+          collection_id: string
+          id: string
+          kind: Database["public"]["Enums"]["life_event_kind"]
+          naam: string
+          occurs_on: string
+          person_id: string
+          title: string
+        }[]
+      }
+      my_networks: { Args: never; Returns: string[] }
+      my_pot_summary: {
+        Args: never
+        Returns: {
+          donatie_aantal: number
           saldo_cents: number
           uit_1pct_cents: number
           uit_donaties_cents: number
           uit_maandbijdrage_cents: number
           uitgekeerd_cents: number
-          donatie_aantal: number
         }[]
-      }
-      record_pot_donation: {
-        Args: { p_network: string; p_person: string; p_amount: number; p_ref: string }
-        Returns: undefined
-      }
-      record_pot_maandbijdrage: {
-        Args: { p_network: string; p_person: string; p_amount: number; p_ref: string }
-        Returns: undefined
-      }
-      pot_maandbijdrage_stats: {
-        Args: Record<string, never>
-        Returns: { leden: number; per_maand_cents: number }[]
-      }
-      relation_label: { Args: { me: string; other: string }; Returns: string }
-      relation_route: { Args: { me: string; other: string }; Returns: string }
-      settle_contribution: {
-        Args: { p_contribution: string; p_intent: string | null }
-        Returns: undefined
-      }
-      siblings_of: {
-        Args: { p: string }
-        Returns: { person_id: string; shared_parents: number }[]
-      }
-      stem_ronde: {
-        Args: Record<string, never>
-        Returns: {
-          id: string
-          network_id: string
-          year: number
-          status: Database["public"]["Enums"]["stem_status"]
-          winner_person_id: string | null
-          created_at: string
-          decided_at: string | null
-        }
-      }
-      stem_uitslag: {
-        Args: { p_round: string }
-        Returns: {
-          nomination_id: string
-          nominee_id: string
-          nominee_naam: string
-          reason: string
-          stemmen: number
-          mijn_stem: boolean
-        }[]
-      }
-      sluit_stem: { Args: { p_round: string }; Returns: string }
-      meld: {
-        Args: {
-          p_recipient: string
-          p_kind: Database["public"]["Enums"]["notification_kind"]
-          p_subject_type: string | null
-          p_subject_id: string | null
-        }
-        Returns: undefined
-      }
-      markeer_meldingen_gelezen: {
-        Args: Record<string, never>
-        Returns: undefined
-      }
-      start_familie: {
-        Args: {
-          p_naam: string
-          p_land: string | null
-          p_voornaam: string
-          p_achternaam: string
-          p_stad: string | null
-        }
-        Returns: string
       }
       ontdek_verbindingen: {
-        Args: Record<string, never>
+        Args: never
         Returns: {
           a_id: string
           a_naam: string
@@ -921,34 +1797,107 @@ export type Database = {
           samen: number
         }[]
       }
-      komende_verjaardagen: {
-        Args: Record<string, never>
+      payout_ready: { Args: { p: string }; Returns: boolean }
+      pot_maandbijdrage_stats: {
+        Args: never
         Returns: {
-          person_id: string
-          naam: string
-          born_on: string
-          volgende: string
-          wordt: number
-          dagen_tot: number
+          leden: number
+          per_maand_cents: number
         }[]
       }
-      mijlpalen_tijdlijn: {
-        Args: Record<string, never>
+      rad_lootjes: {
+        Args: never
         Returns: {
-          id: string
+          first_name: string
+          last_name: string
+          lootjes: number
           person_id: string
-          naam: string
-          kind: Database["public"]["Enums"]["life_event_kind"]
-          title: string
-          occurs_on: string
-          collection_id: string | null
+        }[]
+      }
+      record_pot_donation: {
+        Args: {
+          p_amount: number
+          p_network: string
+          p_person: string
+          p_ref: string
+        }
+        Returns: undefined
+      }
+      record_pot_maandbijdrage: {
+        Args: {
+          p_amount: number
+          p_network: string
+          p_person: string
+          p_ref: string
+        }
+        Returns: undefined
+      }
+      relation_label: { Args: { me: string; other: string }; Returns: string }
+      relation_route: { Args: { me: string; other: string }; Returns: string }
+      settle_contribution: {
+        Args: { p_contribution: string; p_intent: string }
+        Returns: undefined
+      }
+      siblings_of: {
+        Args: { p: string }
+        Returns: {
+          person_id: string
+          shared_parents: number
+        }[]
+      }
+      sluit_stem: { Args: { p_round: string }; Returns: string }
+      start_familie: {
+        Args: {
+          p_achternaam: string
+          p_land: string
+          p_naam: string
+          p_stad: string
+          p_voornaam: string
+        }
+        Returns: string
+      }
+      stem_ronde: {
+        Args: never
+        Returns: {
+          created_at: string
+          decided_at: string | null
+          id: string
+          network_id: string
+          status: Database["public"]["Enums"]["stem_status"]
+          winner_person_id: string | null
+          year: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "stem_rounds"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      stem_uitslag: {
+        Args: { p_round: string }
+        Returns: {
+          mijn_stem: boolean
+          nomination_id: string
+          nominee_id: string
+          nominee_naam: string
+          reason: string
+          stemmen: number
         }[]
       }
     }
     Enums: {
+      business_status: "stemming" | "goedgekeurd" | "afgewezen" | "afgerond"
+      chat_message_type:
+        | "tekst"
+        | "foto"
+        | "collecte_link"
+        | "album_item"
+        | "moment"
+        | "systeem"
+      chat_room_type: "familie" | "tak" | "direct"
       collection_status: "concept" | "open" | "gesloten" | "uitbetaald"
       contact_status: "verbonden" | "stil" | "herstellend"
-      business_status: "stemming" | "goedgekeurd" | "afgewezen" | "afgerond"
       contribution_status: "wachtend" | "betaald" | "mislukt" | "terugbetaald"
       dream_status: "actief" | "vervuld" | "gepauzeerd"
       family_role:
@@ -961,22 +1910,6 @@ export type Database = {
         | "mediator"
         | "archivaris"
       invite_status: "open" | "geaccepteerd" | "verlopen"
-      media_kind: "foto" | "video" | "audio"
-      reaction_kind: "hart" | "lach" | "traan" | "vuur"
-      rad_status: "getrokken" | "besloten"
-      rad_choice: "zelf" | "gunnen" | "pot" | "dromen"
-      stem_status: "open" | "afgerond"
-      notification_kind:
-        | "album_reactie"
-        | "album_opmerking"
-        | "album_tag"
-        | "stem_nominatie"
-        | "stem_winst"
-        | "mijlpaal"
-      payout_provider: "stripe" | "flutterwave"
-      payout_status: "onboarding" | "ready" | "restricted"
-      pot_entry_kind: "transactie_1pct" | "maandbijdrage" | "donatie" | "uitkering"
-      pot_sub_status: "actief" | "geannuleerd"
       life_event_kind:
         | "verjaardag"
         | "ronde_verjaardag"
@@ -989,17 +1922,231 @@ export type Database = {
         | "diaspora_mijlpaal"
         | "business_droom"
         | "nood"
+      media_kind: "foto" | "video" | "audio"
+      notification_kind:
+        | "album_reactie"
+        | "album_opmerking"
+        | "album_tag"
+        | "stem_nominatie"
+        | "stem_winst"
+        | "mijlpaal"
+      payout_provider: "stripe" | "flutterwave"
+      payout_status: "onboarding" | "ready" | "restricted"
+      pot_entry_kind:
+        | "transactie_1pct"
+        | "maandbijdrage"
+        | "donatie"
+        | "uitkering"
+      pot_sub_status: "actief" | "geannuleerd"
+      rad_choice: "zelf" | "gunnen" | "pot" | "dromen"
+      rad_status: "getrokken" | "besloten"
+      reaction_kind: "hart" | "lach" | "traan" | "vuur"
       relationship_kind: "parent" | "partner"
-      relationship_origin: "biological" | "adoptive" | "step" | "foster" | "donor" | "chosen"
+      relationship_origin:
+        | "biological"
+        | "adoptive"
+        | "step"
+        | "foster"
+        | "donor"
+        | "chosen"
+      stem_status: "open" | "afgerond"
     }
-    CompositeTypes: Record<string, never>
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
 
-type PublicSchema = Database["public"]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-export type Tables<T extends keyof PublicSchema["Tables"]> =
-  PublicSchema["Tables"][T]["Row"]
-export type TablesInsert<T extends keyof PublicSchema["Tables"]> =
-  PublicSchema["Tables"][T]["Insert"]
-export type Enums<T extends keyof PublicSchema["Enums"]> = PublicSchema["Enums"][T]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      business_status: ["stemming", "goedgekeurd", "afgewezen", "afgerond"],
+      chat_message_type: [
+        "tekst",
+        "foto",
+        "collecte_link",
+        "album_item",
+        "moment",
+        "systeem",
+      ],
+      chat_room_type: ["familie", "tak", "direct"],
+      collection_status: ["concept", "open", "gesloten", "uitbetaald"],
+      contact_status: ["verbonden", "stil", "herstellend"],
+      contribution_status: ["wachtend", "betaald", "mislukt", "terugbetaald"],
+      dream_status: ["actief", "vervuld", "gepauzeerd"],
+      family_role: [
+        "co_founder",
+        "events_manager",
+        "verhalen_manager",
+        "pot_beheerder",
+        "connector",
+        "welzijn_manager",
+        "mediator",
+        "archivaris",
+      ],
+      invite_status: ["open", "geaccepteerd", "verlopen"],
+      life_event_kind: [
+        "verjaardag",
+        "ronde_verjaardag",
+        "zwemdiploma",
+        "nieuwe_school",
+        "afstuderen",
+        "huwelijk",
+        "geboorte",
+        "overlijden",
+        "diaspora_mijlpaal",
+        "business_droom",
+        "nood",
+      ],
+      media_kind: ["foto", "video", "audio"],
+      notification_kind: [
+        "album_reactie",
+        "album_opmerking",
+        "album_tag",
+        "stem_nominatie",
+        "stem_winst",
+        "mijlpaal",
+      ],
+      payout_provider: ["stripe", "flutterwave"],
+      payout_status: ["onboarding", "ready", "restricted"],
+      pot_entry_kind: [
+        "transactie_1pct",
+        "maandbijdrage",
+        "donatie",
+        "uitkering",
+      ],
+      pot_sub_status: ["actief", "geannuleerd"],
+      rad_choice: ["zelf", "gunnen", "pot", "dromen"],
+      rad_status: ["getrokken", "besloten"],
+      reaction_kind: ["hart", "lach", "traan", "vuur"],
+      relationship_kind: ["parent", "partner"],
+      relationship_origin: [
+        "biological",
+        "adoptive",
+        "step",
+        "foster",
+        "donor",
+        "chosen",
+      ],
+      stem_status: ["open", "afgerond"],
+    },
+  },
+} as const
+

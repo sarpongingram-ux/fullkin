@@ -81,8 +81,8 @@ export async function beslisRad(
   const { error } = await supabase.rpc("beslis_rad", {
     p_draw: drawId,
     p_choice: choice,
-    p_recipient: recipient,
-    p_transfer: transferId,
+    p_recipient: recipient as string,
+    p_transfer: transferId as string,
   })
   if (error) return { ok: false, fout: error.message }
 

@@ -26,10 +26,10 @@ export async function startFamilie(
 
   const { error } = await supabase.rpc("start_familie", {
     p_naam: naam,
-    p_land: land,
+    p_land: land ?? "",
     p_voornaam: voornaam,
     p_achternaam: achternaam,
-    p_stad: stad,
+    p_stad: stad ?? "",
   })
   if (error) return { ok: false, fout: error.message }
 
