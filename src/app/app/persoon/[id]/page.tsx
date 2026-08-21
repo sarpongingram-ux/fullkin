@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { tekenFotoUrls } from "@/lib/album/urls"
+import { totaalZichtbaar } from "@/lib/collecte/privacy"
 import { KindBeheer } from "./KindBeheer"
 import { OverlijdenKnop } from "./OverlijdenKnop"
 import { NaamAanpassen } from "./NaamAanpassen"
@@ -236,24 +237,41 @@ export default async function PersoonPagina({
             ✨ Droom
           </p>
           <p className="font-black text-inkt text-lg">{droom.title}</p>
-          <div className="fk-progress mt-3">
-            <span
-              style={{
-                width: `${Math.min(100, Math.round((Number(droom.raised_cents) / droom.target_cents) * 100))}%`,
-              }}
-            />
-          </div>
-          <p className="text-sm text-inkt-zacht mt-2 font-semibold">
-            {euro(Number(droom.raised_cents))} van {euro(droom.target_cents)}
-            {droom.collection_id && (
-              <>
-                {" · "}
-                <Link href={`/app/collecte/${droom.collection_id}`} className="text-terracotta">
-                  draag bij →
-                </Link>
-              </>
-            )}
-          </p>
+          {totaalZichtbaar(droom.contributor_count ?? 0) ? (
+            <>
+              <div className="fk-progress mt-3">
+                <span
+                  style={{
+                    width: `${Math.min(100, Math.round((Number(droom.raised_cents) / droom.target_cents) * 100))}%`,
+                  }}
+                />
+              </div>
+              <p className="text-sm text-inkt-zacht mt-2 font-semibold">
+                {euro(Number(droom.raised_cents))} van {euro(droom.target_cents)}
+                {droom.collection_id && (
+                  <>
+                    {" · "}
+                    <Link href={`/app/collecte/${droom.collection_id}`} className="text-terracotta">
+                      draag bij →
+                    </Link>
+                  </>
+                )}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-inkt-zacht mt-2 font-semibold">
+              Onderweg naar {euro(droom.target_cents)} 💛 — de voortgang verschijnt
+              zodra meer familie heeft bijgedragen.
+              {droom.collection_id && (
+                <>
+                  {" "}
+                  <Link href={`/app/collecte/${droom.collection_id}`} className="text-terracotta">
+                    draag bij →
+                  </Link>
+                </>
+              )}
+            </p>
+          )}
         </section>
       )}
 

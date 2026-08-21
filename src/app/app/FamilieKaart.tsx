@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { totaalZichtbaar } from "@/lib/collecte/privacy"
 
 type Collecte = { id: string; title: string; voornaam: string }
 type BusinessDroom = { id: string; name: string; voornaam: string; status: string }
@@ -12,6 +13,7 @@ export type Droom = {
   target_cents: number
   raised_cents: number
   collection_id: string | null
+  contributor_count: number
 }
 
 type Stats = { total: number; known: number; silent: number; out_of_touch: number }
@@ -182,12 +184,20 @@ export function FamilieKaart({
                   </p>
                 </div>
               </div>
-              <div className="fk-progress mt-3">
-                <span style={{ width: `${pct}%` }} />
-              </div>
-              <p className="text-sm text-inkt-zacht mt-2 font-semibold">
-                {euro(d.raised_cents)} van {euro(d.target_cents)}
-              </p>
+              {totaalZichtbaar(d.contributor_count) ? (
+                <>
+                  <div className="fk-progress mt-3">
+                    <span style={{ width: `${pct}%` }} />
+                  </div>
+                  <p className="text-sm text-inkt-zacht mt-2 font-semibold">
+                    {euro(d.raised_cents)} van {euro(d.target_cents)}
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-inkt-zacht mt-2 font-semibold">
+                  Onderweg naar {euro(d.target_cents)} 💛 — voortgang vanaf 3 gevers.
+                </p>
+              )}
             </Link>
           )
         })}

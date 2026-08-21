@@ -100,6 +100,7 @@ export default async function AppHome() {
     target_cents: d.target_cents,
     raised_cents: Number(d.raised_cents),
     collection_id: d.collection_id,
+    contributor_count: d.contributor_count ?? 0,
   }))
   const mijnDroom = alleDromen.find((d) => d.person_id === meId) ?? null
 

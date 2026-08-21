@@ -1623,6 +1623,15 @@ export type Database = {
           nodig: number
         }[]
       }
+      chat_systeembericht: {
+        Args: {
+          p_net: string
+          p_ref: string
+          p_text: string
+          p_type: Database["public"]["Enums"]["chat_message_type"]
+        }
+        Returns: undefined
+      }
       claim_invite: { Args: { invite_token: string }; Returns: string }
       cofounder_dashboard: {
         Args: never
@@ -1685,6 +1694,7 @@ export type Database = {
         Args: never
         Returns: {
           collection_id: string
+          contributor_count: number
           dream_id: string
           first_name: string
           last_name: string

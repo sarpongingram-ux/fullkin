@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { MijnDroom } from "../MijnDroom"
+import { totaalZichtbaar } from "@/lib/collecte/privacy"
 
 function euro(cents: number, decimals = 2) {
   return new Intl.NumberFormat("nl-NL", {
@@ -35,6 +36,8 @@ export default async function WalletPagina() {
 
   const mijnDroom = (dromen ?? []).find((d) => d.person_id === meId) ?? null
   const opgehaald = mijnDroom ? Number(mijnDroom.raised_cents) : 0
+  const droomGevers = mijnDroom?.contributor_count ?? 0
+  const toonOpgehaald = totaalZichtbaar(droomGevers)
   const potSaldo = pot?.saldo_cents ?? 0
 
   // Namen bij de collectes van anderen.
@@ -59,11 +62,13 @@ export default async function WalletPagina() {
       {/* Groot centraal bedrag, Cash App-stijl */}
       <section className="fk-card-dark text-center fk-pop">
         <p className="text-sm font-bold opacity-70">Voor jou opgehaald</p>
-        <p className="fk-amount mt-2">{euro(opgehaald)}</p>
+        <p className="fk-amount mt-2">{toonOpgehaald ? euro(opgehaald) : "€ •••"}</p>
         <p className="text-sm opacity-70 mt-2">
-          {mijnDroom
-            ? `Voor "${mijnDroom.title}"`
-            : "Stel je droom in en de familie helpt mee"}
+          {!mijnDroom
+            ? "Stel je droom in en de familie helpt mee"
+            : toonOpgehaald
+              ? `Voor "${mijnDroom.title}"`
+              : `Voor "${mijnDroom.title}" · zichtbaar zodra meer familie heeft bijgedragen`}
         </p>
 
         <div className="grid grid-cols-2 gap-3 mt-6">
@@ -86,6 +91,7 @@ export default async function WalletPagina() {
           huidigeTitel={mijnDroom?.title ?? null}
           huidigStreefCents={mijnDroom?.target_cents ?? null}
           opgehaaldCents={opgehaald}
+          aantalGevers={droomGevers}
         />
       </section>
 

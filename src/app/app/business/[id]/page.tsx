@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Stemhok, Vragen, Updates } from "./BusinessClient"
+import { totaalZichtbaar } from "@/lib/collecte/privacy"
 
 function euro(cents: number) {
   return new Intl.NumberFormat("nl-NL", {
@@ -91,11 +92,13 @@ export default async function BusinessPagina({
 
   // Financieringsvoortgang na goedkeuring.
   let opgehaald = 0
+  let financieringGevers = 0
   if (b.collection_id) {
     const { data: totaal } = await supabase
       .rpc("collection_total", { col: b.collection_id })
       .single()
     opgehaald = totaal?.total_cents ?? 0
+    financieringGevers = totaal?.contributor_count ?? 0
   }
 
   return (
@@ -160,7 +163,10 @@ export default async function BusinessPagina({
             <div>
               <p className="font-semibold text-inkt">De business-collecte loopt</p>
               <p className="text-sm text-inkt-zacht">
-                {euro(opgehaald)} van {euro(b.target_cents)} · draag bij →
+                {totaalZichtbaar(financieringGevers)
+                  ? `${euro(opgehaald)} van ${euro(b.target_cents)}`
+                  : `Onderweg naar ${euro(b.target_cents)} 💛 · totaal vanaf 3 gevers`}{" "}
+                · draag bij →
               </p>
             </div>
           </div>

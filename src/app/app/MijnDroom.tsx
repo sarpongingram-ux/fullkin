@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { stelDroomIn, type DroomResultaat } from "./droom-acties"
+import { totaalZichtbaar } from "@/lib/collecte/privacy"
 
 function euro(cents: number) {
   return new Intl.NumberFormat("nl-NL", {
@@ -16,10 +17,12 @@ export function MijnDroom({
   huidigeTitel,
   huidigStreefCents,
   opgehaaldCents,
+  aantalGevers,
 }: {
   huidigeTitel: string | null
   huidigStreefCents: number | null
   opgehaaldCents: number
+  aantalGevers: number
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -55,13 +58,22 @@ export function MijnDroom({
           </button>
         </div>
         <p className="text-xl font-black text-inkt">{huidigeTitel}</p>
-        <div className="fk-progress mt-3">
-          <span style={{ width: `${pct}%` }} />
-        </div>
-        <p className="text-base text-inkt-zacht mt-2 font-semibold">
-          {euro(opgehaaldCents)} van {euro(huidigStreefCents!)} · {pct}%
-          {pct >= 100 && ". Bereikt! 🎉"}
-        </p>
+        {totaalZichtbaar(aantalGevers) ? (
+          <>
+            <div className="fk-progress mt-3">
+              <span style={{ width: `${pct}%` }} />
+            </div>
+            <p className="text-base text-inkt-zacht mt-2 font-semibold">
+              {euro(opgehaaldCents)} van {euro(huidigStreefCents!)} · {pct}%
+              {pct >= 100 && ". Bereikt! 🎉"}
+            </p>
+          </>
+        ) : (
+          <p className="text-base text-inkt-zacht mt-2 font-semibold">
+            Onderweg naar {euro(huidigStreefCents!)} 💛 — de voortgang verschijnt
+            zodra meer familie heeft bijgedragen, zo blijft ieders bedrag privé.
+          </p>
+        )}
       </section>
     )
   }

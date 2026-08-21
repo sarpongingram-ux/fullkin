@@ -4,11 +4,7 @@ import Link from "next/link"
 import { Bijdragen } from "./Bijdragen"
 import { settleFromSession } from "@/lib/stripe/settle"
 import { Confetti } from "@/components/Confetti"
-
-// Onder dit aantal gevers tonen we het totaal niet: anders is iemands eigen
-// bedrag af te leiden. Vanaf 3 kan niemand (ook een mede-gever niet) nog een
-// individueel bedrag terugrekenen.
-const TOTAAL_DREMPEL = 3
+import { totaalZichtbaar } from "@/lib/collecte/privacy"
 
 function euro(cents: number) {
   return new Intl.NumberFormat("nl-NL", {
@@ -98,7 +94,7 @@ export default async function CollectiePagina({
           afleiden (bij 1 gever is het totaal zijn bedrag; bij 2 kan de één de
           ander uitrekenen). Vanaf 3 gevers is dat niet meer mogelijk. */}
       <section className="fk-card-dark text-center">
-        {aantal >= TOTAAL_DREMPEL ? (
+        {totaalZichtbaar(aantal) ? (
           <>
             <p className="fk-amount text-goud">{euro(total)}</p>
             <p className="text-sm opacity-70 mt-2">
