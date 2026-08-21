@@ -1,8 +1,9 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createClient as createBareClient } from "@supabase/supabase-js"
 import { revalidatePath } from "next/cache"
-import type { Enums } from "@/lib/types/database"
+import type { Database, Enums } from "@/lib/types/database"
 
 export type KindResultaat = { ok: true } | { ok: false; fout: string }
 
@@ -153,7 +154,22 @@ export async function uploadProfielfoto(
   const pad = `${persoon.network_id}/${personId}-${crypto.randomUUID()}.${ext}`
   const bytes = new Uint8Array(await file.arrayBuffer())
 
-  const { error: uploadFout } = await supabase.storage
+  // De storage-client van @supabase/ssr gebruikt bij SSR soms de anon-sleutel
+  // i.p.v. jouw token, waardoor storage-RLS de upload weigert. We maken daarom
+  // een aparte client met jouw sessie-token expliciet in de header.
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session?.access_token) {
+    return { ok: false, fout: "Je sessie is verlopen. Log opnieuw in." }
+  }
+  const opslag = createBareClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { global: { headers: { Authorization: `Bearer ${session.access_token}` } } },
+  )
+
+  const { error: uploadFout } = await opslag.storage
     .from("avatars")
     .upload(pad, bytes, { contentType: file.type, upsert: true })
   if (uploadFout) {
