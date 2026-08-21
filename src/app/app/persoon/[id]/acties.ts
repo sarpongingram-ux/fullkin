@@ -35,6 +35,33 @@ export async function stelKindStatus(
   return { ok: true }
 }
 
+// Past de naam van een familielid aan. Handig om een nog "Onbekende" (automatisch
+// aangemaakte gedeelde ouder) alsnog een naam te geven. RLS bepaalt wie het mag.
+export async function stelNaam(
+  personId: string,
+  voornaam: string,
+  achternaam: string,
+): Promise<KindResultaat> {
+  const voor = voornaam.trim()
+  const achter = achternaam.trim()
+  if (!voor) return { ok: false, fout: "Vul minstens een voornaam in." }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from("persons")
+    .update({ first_name: voor, last_name: achter })
+    .eq("id", personId)
+  if (error) {
+    return {
+      ok: false,
+      fout: "Kon dit niet opslaan. Alleen de Family Keeper of de beheerder kan dit wijzigen.",
+    }
+  }
+  revalidatePath(`/app/persoon/${personId}`)
+  revalidatePath("/app/familie")
+  return { ok: true }
+}
+
 // Legt vast dat een familielid is overleden (of maakt dat ongedaan). De datum
 // is optioneel. RLS bepaalt wie het mag (Family Keeper of beheerder).
 export async function stelOverlijden(

@@ -4,6 +4,7 @@ import Link from "next/link"
 import { tekenFotoUrls } from "@/lib/album/urls"
 import { KindBeheer } from "./KindBeheer"
 import { OverlijdenKnop } from "./OverlijdenKnop"
+import { NaamAanpassen } from "./NaamAanpassen"
 
 function leeftijd(bornOn: string | null): number | null {
   if (!bornOn) return null
@@ -142,6 +143,16 @@ export default async function PersoonPagina({
       {/* De leesbare route, hoe jullie verbonden zijn */}
       {!ikZelf && route && (
         <p className="fk-card text-inkt">{route}</p>
+      )}
+
+      {/* Naam invullen/aanpassen, bijv. voor een nog "Onbekende" gedeelde ouder. */}
+      {kanBeheren && (
+        <NaamAanpassen
+          personId={p.id}
+          voornaam={p.first_name}
+          achternaam={p.last_name}
+          onbekend={p.first_name === "Onbekende"}
+        />
       )}
 
       {/* Kind-beheer: markeer als kind onder 16 (of haal weg). */}
