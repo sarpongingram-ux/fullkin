@@ -1851,6 +1851,7 @@ export type Database = {
         }[]
       }
       sluit_stem: { Args: { p_round: string }; Returns: string }
+      start_direct: { Args: { p_other: string }; Returns: string }
       start_familie: {
         Args: {
           p_achternaam: string

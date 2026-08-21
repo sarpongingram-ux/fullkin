@@ -67,6 +67,19 @@ export async function haalNieuweBerichten(
   return (data ?? []) as ChatBericht[]
 }
 
+// Start (of hervind) een direct gesprek met een familielid. Geeft de room-id.
+export async function startDirect(
+  otherId: string,
+): Promise<{ ok: true; roomId: string } | { ok: false; fout: string }> {
+  if (!otherId) return { ok: false, fout: "Kies een familielid." }
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc("start_direct", { p_other: otherId })
+  if (error || !data) {
+    return { ok: false, fout: "Kon het gesprek niet starten." }
+  }
+  return { ok: true, roomId: data as string }
+}
+
 // Word lid van een takchat (handmatig toetreden aan een andere tak).
 export async function neemDeelAanTak(
   roomId: string,

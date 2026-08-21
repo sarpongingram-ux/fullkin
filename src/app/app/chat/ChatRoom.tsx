@@ -44,6 +44,7 @@ export function ChatRoom({
   directory,
   initieel,
   collecteKandidaten,
+  subtitel,
 }: {
   roomId: string
   meId: string
@@ -52,6 +53,7 @@ export function ChatRoom({
   directory: Directory
   initieel: ChatBericht[]
   collecteKandidaten: Kandidaat[]
+  subtitel?: string
 }) {
   const [berichten, setBerichten] = useState<ChatBericht[]>(initieel)
   const [tekst, setTekst] = useState("")
@@ -150,7 +152,8 @@ export function ChatRoom({
         <div className="min-w-0">
           <p className="font-black text-inkt truncate">{groepsnaam}</p>
           <p className="text-xs text-inkt-zacht">
-            {aantalLeden} {aantalLeden === 1 ? "familielid" : "familieleden"} · privé
+            {subtitel ??
+              `${aantalLeden} ${aantalLeden === 1 ? "familielid" : "familieleden"} · privé`}
           </p>
         </div>
       </header>

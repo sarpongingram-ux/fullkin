@@ -55,13 +55,23 @@ export function ChatOverzicht({ kaarten }: { kaarten: RoomKaart[] }) {
         ))}
       </div>
 
+      {/* Nieuw direct gesprek */}
+      {tab === "direct" && (
+        <Link
+          href="/app/chat/nieuw"
+          className="fk-btn fk-btn-primary fk-btn-full block text-center"
+        >
+          👋 Nieuw gesprek
+        </Link>
+      )}
+
       {/* Lijst */}
-      {tab === "direct" ? (
+      {tab === "direct" && zichtbaar.length === 0 ? (
         <div className="fk-card text-center py-10">
           <p className="text-4xl mb-2">👋</p>
-          <p className="font-black text-inkt">Directe berichten komen eraan</p>
+          <p className="font-black text-inkt">Nog geen directe gesprekken</p>
           <p className="text-inkt-zacht mt-1 text-sm">
-            Binnenkort kun je één-op-één kennismaken met familieleden.
+            Begin een één-op-één gesprek met een familielid.
           </p>
         </div>
       ) : zichtbaar.length === 0 ? (
@@ -85,10 +95,21 @@ export function ChatOverzicht({ kaarten }: { kaarten: RoomKaart[] }) {
                 className="fk-card flex items-center gap-3 hover:bg-oppervlak transition"
               >
                 <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl shrink-0"
-                  style={{ background: k.type === "tak" ? "var(--goud)" : "var(--terracotta)" }}
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl font-black shrink-0"
+                  style={{
+                    background:
+                      k.type === "tak"
+                        ? "var(--goud)"
+                        : k.type === "direct"
+                          ? "var(--inkt)"
+                          : "var(--terracotta)",
+                  }}
                 >
-                  {k.type === "tak" ? "🌍" : "💬"}
+                  {k.type === "tak"
+                    ? "🌍"
+                    : k.type === "direct"
+                      ? (k.naam[0] ?? "?").toUpperCase()
+                      : "💬"}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">

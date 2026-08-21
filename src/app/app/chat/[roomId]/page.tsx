@@ -108,15 +108,35 @@ export default async function ChatRuimtePagina({
 
   const berichten = ((recent ?? []) as ChatBericht[]).slice().reverse()
 
+  // Bij een direct gesprek: naam + relatie van de ánder als kop.
+  let groepsnaam = room.name ?? "Chat"
+  let subtitel: string | undefined = undefined
+  if (room.type === "direct") {
+    const { data: ander } = await supabase
+      .from("chat_members")
+      .select("person_id")
+      .eq("room_id", roomId)
+      .neq("person_id", meId)
+      .limit(1)
+      .maybeSingle()
+    const anderId = ander?.person_id
+    if (anderId) {
+      const info = directory[anderId]
+      groepsnaam = info?.voornaam ?? "Familielid"
+      subtitel = `jouw ${info?.relatie ?? "familielid"}`
+    }
+  }
+
   return (
     <ChatRoom
       roomId={room.id}
       meId={meId}
-      groepsnaam={room.name ?? "Chat"}
+      groepsnaam={groepsnaam}
       aantalLeden={count ?? (personen ?? []).length}
       directory={directory}
       initieel={berichten}
       collecteKandidaten={collecteKandidaten}
+      subtitel={subtitel}
     />
   )
 }

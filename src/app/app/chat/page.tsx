@@ -39,6 +39,30 @@ export default async function ChatOverzichtPagina() {
   )
   const roomIds = (rooms ?? []).map((r) => r.id)
 
+  // Voor directe gesprekken: de naam van de ánder ophalen (room.name is leeg).
+  const directIds = (rooms ?? []).filter((r) => r.type === "direct").map((r) => r.id)
+  const directNaam = new Map<string, string>()
+  if (directIds.length) {
+    const { data: andereLeden } = await supabase
+      .from("chat_members")
+      .select("room_id, person_id")
+      .in("room_id", directIds)
+      .neq("person_id", meId)
+    const anderIds = [...new Set((andereLeden ?? []).map((m) => m.person_id))]
+    const { data: personen } = anderIds.length
+      ? await supabase
+          .from("persons")
+          .select("id, first_name, last_name")
+          .in("id", anderIds)
+      : { data: [] }
+    const naamVan = new Map(
+      (personen ?? []).map((p) => [p.id, `${p.first_name} ${p.last_name}`]),
+    )
+    for (const m of andereLeden ?? []) {
+      directNaam.set(m.room_id, naamVan.get(m.person_id) ?? "Familielid")
+    }
+  }
+
   // Laatste bericht per ruimte (RLS geeft alleen ruimtes die je mag zien).
   const { data: berichten } = roomIds.length
     ? await supabase
@@ -74,7 +98,10 @@ export default async function ChatOverzichtPagina() {
     return {
       id: r.id,
       type: r.type,
-      naam: r.name ?? "Chat",
+      naam:
+        r.type === "direct"
+          ? directNaam.get(r.id) ?? "Familielid"
+          : r.name ?? "Chat",
       laatsteTekst: last
         ? last.type === "collecte_link"
           ? "❤️ Collecte gedeeld"
