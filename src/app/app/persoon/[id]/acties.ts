@@ -154,19 +154,21 @@ export async function uploadProfielfoto(
   const pad = `${persoon.network_id}/${personId}-${crypto.randomUUID()}.${ext}`
   const bytes = new Uint8Array(await file.arrayBuffer())
 
-  // De storage-client van @supabase/ssr gebruikt bij SSR soms de anon-sleutel
-  // i.p.v. jouw token, waardoor storage-RLS de upload weigert. We maken daarom
-  // een aparte client met jouw sessie-token expliciet in de header.
+  // De storage-client van @supabase/ssr draagt bij SSR jouw token niet mee, dus
+  // komt de upload als anon binnen en weigert RLS 'm. Een los meegegeven
+  // Authorization-header wordt door supabase-js overschreven; de juiste manier
+  // is de accessToken-optie, die de client voor élke call (ook storage) gebruikt.
   const {
     data: { session },
   } = await supabase.auth.getSession()
   if (!session?.access_token) {
     return { ok: false, fout: "Je sessie is verlopen. Log opnieuw in." }
   }
+  const token = session.access_token
   const opslag = createBareClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { global: { headers: { Authorization: `Bearer ${session.access_token}` } } },
+    { accessToken: async () => token },
   )
 
   const { error: uploadFout } = await opslag.storage
