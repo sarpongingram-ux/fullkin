@@ -49,6 +49,8 @@ export async function stuurBericht(
   if (error || !data) {
     return { ok: false, fout: "Kon het bericht niet versturen." }
   }
+  // Chatten telt als contact: leg vast dat je in touch bent met deze mensen.
+  await supabase.rpc("leg_chat_contact_vast", { p_room: roomId })
   return { ok: true, bericht: data as ChatBericht }
 }
 
@@ -191,6 +193,9 @@ export async function deelFoto(
     .select(BERICHT_KOLOMMEN)
     .single()
   if (error || !msg) return { ok: false, fout: "Kon de foto niet delen." }
+
+  // Een foto delen telt ook als contact met de mensen in dit gesprek.
+  await supabase.rpc("leg_chat_contact_vast", { p_room: roomId })
 
   const urls = await tekenFotoUrls(supabase, [pad])
   revalidatePath("/app/album")

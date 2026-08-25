@@ -1848,6 +1848,7 @@ export type Database = {
           wordt: number
         }[]
       }
+      leg_chat_contact_vast: { Args: { p_room: string }; Returns: undefined }
       markeer_meldingen_gelezen: { Args: never; Returns: undefined }
       me: { Args: never; Returns: string }
       meld: {
