@@ -38,7 +38,7 @@ export default async function AppHome({
     supabase.rpc("family_stats", { me: meId }).single(),
     supabase
       .from("persons")
-      .select("first_name, network_id")
+      .select("first_name, network_id, born_on")
       .eq("id", meId)
       .single(),
   ])
@@ -123,6 +123,22 @@ export default async function AppHome({
   }))
   const mijnDroom = alleDromen.find((d) => d.person_id === meId) ?? null
 
+  // Herinnering: geboortedatums die ontbreken (voeden de verjaardag-cadeaupot).
+  const { count: aantalZonderDatum } = mij
+    ? await supabase
+        .from("persons")
+        .select("id", { count: "exact", head: true })
+        .eq("network_id", mij.network_id)
+        .is("died_on", null)
+        .is("born_on", null)
+        .neq("id", meId)
+    : { count: 0 }
+  const geboorteHerinnering = {
+    eigenOntbreekt: !mij?.born_on,
+    aantalAnders: aantalZonderDatum ?? 0,
+    meId,
+  }
+
   // Partner-nudge: hang je hier via je partner zonder eigen kant? Geef een zetje.
   const { data: nudge } = await supabase.rpc("partner_nudge", { me: meId })
   const nudgeRow = (nudge ?? [])[0]
@@ -144,6 +160,7 @@ export default async function AppHome({
       ongelezenMeldingen={ongelezen ?? 0}
       komendeVerjaardag={komendeVerjaardag}
       partnerNudge={partnerNudge}
+      geboorteHerinnering={geboorteHerinnering}
     />
   )
 }

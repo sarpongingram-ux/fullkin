@@ -9,6 +9,7 @@ import { NaamAanpassen } from "./NaamAanpassen"
 import { OuderKoppelen } from "./OuderKoppelen"
 import { ProfielFoto } from "./ProfielFoto"
 import { WoonplaatsKnop } from "./WoonplaatsKnop"
+import { GeboortedatumKnop } from "./GeboortedatumKnop"
 
 function leeftijd(bornOn: string | null): number | null {
   if (!bornOn) return null
@@ -218,6 +219,16 @@ export default async function PersoonPagina({
           voornaam={p.first_name}
           stad={p.city}
           land={p.country}
+        />
+      )}
+
+      {/* Geboortedatum (voedt de automatische verjaardag-cadeaupot). */}
+      {kanRelatieBeheren && !p.died_on && (
+        <GeboortedatumKnop
+          personId={p.id}
+          voornaam={p.first_name}
+          bornOn={p.born_on}
+          ikZelf={ikZelf}
         />
       )}
 

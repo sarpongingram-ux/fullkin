@@ -44,6 +44,7 @@ export function FamilieKaart({
   ongelezenMeldingen,
   komendeVerjaardag,
   partnerNudge,
+  geboorteHerinnering,
 }: {
   voornaam: string
   familieNaam: string
@@ -57,6 +58,11 @@ export function FamilieKaart({
   ongelezenMeldingen: number
   komendeVerjaardag: Verjaardag
   partnerNudge: { partnerNaam: string } | null
+  geboorteHerinnering: {
+    eigenOntbreekt: boolean
+    aantalAnders: number
+    meId: string | null
+  }
 }) {
   const anderenDromen = dromen.filter((d) => d.person_id !== mijnPersonId)
 
@@ -124,6 +130,55 @@ export function FamilieKaart({
       <Link href={cta.href} className="fk-btn fk-btn-primary fk-btn-full">
         {cta.tekst}
       </Link>
+
+      {/* Herinnering: eigen geboortedatum ontbreekt → viert de familie je verjaardag. */}
+      {geboorteHerinnering.eigenOntbreekt && geboorteHerinnering.meId && (
+        <Link
+          href={`/app/persoon/${geboorteHerinnering.meId}`}
+          className="fk-card block border-2 border-terracotta/40 bg-terracotta/5"
+        >
+          <div className="flex items-start gap-3">
+            <span className="text-3xl">🎂</span>
+            <div className="min-w-0">
+              <p className="font-black text-inkt leading-snug">
+                Vul je geboortedatum in
+              </p>
+              <p className="text-sm text-inkt-zacht mt-1">
+                Dan opent de familie automatisch een cadeaupot rond jouw
+                verjaardag — zodat niemand het mist.
+              </p>
+              <span className="inline-block mt-2 text-terracotta font-bold text-sm">
+                Mijn geboortedatum invullen →
+              </span>
+            </div>
+          </div>
+        </Link>
+      )}
+
+      {/* Herinnering: anderen missen een geboortedatum (alleen tonen als die van jou wél klopt). */}
+      {!geboorteHerinnering.eigenOntbreekt &&
+        geboorteHerinnering.aantalAnders > 0 && (
+          <Link href="/app/familie" className="fk-card block fk-rise">
+            <div className="flex items-start gap-3">
+              <span className="text-3xl">🎂</span>
+              <div className="min-w-0">
+                <p className="font-black text-inkt leading-snug">
+                  {geboorteHerinnering.aantalAnders}{" "}
+                  {geboorteHerinnering.aantalAnders === 1
+                    ? "familielid mist een geboortedatum"
+                    : "familieleden missen een geboortedatum"}
+                </p>
+                <p className="text-sm text-inkt-zacht mt-1">
+                  Vul ze aan, dan viert de familie ook hún verjaardag met een
+                  cadeaupot.
+                </p>
+                <span className="inline-block mt-2 text-terracotta font-bold text-sm">
+                  Naar de familie →
+                </span>
+              </div>
+            </div>
+          </Link>
+        )}
 
       {/* Partner-nudge: je hangt hier via je partner, bouw je eigen kant. */}
       {partnerNudge && (

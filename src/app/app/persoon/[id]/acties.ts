@@ -252,6 +252,28 @@ export async function stelWoonplaats(
   return { ok: true }
 }
 
+// Zet (of wist) de geboortedatum van een familielid. Nodig voor de automatische
+// verjaardag-cadeaupot. RLS bepaalt wie het mag (persoon zelf/beheerder/keeper).
+export async function stelGeboortedatum(
+  personId: string,
+  datum: string | null,
+): Promise<KindResultaat> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from("persons")
+    .update({ born_on: datum || null })
+    .eq("id", personId)
+  if (error) {
+    return {
+      ok: false,
+      fout: "Kon dit niet opslaan. Alleen de persoon zelf, de beheerder of de Family Keeper kan dit.",
+    }
+  }
+  revalidatePath(`/app/persoon/${personId}`)
+  revalidatePath("/app")
+  return { ok: true }
+}
+
 // Past de naam van een familielid aan. Handig om een nog "Onbekende" (automatisch
 // aangemaakte gedeelde ouder) alsnog een naam te geven. RLS bepaalt wie het mag.
 export async function stelNaam(
