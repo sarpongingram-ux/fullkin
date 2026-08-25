@@ -425,6 +425,7 @@ export type Database = {
       chat_messages: {
         Row: {
           created_at: string
+          edited_at: string | null
           id: string
           message_text: string | null
           message_type: Database["public"]["Enums"]["chat_message_type"]
@@ -434,6 +435,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          edited_at?: string | null
           id?: string
           message_text?: string | null
           message_type?: Database["public"]["Enums"]["chat_message_type"]
@@ -443,6 +445,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          edited_at?: string | null
           id?: string
           message_text?: string | null
           message_type?: Database["public"]["Enums"]["chat_message_type"]
@@ -1755,6 +1758,7 @@ export type Database = {
           status: Database["public"]["Enums"]["invite_status"]
         }[]
       }
+      is_lid_van_room: { Args: { p_room: string }; Returns: boolean }
       kan_bij_room: { Args: { p_room: string }; Returns: boolean }
       komende_verjaardagen: {
         Args: never

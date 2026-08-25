@@ -5,6 +5,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import {
   stuurBericht,
+  bewerkBericht,
   haalNieuweBerichten,
   startCollecteVanuitChat,
   deelMoment,
@@ -69,6 +70,8 @@ export function ChatRoom({
   const [momentOpen, setMomentOpen] = useState(false)
   const [fotoUrls, setFotoUrls] = useState<Record<string, string>>(fotoUrlsInit)
   const [fotoBezig, setFotoBezig] = useState(false)
+  const [bewerktId, setBewerktId] = useState<string | null>(null)
+  const [bewerkTekst, setBewerkTekst] = useState("")
   const fotoInputRef = useRef<HTMLInputElement>(null)
   const berichtenRef = useRef<ChatBericht[]>(initieel)
   const bodemRef = useRef<HTMLDivElement>(null)
@@ -102,6 +105,22 @@ export function ChatRoom({
     })
   }
 
+  function vervang(b: ChatBericht) {
+    setBerichten((prev) => prev.map((m) => (m.id === b.id ? b : m)))
+  }
+
+  async function slaBewerkingOp() {
+    if (!bewerktId) return
+    const t = bewerkTekst.trim()
+    if (!t) return
+    const res = await bewerkBericht(bewerktId, t)
+    if (res.ok) {
+      vervang(res.bericht)
+      setBewerktId(null)
+      setBewerkTekst("")
+    }
+  }
+
   // Live berichten via Supabase Realtime.
   useEffect(() => {
     const supabase = createClient()
@@ -124,6 +143,16 @@ export function ChatRoom({
             filter: `room_id=eq.${roomId}`,
           },
           (payload) => voegToe([payload.new as ChatBericht]),
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "chat_messages",
+            filter: `room_id=eq.${roomId}`,
+          },
+          (payload) => vervang(payload.new as ChatBericht),
         )
         .subscribe()
     })()
@@ -353,8 +382,41 @@ export function ChatRoom({
             relatie: "familielid",
           }
           if (ik) {
+            if (bewerktId === m.id) {
+              return (
+                <div key={m.id} className="flex justify-end">
+                  <div className="w-[85%]">
+                    <textarea
+                      value={bewerkTekst}
+                      onChange={(e) => setBewerkTekst(e.target.value)}
+                      rows={2}
+                      autoFocus
+                      className="w-full rounded-2xl border-2 border-terracotta bg-white px-4 py-2.5 text-inkt text-base outline-none resize-none"
+                    />
+                    <div className="flex justify-end gap-3 mt-1">
+                      <button
+                        onClick={() => {
+                          setBewerktId(null)
+                          setBewerkTekst("")
+                        }}
+                        className="text-sm font-bold text-inkt-zacht"
+                      >
+                        Annuleren
+                      </button>
+                      <button
+                        onClick={slaBewerkingOp}
+                        disabled={!bewerkTekst.trim()}
+                        className="text-sm font-bold text-terracotta disabled:opacity-40"
+                      >
+                        Opslaan
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
+            }
             return (
-              <div key={m.id} className="flex justify-end">
+              <div key={m.id} className="flex justify-end group">
                 <div className="max-w-[78%]">
                   <div
                     className="rounded-3xl rounded-br-md px-4 py-2.5 text-white"
@@ -362,8 +424,20 @@ export function ChatRoom({
                   >
                     <p className="whitespace-pre-wrap break-words">{m.message_text}</p>
                   </div>
-                  <p className="text-[11px] text-inkt-zacht mt-1 text-right">
-                    {tijd(m.created_at)}
+                  <p className="text-[11px] text-inkt-zacht mt-1 text-right flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => {
+                        setBewerktId(m.id)
+                        setBewerkTekst(m.message_text ?? "")
+                      }}
+                      className="font-bold text-terracotta"
+                    >
+                      Bewerken
+                    </button>
+                    <span>
+                      {m.edited_at ? "bewerkt · " : ""}
+                      {tijd(m.created_at)}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -387,7 +461,10 @@ export function ChatRoom({
                 <div className="rounded-3xl rounded-bl-md px-4 py-2.5 bg-oppervlak text-inkt">
                   <p className="whitespace-pre-wrap break-words">{m.message_text}</p>
                 </div>
-                <p className="text-[11px] text-inkt-zacht mt-1 ml-1">{tijd(m.created_at)}</p>
+                <p className="text-[11px] text-inkt-zacht mt-1 ml-1">
+                  {m.edited_at ? "bewerkt · " : ""}
+                  {tijd(m.created_at)}
+                </p>
               </div>
             </div>
           )

@@ -12,10 +12,11 @@ export type ChatBericht = {
   message_type: string
   reference_id: string | null
   created_at: string
+  edited_at: string | null
 }
 
 const BERICHT_KOLOMMEN =
-  "id, sender_id, message_text, message_type, reference_id, created_at"
+  "id, sender_id, message_text, message_type, reference_id, created_at, edited_at"
 
 export type StuurResultaat =
   | { ok: true; bericht: ChatBericht }
@@ -47,6 +48,33 @@ export async function stuurBericht(
     .single()
   if (error || !data) {
     return { ok: false, fout: "Kon het bericht niet versturen." }
+  }
+  return { ok: true, bericht: data as ChatBericht }
+}
+
+// Bewerkt een eigen tekstbericht. RLS staat alleen je eigen berichten toe.
+export async function bewerkBericht(
+  messageId: string,
+  tekst: string,
+): Promise<StuurResultaat> {
+  const schoon = tekst.trim()
+  if (!schoon) return { ok: false, fout: "Leeg bericht." }
+  if (schoon.length > 4000) return { ok: false, fout: "Bericht is te lang." }
+
+  const supabase = await createClient()
+  const { data: meId } = await supabase.rpc("me")
+  if (!meId) return { ok: false, fout: "Je bent niet ingelogd." }
+
+  const { data, error } = await supabase
+    .from("chat_messages")
+    .update({ message_text: schoon, edited_at: new Date().toISOString() })
+    .eq("id", messageId)
+    .eq("sender_id", meId)
+    .eq("message_type", "tekst")
+    .select(BERICHT_KOLOMMEN)
+    .single()
+  if (error || !data) {
+    return { ok: false, fout: "Kon het bericht niet bewerken." }
   }
   return { ok: true, bericht: data as ChatBericht }
 }

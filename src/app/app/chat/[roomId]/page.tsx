@@ -70,7 +70,7 @@ export default async function ChatRuimtePagina({
     await Promise.all([
       supabase
         .from("chat_messages")
-        .select("id, sender_id, message_text, message_type, reference_id, created_at")
+        .select("id, sender_id, message_text, message_type, reference_id, created_at, edited_at")
         .eq("room_id", roomId)
         .order("created_at", { ascending: false })
         .limit(50),
