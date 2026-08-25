@@ -1946,6 +1946,7 @@ export type Database = {
         | "stem_nominatie"
         | "stem_winst"
         | "mijlpaal"
+        | "uitnodiging_geaccepteerd"
       payout_provider: "stripe" | "flutterwave"
       payout_status: "onboarding" | "ready" | "restricted"
       pot_entry_kind:
@@ -2139,6 +2140,7 @@ export const Constants = {
         "stem_nominatie",
         "stem_winst",
         "mijlpaal",
+        "uitnodiging_geaccepteerd",
       ],
       payout_provider: ["stripe", "flutterwave"],
       payout_status: ["onboarding", "ready", "restricted"],
