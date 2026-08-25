@@ -44,7 +44,7 @@ export default async function NieuwePagina() {
         <h1 className="text-3xl font-black text-inkt mt-1">Deel een moment 📷</h1>
       </header>
 
-      <Uploader networkId={mij.network_id} familie={familie} />
+      <Uploader familie={familie} />
     </main>
   )
 }

@@ -8,6 +8,63 @@ export type NieuwResultaat =
   | { ok: true; id: string }
   | { ok: false; fout: string }
 
+export type UploadUrlResultaat =
+  | { ok: true; pad: string; token: string }
+  | { ok: false; fout: string }
+
+// Maakt een geautoriseerde upload-link (signed upload URL) aan. De telefoon
+// uploadt het bestand daar RECHTSTREEKS naartoe — dat omzeilt zowel het
+// anon-token-probleem van @supabase/ssr bij Storage als de ~4,5MB body-limiet
+// van Vercel-functies (grote video/audio kan zo tot 200MB).
+export async function maakUploadUrl(ext: string): Promise<UploadUrlResultaat> {
+  const supabase = await createClient()
+  const { data: meId } = await supabase.rpc("me")
+  if (!meId) return { ok: false, fout: "Je bent niet ingelogd." }
+
+  const { data: mij } = await supabase
+    .from("persons")
+    .select("network_id")
+    .eq("id", meId)
+    .single()
+  if (!mij) return { ok: false, fout: "Je profiel is niet gevonden." }
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session?.access_token)
+    return { ok: false, fout: "Je sessie is verlopen. Log opnieuw in." }
+
+  const veiligExt =
+    (ext || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5) || "jpg"
+  const pad = `${mij.network_id}/${crypto.randomUUID()}.${veiligExt}`
+
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const res = await fetch(
+    `${base}/storage/v1/object/upload/sign/family-album/${pad}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        "Content-Type": "application/json",
+      },
+    },
+  )
+  if (!res.ok) {
+    const t = await res.text().catch(() => "")
+    return {
+      ok: false,
+      fout: "Kon de upload niet voorbereiden: " + (t || res.status),
+    }
+  }
+  const data = (await res.json().catch(() => null)) as { url?: string } | null
+  const url = data?.url ?? ""
+  const token = new URLSearchParams(url.split("?")[1] ?? "").get("token") ?? ""
+  if (!token) return { ok: false, fout: "Geen upload-token ontvangen." }
+
+  return { ok: true, pad, token }
+}
+
 // Maakt een herinnering aan nadat het bestand al naar Storage is geüpload.
 // De client uploadt (respecteert storage-RLS) en stuurt hier het opslagpad +
 // de gekozen tags door.

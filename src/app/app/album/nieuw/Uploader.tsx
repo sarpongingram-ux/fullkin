@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { maakHerinnering } from "../acties"
+import { maakHerinnering, maakUploadUrl } from "../acties"
 import type { Enums } from "@/lib/types/database"
 
 type Lid = { id: string; naam: string }
@@ -14,13 +14,7 @@ function mediaSoort(mime: string): Enums<"media_kind"> {
   return "foto"
 }
 
-export function Uploader({
-  networkId,
-  familie,
-}: {
-  networkId: string
-  familie: Lid[]
-}) {
+export function Uploader({ familie }: { familie: Lid[] }) {
   const router = useRouter()
   const [bestand, setBestand] = useState<File | null>(null)
   const [soort, setSoort] = useState<Enums<"media_kind">>("foto")
@@ -66,11 +60,23 @@ export function Uploader({
 
     const supabase = createClient()
     const ext = bestand.name.split(".").pop()?.toLowerCase() || "jpg"
-    const pad = `${networkId}/${crypto.randomUUID()}.${ext}`
 
+    // 1) De server maakt een geautoriseerde upload-link (met jouw token).
+    const link = await maakUploadUrl(ext)
+    if (!link.ok) {
+      setFout(link.fout)
+      setBezig(false)
+      return
+    }
+
+    // 2) De telefoon uploadt rechtstreeks naar Storage via die link.
+    //    (Omzeilt het anon-token-probleem én de Vercel body-limiet.)
     const { error: uploadFout } = await supabase.storage
       .from("family-album")
-      .upload(pad, bestand, { cacheControl: "3600", upsert: false })
+      .uploadToSignedUrl(link.pad, link.token, bestand, {
+        contentType: bestand.type || undefined,
+        upsert: false,
+      })
     if (uploadFout) {
       setFout("Uploaden mislukt: " + uploadFout.message)
       setBezig(false)
@@ -78,7 +84,7 @@ export function Uploader({
     }
 
     const res = await maakHerinnering({
-      filePath: pad,
+      filePath: link.pad,
       fileType: soort,
       title: titel,
       memoryText: verhaal,
