@@ -5,7 +5,12 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { wisselFamilie } from "./familie-acties"
 
-export type Familie = { network_id: string; name: string; is_active: boolean }
+export type Familie = {
+  network_id: string
+  name: string
+  is_active: boolean
+  bevroren: boolean
+}
 
 export function FamilieWisselaar({ families }: { families: Familie[] }) {
   const [open, setOpen] = useState(false)
@@ -55,12 +60,20 @@ export function FamilieWisselaar({ families }: { families: Familie[] }) {
                 onClick={() => kies(f.network_id)}
                 className="flex w-full items-center gap-2 px-4 py-3 text-left hover:bg-zand transition"
               >
-                <span className="text-lg">{f.is_active ? "🌳" : "🌱"}</span>
+                <span className="text-lg">
+                  {f.bevroren ? "⏸️" : f.is_active ? "🌳" : "🌱"}
+                </span>
                 <span className="flex-1 truncate font-semibold text-inkt">
                   {f.name}
                 </span>
-                {f.is_active && (
-                  <span className="text-terracotta text-xs font-bold">nu</span>
+                {f.bevroren ? (
+                  <span className="text-inkt-zacht text-xs font-bold">
+                    op pauze
+                  </span>
+                ) : (
+                  f.is_active && (
+                    <span className="text-terracotta text-xs font-bold">nu</span>
+                  )
                 )}
               </button>
             ))}

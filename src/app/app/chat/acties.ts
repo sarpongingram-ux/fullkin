@@ -3,7 +3,24 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { tekenFotoUrls } from "@/lib/album/urls"
+import { netwerkOpPauze, PAUZE_FOUT } from "@/lib/familie/status"
+import type { SupabaseClient } from "@supabase/supabase-js"
+import type { Database } from "@/lib/types/database"
 import type { Enums } from "@/lib/types/database"
+
+// Staat de familie van deze chatruimte op pauze? Zo ja, dan geen nieuwe berichten.
+async function roomOpPauze(
+  supabase: SupabaseClient<Database>,
+  roomId: string,
+): Promise<boolean> {
+  const { data: room } = await supabase
+    .from("chat_rooms")
+    .select("network_id")
+    .eq("id", roomId)
+    .maybeSingle()
+  if (!room?.network_id) return false
+  return netwerkOpPauze(supabase, room.network_id)
+}
 
 export type ChatBericht = {
   id: string
@@ -35,6 +52,10 @@ export async function stuurBericht(
   const supabase = await createClient()
   const { data: meId } = await supabase.rpc("me")
   if (!meId) return { ok: false, fout: "Je bent niet ingelogd." }
+
+  if (await roomOpPauze(supabase, roomId)) {
+    return { ok: false, fout: PAUZE_FOUT }
+  }
 
   const { data, error } = await supabase
     .from("chat_messages")
@@ -135,6 +156,11 @@ export async function deelFoto(
   const supabase = await createClient()
   const { data: meId } = await supabase.rpc("me")
   if (!meId) return { ok: false, fout: "Je bent niet ingelogd." }
+
+  if (await roomOpPauze(supabase, roomId)) {
+    return { ok: false, fout: PAUZE_FOUT }
+  }
+
   const { data: mij } = await supabase
     .from("persons")
     .select("network_id")

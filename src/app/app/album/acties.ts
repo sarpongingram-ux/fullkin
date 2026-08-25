@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/service"
 import { revalidatePath } from "next/cache"
+import { netwerkOpPauze, PAUZE_FOUT } from "@/lib/familie/status"
 import type { Enums } from "@/lib/types/database"
 
 export type NieuwResultaat =
@@ -28,6 +29,10 @@ export async function maakUploadUrl(ext: string): Promise<UploadUrlResultaat> {
     .eq("id", meId)
     .single()
   if (!mij) return { ok: false, fout: "Je profiel is niet gevonden." }
+
+  if (await netwerkOpPauze(supabase, mij.network_id)) {
+    return { ok: false, fout: PAUZE_FOUT }
+  }
 
   const veiligExt =
     (ext || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5) || "jpg"

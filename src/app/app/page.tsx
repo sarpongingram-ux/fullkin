@@ -1,12 +1,15 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { FamilieKaart } from "./FamilieKaart"
-import { settleExtraFamilieFromSession } from "@/lib/stripe/extraFamilie"
+import {
+  settleExtraFamilieFromSession,
+  settleHeractiveringFromSession,
+} from "@/lib/stripe/extraFamilie"
 
 export default async function AppHome({
   searchParams,
 }: {
-  searchParams: Promise<{ nieuwe_familie?: string }>
+  searchParams: Promise<{ nieuwe_familie?: string; familie_heractiveerd?: string }>
 }) {
   const supabase = await createClient()
 
@@ -20,6 +23,10 @@ export default async function AppHome({
   const sp = await searchParams
   if (sp?.nieuwe_familie) {
     await settleExtraFamilieFromSession(sp.nieuwe_familie)
+  }
+  // Terug van een heractivering? Zet de familie meteen weer op actief.
+  if (sp?.familie_heractiveerd) {
+    await settleHeractiveringFromSession(sp.familie_heractiveerd)
   }
 
   // Wie ben ik als persoon op de kaart? Nog geen familie? Dan naar de voordeur:

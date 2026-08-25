@@ -1,6 +1,9 @@
 import { getStripe } from "@/lib/stripe/server"
 import { createServiceClient } from "@/lib/supabase/service"
-import { settleExtraFamilieFromSession } from "@/lib/stripe/extraFamilie"
+import {
+  settleExtraFamilieFromSession,
+  settleHeractiveringFromSession,
+} from "@/lib/stripe/extraFamilie"
 import type Stripe from "stripe"
 
 // Stripe-webhook. Bij een geslaagde betaling wordt de bijdrage afgerekend:
@@ -30,6 +33,13 @@ export async function POST(req: Request) {
     if (session.metadata?.soort === "extra_familie") {
       const net = await settleExtraFamilieFromSession(session.id)
       if (!net) return new Response("Familie aanmaken mislukt", { status: 500 })
+      return new Response("ok")
+    }
+
+    // Een bevroren familie wordt opnieuw geactiveerd.
+    if (session.metadata?.soort === "heractiveer_familie") {
+      const ok = await settleHeractiveringFromSession(session.id)
+      if (!ok) return new Response("Heractiveren mislukt", { status: 500 })
       return new Response("ok")
     }
 
@@ -69,7 +79,27 @@ export async function POST(req: Request) {
         })
         if (error) return new Response("Boeken mislukt", { status: 500 })
       }
+
+      // Een familie-abonnement dat weer betaalt → familie weer 'actief'
+      // (ontdooien na een eerder betaalprobleem).
+      await svc
+        .from("family_subscriptions")
+        .update({ status: "actief", canceled_at: null })
+        .eq("stripe_subscription_id", subId)
     }
+  }
+
+  // Abonnement definitief beëindigd → lid-gestichte familie op pauze.
+  if (event.type === "customer.subscription.deleted") {
+    const sub = event.data.object as Stripe.Subscription
+    const svc = createServiceClient()
+    await svc
+      .from("family_subscriptions")
+      .update({
+        status: "geannuleerd",
+        canceled_at: new Date().toISOString(),
+      })
+      .eq("stripe_subscription_id", sub.id)
   }
 
   return new Response("ok")

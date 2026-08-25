@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { netwerkOpPauze, PAUZE_FOUT } from "@/lib/familie/status"
 import type { Enums } from "@/lib/types/database"
 
 export type RelatieKeuze = "ouder" | "kind" | "partner" | "broer_zus"
@@ -53,6 +54,10 @@ export async function voegFamilielidToe(
     .single()
   if (!mij) return { ok: false, fout: "Je profiel is niet gevonden." }
   const network_id = mij.network_id
+
+  if (await netwerkOpPauze(supabase, network_id)) {
+    return { ok: false, fout: PAUZE_FOUT }
+  }
 
   // Het nieuwe lid wordt gekoppeld aan een "anker": standaard jij, maar het mag
   // ook een ander familielid zijn (zo bouw je de bredere familie op). Het anker

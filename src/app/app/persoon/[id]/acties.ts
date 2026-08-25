@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/service"
 import { revalidatePath } from "next/cache"
+import { netwerkOpPauze, PAUZE_FOUT } from "@/lib/familie/status"
 import type { Enums } from "@/lib/types/database"
 
 export type KindResultaat = { ok: true } | { ok: false; fout: string }
@@ -153,6 +154,10 @@ export async function maakAvatarUploadUrl(
     .single()
   if (!mij || mij.network_id !== persoon.network_id) {
     return { ok: false, fout: "Dit familielid hoort niet bij jouw familie." }
+  }
+
+  if (await netwerkOpPauze(supabase, persoon.network_id)) {
+    return { ok: false, fout: PAUZE_FOUT }
   }
 
   const veiligExt =

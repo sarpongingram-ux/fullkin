@@ -1824,6 +1824,16 @@ export type Database = {
         Args: { net: string; r: Database["public"]["Enums"]["family_role"] }
         Returns: boolean
       }
+      heractiveer_familie_abonnement: {
+        Args: {
+          p_amount?: number
+          p_customer: string
+          p_net: string
+          p_person: string
+          p_sub_id: string
+        }
+        Returns: undefined
+      }
       invite_preview: {
         Args: { invite_token: string }
         Returns: {
@@ -1875,6 +1885,7 @@ export type Database = {
       mijn_families: {
         Args: never
         Returns: {
+          bevroren: boolean
           is_active: boolean
           name: string
           network_id: string
@@ -1892,6 +1903,7 @@ export type Database = {
           uitgekeerd_cents: number
         }[]
       }
+      netwerk_bevroren: { Args: { p_net: string }; Returns: boolean }
       ontdek_verbindingen: {
         Args: never
         Returns: {

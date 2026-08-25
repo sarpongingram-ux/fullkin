@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { BottomNav } from "./BottomNav"
 import { FamilieWisselaar, type Familie } from "./FamilieWisselaar"
+import { PauzeBanner } from "./PauzeBanner"
 
 // Alle app-schermen delen de onderste navigatiebalk en — als je bij een familie
 // hoort — de familie-wisselaar bovenin. De extra onderruimte zorgt dat inhoud
@@ -13,6 +14,7 @@ export default async function AppLayout({
   const supabase = await createClient()
   const { data: families } = await supabase.rpc("mijn_families")
   const lijst = (families ?? []) as Familie[]
+  const actief = lijst.find((f) => f.is_active) ?? lijst[0]
 
   return (
     <div className="pb-24">
@@ -20,6 +22,9 @@ export default async function AppLayout({
         <div className="sticky top-0 z-30 flex items-center px-4 py-2 bg-zand/85 backdrop-blur border-b border-rand">
           <FamilieWisselaar families={lijst} />
         </div>
+      )}
+      {actief?.bevroren && (
+        <PauzeBanner networkId={actief.network_id} familieNaam={actief.name} />
       )}
       {children}
       <BottomNav />

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { getStripe } from "@/lib/stripe/server"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { netwerkOpPauze, PAUZE_FOUT } from "@/lib/familie/status"
 import type { Enums } from "@/lib/types/database"
 import type Stripe from "stripe"
 
@@ -43,6 +44,10 @@ export async function startCollecte(
     .eq("id", meId)
     .single()
   if (!mij) return { ok: false, fout: "Je profiel is niet gevonden." }
+
+  if (await netwerkOpPauze(supabase, mij.network_id)) {
+    return { ok: false, fout: PAUZE_FOUT }
+  }
 
   // Suggestiebedrag ophalen bij dit soort moment.
   const { data: sugg } = await supabase
