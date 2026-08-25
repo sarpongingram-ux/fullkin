@@ -72,9 +72,26 @@ export function ChatRoom({
   const fotoInputRef = useRef<HTMLInputElement>(null)
   const berichtenRef = useRef<ChatBericht[]>(initieel)
   const bodemRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const gevraagd = useRef<Set<string>>(new Set())
 
   berichtenRef.current = berichten
+
+  // Houd de chat exact zo hoog als het zichtbare venster, zodat de invoerbalk
+  // boven het toetsenbord blijft (i.p.v. erachter te verdwijnen op mobiel).
+  useEffect(() => {
+    const vv = window.visualViewport
+    const el = containerRef.current
+    if (!vv || !el) return
+    const pas = () => {
+      el.style.height = `${vv.height}px`
+    }
+    pas()
+    vv.addEventListener("resize", pas)
+    return () => {
+      vv.removeEventListener("resize", pas)
+    }
+  }, [])
 
   function voegToe(nieuwe: ChatBericht[]) {
     if (nieuwe.length === 0) return
@@ -185,9 +202,13 @@ export function ChatRoom({
   }
 
   return (
-    <div className="max-w-md mx-auto">
+    <div
+      ref={containerRef}
+      className="fixed inset-0 z-50 flex flex-col bg-white"
+      style={{ height: "100dvh" }}
+    >
       {/* Kop */}
-      <header className="sticky top-0 z-20 bg-white border-b border-rand px-4 py-3 flex items-center gap-3">
+      <header className="flex-none bg-white border-b border-rand px-4 py-3 flex items-center gap-3">
         <Link href="/app/chat" className="text-inkt-zacht font-bold hover:text-inkt">
           ←
         </Link>
@@ -207,7 +228,7 @@ export function ChatRoom({
       </header>
 
       {/* Berichten */}
-      <div className="px-4 pt-4 pb-32 space-y-3">
+      <div className="flex-1 overflow-y-auto min-h-0 px-4 pt-4 pb-3 space-y-3">
         {berichten.map((m) => {
           if (m.message_type === "collecte_link" && m.reference_id) {
             const wie = m.sender_id ? directory[m.sender_id] : null
@@ -376,10 +397,10 @@ export function ChatRoom({
 
       {/* Chatbalk */}
       <div
-        className="fixed inset-x-0 z-30 bg-white border-t border-rand"
-        style={{ bottom: "calc(env(safe-area-inset-bottom) + 60px)" }}
+        className="flex-none bg-white border-t border-rand"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <div className="max-w-md mx-auto px-3 py-2 flex items-center gap-1.5">
+        <div className="px-3 py-2 flex items-center gap-1.5">
           <input
             ref={fotoInputRef}
             type="file"
@@ -499,7 +520,7 @@ function MomentSheet({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-inkt/40 px-4">
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-inkt/40 px-4">
       <div className="w-full max-w-md bg-white rounded-3xl p-5 mb-24 sm:mb-0">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-black text-inkt text-lg">🎉 Deel een moment</h3>
@@ -600,7 +621,7 @@ function CollecteSheet({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-inkt/40 px-4">
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-inkt/40 px-4">
       <div className="w-full max-w-md bg-white rounded-3xl p-5 mb-24 sm:mb-0">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-black text-inkt text-lg">❤️ Start een collecte</h3>
