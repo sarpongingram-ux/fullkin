@@ -222,7 +222,7 @@ export function ChatRoom({
           <p className="font-black text-inkt truncate">{groepsnaam}</p>
           <p className="text-xs text-inkt-zacht">
             {subtitel ??
-              `${aantalLeden} ${aantalLeden === 1 ? "familielid" : "familieleden"} · privé`}
+              `${aantalLeden} ${aantalLeden === 1 ? "familielid" : "familieleden"} · iedereen leest mee`}
           </p>
         </div>
       </header>

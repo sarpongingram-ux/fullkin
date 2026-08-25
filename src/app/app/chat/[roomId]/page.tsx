@@ -149,7 +149,7 @@ export default async function ChatRuimtePagina({
     if (anderId) {
       const info = directory[anderId]
       groepsnaam = info?.voornaam ?? "Familielid"
-      subtitel = `jouw ${info?.relatie ?? "familielid"}`
+      subtitel = `🔒 Privé · alleen jij en ${info?.voornaam ?? "dit familielid"}`
     }
   }
 
