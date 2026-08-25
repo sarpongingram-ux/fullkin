@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/service"
 import { revalidatePath } from "next/cache"
 import type { Enums } from "@/lib/types/database"
 
@@ -28,41 +29,31 @@ export async function maakUploadUrl(ext: string): Promise<UploadUrlResultaat> {
     .single()
   if (!mij) return { ok: false, fout: "Je profiel is niet gevonden." }
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session?.access_token)
-    return { ok: false, fout: "Je sessie is verlopen. Log opnieuw in." }
-
   const veiligExt =
     (ext || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5) || "jpg"
   const pad = `${mij.network_id}/${crypto.randomUUID()}.${veiligExt}`
 
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const res = await fetch(
-    `${base}/storage/v1/object/upload/sign/family-album/${pad}`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        "Content-Type": "application/json",
-      },
-    },
-  )
-  if (!res.ok) {
-    const t = await res.text().catch(() => "")
+  // De service-client maakt de geautoriseerde upload-link (SDK-methode). De
+  // telefoon uploadt daar rechtstreeks naartoe. Het pad is server-side afgeleid
+  // van jouw eigen netwerk, dus je kunt alleen in je eigen familie-map uploaden.
+  try {
+    const svc = createServiceClient()
+    const { data, error } = await svc.storage
+      .from("family-album")
+      .createSignedUploadUrl(pad)
+    if (error || !data?.token) {
+      return {
+        ok: false,
+        fout: "Kon de upload niet voorbereiden. Probeer het nog eens.",
+      }
+    }
+    return { ok: true, pad: data.path, token: data.token }
+  } catch {
     return {
       ok: false,
-      fout: "Kon de upload niet voorbereiden: " + (t || res.status),
+      fout: "Uploaden kan nu even niet. Probeer het straks opnieuw.",
     }
   }
-  const data = (await res.json().catch(() => null)) as { url?: string } | null
-  const url = data?.url ?? ""
-  const token = new URLSearchParams(url.split("?")[1] ?? "").get("token") ?? ""
-  if (!token) return { ok: false, fout: "Geen upload-token ontvangen." }
-
-  return { ok: true, pad, token }
 }
 
 // Maakt een herinnering aan nadat het bestand al naar Storage is geüpload.
