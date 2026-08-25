@@ -43,6 +43,7 @@ export function FamilieKaart({
   businessDromen,
   ongelezenMeldingen,
   komendeVerjaardag,
+  partnerNudge,
 }: {
   voornaam: string
   familieNaam: string
@@ -55,6 +56,7 @@ export function FamilieKaart({
   businessDromen: BusinessDroom[]
   ongelezenMeldingen: number
   komendeVerjaardag: Verjaardag
+  partnerNudge: { partnerNaam: string } | null
 }) {
   const anderenDromen = dromen.filter((d) => d.person_id !== mijnPersonId)
 
@@ -122,6 +124,31 @@ export function FamilieKaart({
       <Link href={cta.href} className="fk-btn fk-btn-primary fk-btn-full">
         {cta.tekst}
       </Link>
+
+      {/* Partner-nudge: je hangt hier via je partner, bouw je eigen kant. */}
+      {partnerNudge && (
+        <Link
+          href="/app/familie/nieuw"
+          className="fk-card block border-2 border-terracotta/40 bg-terracotta/5 fk-rise"
+        >
+          <div className="flex items-start gap-3">
+            <span className="text-3xl">🌳</span>
+            <div className="min-w-0">
+              <p className="font-black text-inkt leading-snug">
+                Breng ook jouw kant in beeld
+              </p>
+              <p className="text-sm text-inkt-zacht mt-1">
+                Je bent hier verbonden via {partnerNudge.partnerNaam}. Je eigen
+                vader- en moederskant staat er nog niet. Bouw jouw familie erbij —
+                dan hoor je straks aan beide kanten thuis.
+              </p>
+              <span className="inline-block mt-2 text-terracotta font-bold text-sm">
+                Bouw mijn vader- of moederskant →
+              </span>
+            </div>
+          </div>
+        </Link>
+      )}
 
       {/* Familiemomenten, als kaarten, niet als lijst */}
       <section className="space-y-3">

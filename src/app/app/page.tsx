@@ -123,6 +123,13 @@ export default async function AppHome({
   }))
   const mijnDroom = alleDromen.find((d) => d.person_id === meId) ?? null
 
+  // Partner-nudge: hang je hier via je partner zonder eigen kant? Geef een zetje.
+  const { data: nudge } = await supabase.rpc("partner_nudge", { me: meId })
+  const nudgeRow = (nudge ?? [])[0]
+  const partnerNudge = nudgeRow?.toon
+    ? { partnerNaam: nudgeRow.partner_naam ?? "je partner" }
+    : null
+
   return (
     <FamilieKaart
       voornaam={mij?.first_name ?? "familielid"}
@@ -136,6 +143,7 @@ export default async function AppHome({
       businessDromen={businessDromen}
       ongelezenMeldingen={ongelezen ?? 0}
       komendeVerjaardag={komendeVerjaardag}
+      partnerNudge={partnerNudge}
     />
   )
 }

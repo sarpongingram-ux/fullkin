@@ -1975,6 +1975,13 @@ export type Database = {
           samen: number
         }[]
       }
+      partner_nudge: {
+        Args: { me: string }
+        Returns: {
+          partner_naam: string
+          toon: boolean
+        }[]
+      }
       payout_ready: { Args: { p: string }; Returns: boolean }
       pot_maandbijdrage_stats: {
         Args: never
