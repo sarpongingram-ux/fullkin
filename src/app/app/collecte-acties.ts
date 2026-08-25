@@ -103,6 +103,90 @@ export async function startCollecte(
   return { ok: true, collectieId: collectie.id }
 }
 
+export type BeheerResultaat = { ok: true } | { ok: false; fout: string }
+
+// Mag ik deze collecte beheren? De keeper, degene die 'm startte, of de
+// begunstigde zelf. Geeft ook de collecte terug voor verdere checks.
+async function magBeheren(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  collectionId: string,
+) {
+  const { data: meId } = await supabase.rpc("me")
+  if (!meId) return { mag: false as const, meId: null, col: null }
+  const { data: col } = await supabase
+    .from("collections")
+    .select("id, network_id, beneficiary_id, started_by, status")
+    .eq("id", collectionId)
+    .single()
+  if (!col) return { mag: false as const, meId, col: null }
+  const { data: isKeeper } = await supabase.rpc("has_role", {
+    net: col.network_id,
+    r: "co_founder",
+  })
+  const mag =
+    !!isKeeper || col.started_by === meId || col.beneficiary_id === meId
+  return { mag, meId, col }
+}
+
+// Stop een lopende collecte: 'gesloten'. Reeds gegeven bijdragen blijven staan;
+// er kan niet meer bijgedragen worden en de auto-verjaardagpot maakt 'm niet
+// opnieuw aan.
+export async function stopCollecte(
+  collectionId: string,
+): Promise<BeheerResultaat> {
+  const supabase = await createClient()
+  const { mag, col } = await magBeheren(supabase, collectionId)
+  if (!col) return { ok: false, fout: "Deze collecte bestaat niet." }
+  if (!mag) {
+    return {
+      ok: false,
+      fout: "Alleen de Family Keeper, de starter of de begunstigde kan dit.",
+    }
+  }
+  const { error } = await supabase
+    .from("collections")
+    .update({ status: "gesloten" })
+    .eq("id", collectionId)
+  if (error) return { ok: false, fout: "Kon de collecte niet stoppen." }
+  revalidatePath("/app")
+  revalidatePath(`/app/collecte/${collectionId}`)
+  return { ok: true }
+}
+
+// Verwijder een collecte (zacht: 'verwijderd', verborgen). Alleen als er nog geen
+// bijdragen zijn — anders is stoppen de juiste keuze.
+export async function verwijderCollecte(
+  collectionId: string,
+): Promise<BeheerResultaat> {
+  const supabase = await createClient()
+  const { mag, col } = await magBeheren(supabase, collectionId)
+  if (!col) return { ok: false, fout: "Deze collecte bestaat niet." }
+  if (!mag) {
+    return {
+      ok: false,
+      fout: "Alleen de Family Keeper, de starter of de begunstigde kan dit.",
+    }
+  }
+  const { count } = await supabase
+    .from("contributions")
+    .select("id", { count: "exact", head: true })
+    .eq("collection_id", collectionId)
+  if ((count ?? 0) > 0) {
+    return {
+      ok: false,
+      fout: "Er is al bijgedragen — stop de collecte in plaats van verwijderen.",
+    }
+  }
+  const { error } = await supabase
+    .from("collections")
+    .update({ status: "verwijderd" })
+    .eq("id", collectionId)
+  if (error) return { ok: false, fout: "Kon de collecte niet verwijderen." }
+  revalidatePath("/app")
+  revalidatePath(`/app/collecte/${collectionId}`)
+  return { ok: true }
+}
+
 // ---------------------------------------------------------------------------
 // Bijdragen aan een collecte.
 //

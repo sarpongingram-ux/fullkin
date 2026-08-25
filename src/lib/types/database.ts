@@ -1920,6 +1920,7 @@ export type Database = {
         }[]
       }
       leg_chat_contact_vast: { Args: { p_room: string }; Returns: undefined }
+      maak_verjaardag_collectes: { Args: { p_dagen?: number }; Returns: number }
       markeer_meldingen_gelezen: { Args: never; Returns: undefined }
       me: { Args: never; Returns: string }
       meld: {
@@ -2097,7 +2098,12 @@ export type Database = {
         | "moment"
         | "systeem"
       chat_room_type: "familie" | "tak" | "direct"
-      collection_status: "concept" | "open" | "gesloten" | "uitbetaald"
+      collection_status:
+        | "concept"
+        | "open"
+        | "gesloten"
+        | "uitbetaald"
+        | "verwijderd"
       contact_status: "verbonden" | "stil" | "herstellend"
       contribution_status: "wachtend" | "betaald" | "mislukt" | "terugbetaald"
       dream_status: "actief" | "vervuld" | "gepauzeerd"
@@ -2289,7 +2295,13 @@ export const Constants = {
         "systeem",
       ],
       chat_room_type: ["familie", "tak", "direct"],
-      collection_status: ["concept", "open", "gesloten", "uitbetaald"],
+      collection_status: [
+        "concept",
+        "open",
+        "gesloten",
+        "uitbetaald",
+        "verwijderd",
+      ],
       contact_status: ["verbonden", "stil", "herstellend"],
       contribution_status: ["wachtend", "betaald", "mislukt", "terugbetaald"],
       dream_status: ["actief", "vervuld", "gepauzeerd"],

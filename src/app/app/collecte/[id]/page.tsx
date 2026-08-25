@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Bijdragen } from "./Bijdragen"
+import { CollecteBeheer } from "./CollecteBeheer"
 import { settleFromSession } from "@/lib/stripe/settle"
 import { Confetti } from "@/components/Confetti"
 import { totaalZichtbaar } from "@/lib/collecte/privacy"
@@ -43,17 +44,29 @@ export default async function CollectiePagina({
 
   const { data: collectie } = await supabase
     .from("collections")
-    .select("id, title, message, suggested_cents, status, beneficiary_id")
+    .select(
+      "id, title, message, suggested_cents, status, beneficiary_id, started_by, network_id",
+    )
     .eq("id", id)
     .single()
 
-  if (!collectie) {
+  if (!collectie || collectie.status === "verwijderd") {
     return (
       <main className="min-h-screen flex items-center justify-center px-6 text-center">
         <p className="text-inkt-zacht">Deze collecte bestaat niet.</p>
       </main>
     )
   }
+
+  // Mag ik deze collecte beheren (stoppen/verwijderen)?
+  const { data: isKeeper } = await supabase.rpc("has_role", {
+    net: collectie.network_id,
+    r: "co_founder",
+  })
+  const magBeheren =
+    !!isKeeper ||
+    collectie.started_by === meId ||
+    collectie.beneficiary_id === meId
 
   const [{ data: begunstigde }, { data: totaal }, { data: gevers }] =
     await Promise.all([
@@ -113,6 +126,15 @@ export default async function CollectiePagina({
         )}
       </section>
 
+      {collectie.status === "gesloten" && (
+        <div className="fk-card text-center">
+          <p className="font-black text-inkt">Deze collecte is gesloten</p>
+          <p className="text-inkt-zacht text-sm mt-1">
+            Er kan niet meer worden bijgedragen.
+          </p>
+        </div>
+      )}
+
       {/* Bijdragen, alleen als je niet de begunstigde bent en nog niet gaf. */}
       {collectie.status === "open" && !isBegunstigde && !alBijgedragen && (
         <Bijdragen
@@ -162,6 +184,18 @@ export default async function CollectiePagina({
         Iedereen ziet wie heeft bijgedragen. Niemand ziet hoeveel. De oma die
         €0,75 geeft staat naast de oom die €200 geeft.
       </p>
+
+      {/* Beheer: stoppen of verwijderen (keeper, starter of begunstigde). */}
+      {magBeheren && collectie.status !== "gesloten" && (
+        <CollecteBeheer
+          collectieId={id}
+          open={collectie.status === "open"}
+          geenBijdragen={aantal === 0}
+        />
+      )}
+      {magBeheren && collectie.status === "gesloten" && aantal === 0 && (
+        <CollecteBeheer collectieId={id} open={false} geenBijdragen={true} />
+      )}
     </main>
   )
 }
