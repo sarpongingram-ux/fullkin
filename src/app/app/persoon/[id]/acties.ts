@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/service"
 import { revalidatePath } from "next/cache"
 import type { Enums } from "@/lib/types/database"
 
@@ -113,8 +114,6 @@ export async function stelKindStatus(
   return { ok: true }
 }
 
-const AVATAR_MAX = 10 * 1024 * 1024
-
 function vernieuwProfiel(personId: string) {
   revalidatePath(`/app/persoon/${personId}`)
   revalidatePath("/app/familie")
@@ -122,26 +121,24 @@ function vernieuwProfiel(personId: string) {
   revalidatePath("/app")
 }
 
-// Uploadt een profielfoto en koppelt 'm aan de persoon. De upload loopt via de
-// server (met jouw ingelogde sessie), zodat storage-RLS altijd klopt — anders
-// dan een client-upload die soms als anonieme gebruiker binnenkomt.
-export async function uploadProfielfoto(
-  formData: FormData,
-): Promise<KindResultaat> {
-  const personId = String(formData.get("personId") ?? "")
-  const file = formData.get("foto")
+export type AvatarUrlResultaat =
+  | { ok: true; pad: string; token: string }
+  | { ok: false; fout: string }
+
+// Maakt een geautoriseerde upload-link voor een profielfoto. De telefoon uploadt
+// daar RECHTSTREEKS naartoe — buiten Vercel om (dus ook grote foto's, geen 4,5MB-
+// limiet) en zonder afhankelijkheid van de SSR-sessietoken. Het pad wordt
+// server-side afgeleid van het netwerk van de persoon.
+export async function maakAvatarUploadUrl(
+  personId: string,
+  ext: string,
+): Promise<AvatarUrlResultaat> {
   if (!personId) return { ok: false, fout: "Onbekende persoon." }
-  if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, fout: "Kies een afbeelding." }
-  }
-  if (!file.type.startsWith("image/")) {
-    return { ok: false, fout: "Dit is geen afbeelding." }
-  }
-  if (file.size > AVATAR_MAX) {
-    return { ok: false, fout: "Deze foto is groter dan 10MB." }
-  }
 
   const supabase = await createClient()
+  const { data: meId } = await supabase.rpc("me")
+  if (!meId) return { ok: false, fout: "Je bent niet ingelogd." }
+
   const { data: persoon } = await supabase
     .from("persons")
     .select("network_id")
@@ -149,40 +146,51 @@ export async function uploadProfielfoto(
     .single()
   if (!persoon) return { ok: false, fout: "Persoon niet gevonden." }
 
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase()
-  const pad = `${persoon.network_id}/${personId}-${crypto.randomUUID()}.${ext}`
-  const bytes = new Uint8Array(await file.arrayBuffer())
-
-  // De storage-client van @supabase/ssr (en zelfs de accessToken-optie) draagt
-  // jouw token bij SSR niet mee, waardoor de upload als anon binnenkomt en RLS
-  // 'm weigert. We doen de upload daarom met een directe HTTP-call, waarin we
-  // jouw sessie-token zelf in de Authorization-header zetten. Zo komt de upload
-  // gegarandeerd geauthenticeerd binnen.
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session?.access_token) {
-    return { ok: false, fout: "Je sessie is verlopen. Log opnieuw in." }
+  const { data: mij } = await supabase
+    .from("persons")
+    .select("network_id")
+    .eq("id", meId)
+    .single()
+  if (!mij || mij.network_id !== persoon.network_id) {
+    return { ok: false, fout: "Dit familielid hoort niet bij jouw familie." }
   }
-  // Het pad is altijd een nieuwe UUID, dus een gewone insert (zonder upsert)
-  // volstaat — en die valt netjes onder de insert-policy voor geauthenticeerde
-  // gebruikers.
+
+  const veiligExt =
+    (ext || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5) || "jpg"
+  const pad = `${persoon.network_id}/${personId}-${crypto.randomUUID()}.${veiligExt}`
+
+  try {
+    const svc = createServiceClient()
+    const { data, error } = await svc.storage
+      .from("avatars")
+      .createSignedUploadUrl(pad)
+    if (error || !data?.token) {
+      return {
+        ok: false,
+        fout: "Kon de upload niet voorbereiden. Probeer het nog eens.",
+      }
+    }
+    return { ok: true, pad: data.path, token: data.token }
+  } catch {
+    return {
+      ok: false,
+      fout: "Uploaden kan nu even niet. Probeer het straks opnieuw.",
+    }
+  }
+}
+
+// Koppelt een geüploade profielfoto aan de persoon. De update valt onder RLS:
+// alleen de persoon zelf, de beheerder of de Family Keeper mag dit opslaan.
+export async function koppelProfielfoto(
+  personId: string,
+  pad: string,
+): Promise<KindResultaat> {
+  if (!personId || !pad) return { ok: false, fout: "Onbekende foto." }
+
+  const supabase = await createClient()
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const uploadRes = await fetch(`${base}/storage/v1/object/avatars/${pad}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${session.access_token}`,
-      apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      "Content-Type": file.type,
-    },
-    body: bytes,
-  })
-  if (!uploadRes.ok) {
-    const body = await uploadRes.text().catch(() => "")
-    return { ok: false, fout: "Uploaden mislukt: " + (body || uploadRes.status) }
-  }
-
   const fotoUrl = `${base}/storage/v1/object/public/avatars/${pad}`
+
   const { error } = await supabase
     .from("persons")
     .update({ photo_url: fotoUrl })

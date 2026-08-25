@@ -2,7 +2,14 @@
 
 import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { uploadProfielfoto, verwijderProfielfoto } from "./acties"
+import { createClient } from "@/lib/supabase/client"
+import {
+  maakAvatarUploadUrl,
+  koppelProfielfoto,
+  verwijderProfielfoto,
+} from "./acties"
+
+const AVATAR_MAX = 10 * 1024 * 1024
 
 export function ProfielFoto({
   personId,
@@ -20,21 +27,46 @@ export function ProfielFoto({
 
   function kies(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
+    // laat dezelfde foto opnieuw kiezen mogelijk blijven
+    e.target.value = ""
     if (!f) return
     setFout(null)
-    const formData = new FormData()
-    formData.set("personId", personId)
-    formData.set("foto", f)
+    if (!f.type.startsWith("image/")) {
+      setFout("Dit is geen afbeelding.")
+      return
+    }
+    if (f.size > AVATAR_MAX) {
+      setFout("Deze foto is groter dan 10MB.")
+      return
+    }
     start(async () => {
-      const res = await uploadProfielfoto(formData)
+      const ext = f.name.split(".").pop()?.toLowerCase() || "jpg"
+      // 1) De server maakt een geautoriseerde upload-link.
+      const link = await maakAvatarUploadUrl(personId, ext)
+      if (!link.ok) {
+        setFout(link.fout)
+        return
+      }
+      // 2) De telefoon uploadt de foto rechtstreeks naar Storage.
+      const supabase = createClient()
+      const { error } = await supabase.storage
+        .from("avatars")
+        .uploadToSignedUrl(link.pad, link.token, f, {
+          contentType: f.type || undefined,
+          upsert: false,
+        })
+      if (error) {
+        setFout("Uploaden mislukt: " + error.message)
+        return
+      }
+      // 3) De foto aan de persoon koppelen.
+      const res = await koppelProfielfoto(personId, link.pad)
       if (!res.ok) {
         setFout(res.fout)
         return
       }
       router.refresh()
     })
-    // laat dezelfde foto opnieuw kiezen mogelijk blijven
-    e.target.value = ""
   }
 
   function verwijder() {
