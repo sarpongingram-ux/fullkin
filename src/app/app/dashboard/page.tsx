@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { RollenBeheer } from "./RollenBeheer"
+import { KeeperUpgradeKaart } from "./KeeperUpgradeKaart"
+import { settleKeeperUpgradeFromSession } from "@/lib/stripe/keeperUpgrade"
 
 function euro(cents: number, decimals = 0) {
   return new Intl.NumberFormat("nl-NL", {
@@ -11,15 +13,25 @@ function euro(cents: number, decimals = 0) {
   }).format(cents / 100)
 }
 
-const ABONNEMENT_CENTS = 999 // €9,99 per maand
+const ABONNEMENT_CENTS = 499 // Family Keeper-upgrade: €4,99 per maand
 
-export default async function Dashboard() {
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ keeper_upgrade?: string }>
+}) {
   const supabase = await createClient()
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) redirect("/inloggen")
+
+  // Net teruggekeerd van de keeper-upgrade-betaling? Leg 'm nu vast (idempotent).
+  const sp = await searchParams
+  if (sp?.keeper_upgrade) {
+    await settleKeeperUpgradeFromSession(sp.keeper_upgrade)
+  }
 
   const { data: meId } = await supabase.rpc("me")
   if (!meId) redirect("/app")
@@ -50,7 +62,13 @@ export default async function Dashboard() {
     )
   }
 
-  const [{ data: dash }, { data: rollen }, { data: leden }] = await Promise.all([
+  const [
+    { data: dash },
+    { data: rollen },
+    { data: leden },
+    { data: heeftUpgrade },
+    { data: keeperSaldo },
+  ] = await Promise.all([
     supabase.rpc("cofounder_dashboard").single(),
     supabase.rpc("family_roles"),
     supabase
@@ -58,6 +76,8 @@ export default async function Dashboard() {
       .select("id, first_name, last_name")
       .eq("network_id", mij.network_id)
       .not("claimed_by", "is", null),
+    supabase.rpc("heeft_keeper_upgrade", { p_net: mij.network_id }),
+    supabase.rpc("keeper_saldo", { p_net: mij.network_id }),
   ])
 
   const d = dash ?? {
@@ -90,7 +110,7 @@ export default async function Dashboard() {
     return {
       leden: n,
       volume,
-      verdienste: Math.round(volume * 0.005), // 0,50%
+      verdienste: Math.round(volume * 0.02), // 2% als Family Keeper
     }
   })
 
@@ -116,7 +136,7 @@ export default async function Dashboard() {
     effect: "Elke collecte bouwt de pot en jouw verdienste op",
   })
 
-  const abonnementGedekt = d.cofounder_verdienste_cents >= ABONNEMENT_CENTS
+  const abonnementGedekt = (keeperSaldo ?? 0) >= ABONNEMENT_CENTS
 
   return (
     <main className="max-w-md mx-auto px-5 py-8 space-y-4">
@@ -132,6 +152,12 @@ export default async function Dashboard() {
           Dag {mij.first_name} 📊
         </h1>
       </header>
+
+      <KeeperUpgradeKaart
+        networkId={mij.network_id}
+        actief={!!heeftUpgrade}
+        saldoCents={keeperSaldo ?? 0}
+      />
 
       {/* Netwerksterkte, één getal bovenaan. */}
       <section className="fk-card-dark flex items-center justify-between">
@@ -178,20 +204,25 @@ export default async function Dashboard() {
           <Rij label="Volume dit jaar" waarde={euro(d.volume_jaar_cents)} />
           <Rij label="Volume totaal" waarde={euro(d.volume_totaal_cents)} />
           <Rij
-            label="Jouw verdienste (0,50%)"
-            waarde={euro(d.cofounder_verdienste_cents, 2)}
+            label={`Jouw verdienste (${heeftUpgrade ? "2%" : "0%"})`}
+            waarde={euro(keeperSaldo ?? 0, 2)}
             accent
           />
-          <Rij label="Rolpool (0,50%)" waarde={euro(d.rolpool_cents, 2)} />
           <Rij label="Familie Pot saldo (1%)" waarde={euro(d.pot_saldo_cents, 2)} />
         </dl>
-        <p
-          className={`text-sm mt-3 ${abonnementGedekt ? "text-groen" : "text-inkt-zacht"}`}
-        >
-          {abonnementGedekt
-            ? "✓ Je verdienste dekt je abonnement van €9,99."
-            : `Nog ${euro(ABONNEMENT_CENTS - d.cofounder_verdienste_cents, 2)} verdienste tot je abonnement gedekt is.`}
-        </p>
+        {heeftUpgrade ? (
+          <p
+            className={`text-sm mt-3 ${abonnementGedekt ? "text-groen" : "text-inkt-zacht"}`}
+          >
+            {abonnementGedekt
+              ? "✓ Je verdienste dekt je Family Keeper-abonnement van €4,99."
+              : `Nog ${euro(ABONNEMENT_CENTS - (keeperSaldo ?? 0), 2)} verdienste tot je abonnement van €4,99 gedekt is.`}
+          </p>
+        ) : (
+          <p className="text-sm mt-3 text-inkt-zacht">
+            Word Family Keeper om 2% van elke geldstroom te verdienen.
+          </p>
+        )}
       </section>
 
       {/* Blok 3, Potentie */}

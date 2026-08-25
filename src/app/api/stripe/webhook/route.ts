@@ -4,6 +4,7 @@ import {
   settleExtraFamilieFromSession,
   settleHeractiveringFromSession,
 } from "@/lib/stripe/extraFamilie"
+import { settleKeeperUpgradeFromSession } from "@/lib/stripe/keeperUpgrade"
 import type Stripe from "stripe"
 
 // Stripe-webhook. Bij een geslaagde betaling wordt de bijdrage afgerekend:
@@ -40,6 +41,13 @@ export async function POST(req: Request) {
     if (session.metadata?.soort === "heractiveer_familie") {
       const ok = await settleHeractiveringFromSession(session.id)
       if (!ok) return new Response("Heractiveren mislukt", { status: 500 })
+      return new Response("ok")
+    }
+
+    // Iemand neemt de Family Keeper-upgrade (€4,99/mnd).
+    if (session.metadata?.soort === "keeper_upgrade") {
+      const ok = await settleKeeperUpgradeFromSession(session.id)
+      if (!ok) return new Response("Upgrade mislukt", { status: 500 })
       return new Response("ok")
     }
 
@@ -89,16 +97,19 @@ export async function POST(req: Request) {
     }
   }
 
-  // Abonnement definitief beëindigd → lid-gestichte familie op pauze.
+  // Abonnement definitief beëindigd → familie op pauze en/of keeper-upgrade uit.
   if (event.type === "customer.subscription.deleted") {
     const sub = event.data.object as Stripe.Subscription
     const svc = createServiceClient()
+    const nu = new Date().toISOString()
     await svc
       .from("family_subscriptions")
-      .update({
-        status: "geannuleerd",
-        canceled_at: new Date().toISOString(),
-      })
+      .update({ status: "geannuleerd", canceled_at: nu })
+      .eq("stripe_subscription_id", sub.id)
+    // Keeper-upgrade opgezegd → keeper verdient niet meer mee.
+    await svc
+      .from("keeper_upgrades")
+      .update({ status: "geannuleerd", canceled_at: nu })
       .eq("stripe_subscription_id", sub.id)
   }
 

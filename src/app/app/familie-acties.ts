@@ -74,3 +74,56 @@ export async function heractiveerFamilie(
   const session = await stripe.checkout.sessions.create(params)
   redirect(session.url!)
 }
+
+// Neem de Family Keeper-upgrade (€4,99/mnd): je wordt de betaalde keeper van deze
+// familie en verdient vanaf nu 2% van elke geldstroom (loopt op als saldo).
+export async function neemKeeperUpgrade(
+  networkId: string,
+): Promise<{ ok: false; fout: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, fout: "Je bent niet ingelogd." }
+
+  const { data: mij } = await supabase
+    .from("persons")
+    .select("id")
+    .eq("claimed_by", user.id)
+    .eq("network_id", networkId)
+    .maybeSingle()
+  if (!mij) return { ok: false, fout: "Je hoort niet bij deze familie." }
+
+  const stripe = getStripe()
+  if (!stripe) return { ok: false, fout: "Betalen kan nu niet — Stripe ontbreekt." }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3210"
+  const meta = {
+    soort: "keeper_upgrade",
+    net: networkId,
+    person: mij.id,
+    auth_uid: user.id,
+  }
+  const params: Stripe.Checkout.SessionCreateParams = {
+    mode: "subscription",
+    line_items: [
+      {
+        price_data: {
+          currency: "eur",
+          product_data: { name: "Fullkin — Family Keeper worden" },
+          unit_amount: 499,
+          recurring: { interval: "month" },
+        },
+        quantity: 1,
+      },
+    ],
+    metadata: meta,
+    subscription_data: { metadata: meta },
+    success_url: `${appUrl}/app/dashboard?keeper_upgrade={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${appUrl}/app/dashboard?geannuleerd=1`,
+  }
+  ;(params as Record<string, unknown>).managed_payments = { enabled: false }
+
+  const session = await stripe.checkout.sessions.create(params)
+  redirect(session.url!)
+}

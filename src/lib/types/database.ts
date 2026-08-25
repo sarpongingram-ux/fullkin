@@ -969,6 +969,54 @@ export type Database = {
           },
         ]
       }
+      keeper_upgrades: {
+        Row: {
+          amount_cents: number
+          canceled_at: string | null
+          created_at: string
+          network_id: string
+          person_id: string
+          status: Database["public"]["Enums"]["pot_sub_status"]
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+        }
+        Insert: {
+          amount_cents?: number
+          canceled_at?: string | null
+          created_at?: string
+          network_id: string
+          person_id: string
+          status?: Database["public"]["Enums"]["pot_sub_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          canceled_at?: string | null
+          created_at?: string
+          network_id?: string
+          person_id?: string
+          status?: Database["public"]["Enums"]["pot_sub_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "keeper_upgrades_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: true
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "keeper_upgrades_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       life_events: {
         Row: {
           created_at: string
@@ -1668,6 +1716,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activeer_keeper_upgrade: {
+        Args: {
+          p_amount?: number
+          p_customer: string
+          p_net: string
+          p_person: string
+          p_sub_id: string
+        }
+        Returns: undefined
+      }
       album_reaction_counts: {
         Args: { p_item: string }
         Returns: {
@@ -1824,6 +1882,7 @@ export type Database = {
         Args: { net: string; r: Database["public"]["Enums"]["family_role"] }
         Returns: boolean
       }
+      heeft_keeper_upgrade: { Args: { p_net: string }; Returns: boolean }
       heractiveer_familie_abonnement: {
         Args: {
           p_amount?: number
@@ -1847,6 +1906,8 @@ export type Database = {
       }
       is_lid_van_room: { Args: { p_room: string }; Returns: boolean }
       kan_bij_room: { Args: { p_room: string }; Returns: boolean }
+      keeper_saldo: { Args: { p_net: string }; Returns: number }
+      keeper_van: { Args: { p_net: string }; Returns: string }
       komende_verjaardagen: {
         Args: never
         Returns: {
