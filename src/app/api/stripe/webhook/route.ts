@@ -1,5 +1,6 @@
 import { getStripe } from "@/lib/stripe/server"
 import { createServiceClient } from "@/lib/supabase/service"
+import { settleExtraFamilieFromSession } from "@/lib/stripe/extraFamilie"
 import type Stripe from "stripe"
 
 // Stripe-webhook. Bij een geslaagde betaling wordt de bijdrage afgerekend:
@@ -24,6 +25,14 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session
+
+    // Een lid sticht een nieuwe familie (€0,99/mnd): familie aanmaken.
+    if (session.metadata?.soort === "extra_familie") {
+      const net = await settleExtraFamilieFromSession(session.id)
+      if (!net) return new Response("Familie aanmaken mislukt", { status: 500 })
+      return new Response("ok")
+    }
+
     const contributionId = session.metadata?.contribution_id
     if (contributionId) {
       const supabase = createServiceClient()

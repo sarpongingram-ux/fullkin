@@ -1,14 +1,26 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { FamilieKaart } from "./FamilieKaart"
+import { settleExtraFamilieFromSession } from "@/lib/stripe/extraFamilie"
 
-export default async function AppHome() {
+export default async function AppHome({
+  searchParams,
+}: {
+  searchParams: Promise<{ nieuwe_familie?: string }>
+}) {
   const supabase = await createClient()
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) redirect("/inloggen")
+
+  // Net een nieuwe familie gesticht en teruggekeerd van Stripe? Maak 'm nu aan
+  // (idempotent — de webhook doet hetzelfde). Daarna is deze familie actief.
+  const sp = await searchParams
+  if (sp?.nieuwe_familie) {
+    await settleExtraFamilieFromSession(sp.nieuwe_familie)
+  }
 
   // Wie ben ik als persoon op de kaart? Nog geen familie? Dan naar de voordeur:
   // een nieuwe familie starten (uitgenodigden komen binnen via /welkom).

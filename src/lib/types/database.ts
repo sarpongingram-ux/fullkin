@@ -16,6 +16,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_network: {
+        Row: {
+          auth_uid: string
+          network_id: string
+          updated_at: string
+        }
+        Insert: {
+          auth_uid: string
+          network_id: string
+          updated_at?: string
+        }
+        Update: {
+          auth_uid?: string
+          network_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "active_network_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       album_comments: {
         Row: {
           album_item_id: string
@@ -824,6 +850,57 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      family_subscriptions: {
+        Row: {
+          amount_cents: number
+          canceled_at: string | null
+          created_at: string
+          id: string
+          network_id: string
+          person_id: string
+          status: Database["public"]["Enums"]["pot_sub_status"]
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+        }
+        Insert: {
+          amount_cents?: number
+          canceled_at?: string | null
+          created_at?: string
+          id?: string
+          network_id: string
+          person_id: string
+          status?: Database["public"]["Enums"]["pot_sub_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          canceled_at?: string | null
+          created_at?: string
+          id?: string
+          network_id?: string
+          person_id?: string
+          status?: Database["public"]["Enums"]["pot_sub_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_subscriptions_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_subscriptions_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invites: {
         Row: {
@@ -1794,6 +1871,14 @@ export type Database = {
           title: string
         }[]
       }
+      mijn_families: {
+        Args: never
+        Returns: {
+          is_active: boolean
+          name: string
+          network_id: string
+        }[]
+      }
       my_networks: { Args: never; Returns: string[] }
       my_pot_summary: {
         Args: never
@@ -1905,6 +1990,21 @@ export type Database = {
           stemmen: number
         }[]
       }
+      stich_familie_als_lid: {
+        Args: {
+          p_amount?: number
+          p_auth: string
+          p_city: string
+          p_country: string
+          p_customer: string
+          p_family_name: string
+          p_first: string
+          p_last: string
+          p_sub_id: string
+        }
+        Returns: string
+      }
+      zet_actieve_familie: { Args: { p_net: string }; Returns: undefined }
     }
     Enums: {
       business_status: "stemming" | "goedgekeurd" | "afgewezen" | "afgerond"
@@ -2171,4 +2271,3 @@ export const Constants = {
     },
   },
 } as const
-
