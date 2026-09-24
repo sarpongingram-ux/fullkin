@@ -15,6 +15,12 @@ const items = [
       p.startsWith("/app/familie") || p.startsWith("/app/persoon"),
   },
   {
+    href: "/app/ontdek",
+    label: "Ontdek",
+    emoji: "🔍",
+    match: (p: string) => p.startsWith("/app/ontdek"),
+  },
+  {
     href: "/app/chat",
     label: "Chat",
     emoji: "💬",
@@ -47,7 +53,7 @@ export function BottomNav() {
       className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-rand"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="max-w-md mx-auto grid grid-cols-4">
+      <div className="max-w-md mx-auto grid grid-cols-5">
         {items.map((item) => {
           const actief = item.match(pathname)
           return (

@@ -1265,6 +1265,52 @@ export type Database = {
           },
         ]
       }
+      person_links: {
+        Row: {
+          confirmed_by: string | null
+          created_at: string
+          id: string
+          person_a: string
+          person_b: string
+        }
+        Insert: {
+          confirmed_by?: string | null
+          created_at?: string
+          id?: string
+          person_a: string
+          person_b: string
+        }
+        Update: {
+          confirmed_by?: string | null
+          created_at?: string
+          id?: string
+          person_a?: string
+          person_b?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "person_links_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_links_person_a_fkey"
+            columns: ["person_a"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_links_person_b_fkey"
+            columns: ["person_b"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       persons: {
         Row: {
           birth_name: string | null
@@ -1792,6 +1838,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      bevestig_persoon_match: {
+        Args: { p_a: string; p_b: string }
+        Returns: undefined
+      }
       business_tally: {
         Args: { bid: string }
         Returns: {
@@ -2004,6 +2054,17 @@ export type Database = {
           network_id: string
         }[]
       }
+      mogelijke_matches: {
+        Args: { me: string }
+        Returns: {
+          ander_familie: string
+          ander_id: string
+          ander_naam: string
+          mijn_id: string
+          mijn_naam: string
+          signaal: string
+        }[]
+      }
       my_networks: { Args: never; Returns: string[] }
       my_pot_summary: {
         Args: never
@@ -2025,6 +2086,17 @@ export type Database = {
           b_id: string
           b_naam: string
           samen: number
+        }[]
+      }
+      ontdekte_familie: {
+        Args: { me: string }
+        Returns: {
+          ander_familie: string
+          brug_naam: string
+          hun_kant: string
+          mijn_kant: string
+          ontdekt_id: string
+          ontdekt_naam: string
         }[]
       }
       partner_nudge: {
