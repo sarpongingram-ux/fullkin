@@ -68,6 +68,9 @@ export default async function Dashboard({
     { data: leden },
     { data: heeftUpgrade },
     { data: keeperSaldo },
+    { data: keeperVan },
+    { data: keeperBeschikbaar },
+    { data: payoutAcc },
   ] = await Promise.all([
     supabase.rpc("cofounder_dashboard").single(),
     supabase.rpc("family_roles"),
@@ -78,7 +81,18 @@ export default async function Dashboard({
       .not("claimed_by", "is", null),
     supabase.rpc("heeft_keeper_upgrade", { p_net: mij.network_id }),
     supabase.rpc("keeper_saldo", { p_net: mij.network_id }),
+    supabase.rpc("keeper_van", { p_net: mij.network_id }),
+    supabase.rpc("keeper_beschikbaar", { p_net: mij.network_id }),
+    supabase
+      .from("payout_accounts")
+      .select("status")
+      .eq("person_id", meId)
+      .eq("provider", "stripe")
+      .maybeSingle(),
   ])
+
+  const benKeeper = keeperVan === meId
+  const uitbetaalKlaar = payoutAcc?.status === "ready"
 
   const d = dash ?? {
     leden_totaal: 0,
@@ -157,6 +171,9 @@ export default async function Dashboard({
         networkId={mij.network_id}
         actief={!!heeftUpgrade}
         saldoCents={keeperSaldo ?? 0}
+        beschikbaarCents={keeperBeschikbaar ?? 0}
+        benKeeper={benKeeper}
+        uitbetaalKlaar={uitbetaalKlaar}
       />
 
       {/* Netwerksterkte, één getal bovenaan. */}

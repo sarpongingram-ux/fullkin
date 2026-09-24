@@ -1,7 +1,9 @@
 "use client"
 
-import { useTransition } from "react"
-import { neemKeeperUpgrade } from "../familie-acties"
+import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { neemKeeperUpgrade, betaalKeeperUit } from "../familie-acties"
 
 function euro(cents: number) {
   return new Intl.NumberFormat("nl-NL", {
@@ -15,12 +17,32 @@ export function KeeperUpgradeKaart({
   networkId,
   actief,
   saldoCents,
+  beschikbaarCents,
+  benKeeper,
+  uitbetaalKlaar,
 }: {
   networkId: string
   actief: boolean
   saldoCents: number
+  beschikbaarCents: number
+  benKeeper: boolean
+  uitbetaalKlaar: boolean
 }) {
+  const router = useRouter()
   const [bezig, start] = useTransition()
+  const [fout, setFout] = useState<string | null>(null)
+  const [gelukt, setGelukt] = useState<string | null>(null)
+
+  function betaalUit() {
+    setFout(null)
+    setGelukt(null)
+    start(async () => {
+      const res = await betaalKeeperUit(networkId)
+      if (!res.ok) return setFout(res.fout)
+      setGelukt(`${euro(res.bedrag)} onderweg naar je rekening 🎉`)
+      router.refresh()
+    })
+  }
 
   if (actief) {
     return (
@@ -35,14 +57,45 @@ export function KeeperUpgradeKaart({
             </p>
           </div>
           <div className="text-right shrink-0">
-            <span className="fk-amount text-goud">{euro(saldoCents)}</span>
-            <p className="text-xs opacity-60">verdiend</p>
+            <span className="fk-amount text-goud">{euro(beschikbaarCents)}</span>
+            <p className="text-xs opacity-60">beschikbaar</p>
           </div>
         </div>
-        <p className="text-xs opacity-70 mt-3 border-t border-white/15 pt-3">
-          Uitbetaling volgt zodra je je uitbetaalrekening koppelt — je saldo
-          blijft veilig oplopen.
-        </p>
+
+        <div className="border-t border-white/15 mt-3 pt-3">
+          <p className="text-xs opacity-70">
+            Totaal verdiend: {euro(saldoCents)}
+          </p>
+
+          {benKeeper && uitbetaalKlaar && (
+            <button
+              type="button"
+              disabled={bezig || beschikbaarCents < 100}
+              onClick={betaalUit}
+              className="fk-btn fk-btn-primary fk-btn-full mt-3 disabled:opacity-50"
+            >
+              {bezig
+                ? "Bezig…"
+                : beschikbaarCents < 100
+                  ? "Nog te weinig om uit te betalen"
+                  : `Laat ${euro(beschikbaarCents)} uitbetalen`}
+            </button>
+          )}
+
+          {benKeeper && !uitbetaalKlaar && (
+            <Link
+              href="/app/uitbetaling"
+              className="fk-btn fk-btn-primary fk-btn-full mt-3"
+            >
+              Koppel je uitbetaalrekening →
+            </Link>
+          )}
+
+          {gelukt && (
+            <p className="text-groen font-bold text-sm mt-2">{gelukt}</p>
+          )}
+          {fout && <p className="text-goud font-semibold text-sm mt-2">{fout}</p>}
+        </div>
       </section>
     )
   }
