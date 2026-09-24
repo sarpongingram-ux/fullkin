@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 import { netwerkOpPauze, PAUZE_FOUT } from "@/lib/familie/status"
 import type { Enums } from "@/lib/types/database"
 
-export type RelatieKeuze = "ouder" | "kind" | "partner" | "broer_zus"
+export type RelatieKeuze = "ouder" | "kind" | "partner" | "ex_partner" | "broer_zus"
 
 export type ToevoegResultaat =
   | { ok: true; naam: string }
@@ -34,7 +34,7 @@ export async function voegFamilielidToe(
   if (!voornaam || !achternaam) {
     return { ok: false, fout: "Vul een voor- en achternaam in." }
   }
-  if (!["ouder", "kind", "partner", "broer_zus"].includes(relatie)) {
+  if (!["ouder", "kind", "partner", "ex_partner", "broer_zus"].includes(relatie)) {
     return { ok: false, fout: "Kies hoe dit familielid verbonden is." }
   }
 
@@ -151,6 +151,9 @@ export async function voegFamilielidToe(
     // partner_normalised: from_person < to_person
     const [a, b] = [ankerId, nieuw.id].sort()
     edges.push({ kind: "partner", from_person: a, to_person: b })
+  } else if (relatie === "ex_partner") {
+    const [a, b] = [ankerId, nieuw.id].sort()
+    edges.push({ kind: "former_partner", from_person: a, to_person: b })
   } else if (relatie === "broer_zus") {
     // Zelfde ouder(s) als ik → automatisch broer of zus op de kaart.
     for (const ouderId of ouderIds) {

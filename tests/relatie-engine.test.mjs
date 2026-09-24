@@ -68,6 +68,8 @@ async function main() {
     check("Sarah = oom of tante", await label(J, id["Sarah"]), "oom of tante")
     check("Nadia = partner", await label(J, id["Nadia"]), "partner")
     check("Leah = kind", await label(J, id["Leah"]), "kind")
+    // Ex-partner: Daniel en Linda waren eerder partners (former_partner, Z5).
+    check("Daniel → Linda = ex-partner", await label(id["Daniel"], id["Linda"]), "ex-partner")
     // Leah's perspectief: George is overgrootouder (3 generaties).
     check("Leah → George = overgrootouder", await label(id["Leah"], id["George"]), "overgrootouder")
 

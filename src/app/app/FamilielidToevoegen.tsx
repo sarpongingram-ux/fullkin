@@ -7,6 +7,7 @@ const relaties = [
   { waarde: "ouder", label: "Ouder" },
   { waarde: "kind", label: "Kind" },
   { waarde: "partner", label: "Partner" },
+  { waarde: "ex_partner", label: "Ex-partner" },
   { waarde: "broer_zus", label: "Broer of zus" },
 ] as const
 

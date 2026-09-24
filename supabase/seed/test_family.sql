@@ -10,7 +10,7 @@
 -- Structuur (17 personen, 3 generaties): George+Helen → Daniel+Anita,
 -- Michael+Sophia, Sarah(+Peter); Gen 3: James+Nadia→Leah, Rebecca, Tom (halfbroer
 -- via Daniel+Linda), Michelle, David, Emma. Bevat gewijzigde achternaam, maiden
--- name, half-sibling en een niet-gemodelleerde former partner (Linda; audit Z5).
+-- name, half-sibling en een former partner (Daniel ↔ Linda, kind=former_partner).
 --
 -- Dekt: parent, child, sibling, half-sibling, grandparent, grandchild,
 -- great-grandparent, uncle/aunt, cousin, partner.

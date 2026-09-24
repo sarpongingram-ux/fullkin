@@ -12,7 +12,8 @@ type Persoon = {
   died_on: string | null
 }
 type Relatie = {
-  kind: "parent" | "partner"
+  // former_partner wordt niet in de stamboom getekend (alleen parent/partner).
+  kind: "parent" | "partner" | "former_partner"
   from_person: string
   to_person: string
 }

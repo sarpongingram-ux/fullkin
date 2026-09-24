@@ -2056,6 +2056,7 @@ export type Database = {
           wordt: number
         }[]
       }
+      laad_testfamilie: { Args: { p_net_naam: string }; Returns: string }
       leg_chat_contact_vast: { Args: { p_room: string }; Returns: undefined }
       maak_verjaardag_collectes: { Args: { p_dagen?: number }; Returns: number }
       markeer_meldingen_gelezen: { Args: never; Returns: undefined }
@@ -2275,6 +2276,10 @@ export type Database = {
         }
         Returns: string
       }
+      verwijder_testnetwerk: {
+        Args: { p_net_naam: string }
+        Returns: undefined
+      }
       zeg_hallo: { Args: { p_naar: string }; Returns: undefined }
       zet_actieve_familie: { Args: { p_net: string }; Returns: undefined }
     }
@@ -2339,7 +2344,7 @@ export type Database = {
       rad_choice: "zelf" | "gunnen" | "pot" | "dromen"
       rad_status: "getrokken" | "besloten"
       reaction_kind: "hart" | "lach" | "traan" | "vuur"
-      relationship_kind: "parent" | "partner"
+      relationship_kind: "parent" | "partner" | "former_partner"
       relationship_origin:
         | "biological"
         | "adoptive"
@@ -2541,7 +2546,7 @@ export const Constants = {
       rad_choice: ["zelf", "gunnen", "pot", "dromen"],
       rad_status: ["getrokken", "besloten"],
       reaction_kind: ["hart", "lach", "traan", "vuur"],
-      relationship_kind: ["parent", "partner"],
+      relationship_kind: ["parent", "partner", "former_partner"],
       relationship_origin: [
         "biological",
         "adoptive",
