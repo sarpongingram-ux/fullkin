@@ -3,13 +3,16 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+// Navigatie rond de North Star: Thuis (belong) · Familie (discover/build) ·
+// Chat (connect) · Meer (alle ondersteunende features, incl. de economie).
 const items = [
   { href: "/app", label: "Thuis", emoji: "🏠", match: (p: string) => p === "/app" },
   {
-    href: "/app/album",
-    label: "Album",
-    emoji: "📷",
-    match: (p: string) => p.startsWith("/app/album"),
+    href: "/app/familie",
+    label: "Familie",
+    emoji: "👨‍👩‍👧‍👦",
+    match: (p: string) =>
+      p.startsWith("/app/familie") || p.startsWith("/app/persoon"),
   },
   {
     href: "/app/chat",
@@ -18,22 +21,20 @@ const items = [
     match: (p: string) => p.startsWith("/app/chat"),
   },
   {
-    href: "/app/wallet",
-    label: "Wallet",
-    emoji: "💰",
+    href: "/app/meer",
+    label: "Meer",
+    emoji: "⋯",
     match: (p: string) =>
+      p.startsWith("/app/meer") ||
+      p.startsWith("/app/album") ||
       p.startsWith("/app/wallet") ||
       p.startsWith("/app/pot") ||
       p.startsWith("/app/uitbetaling") ||
-      p.startsWith("/app/collecte"),
-  },
-  {
-    href: "/app/familie",
-    label: "Familie",
-    emoji: "👨‍👩‍👧‍👦",
-    match: (p: string) =>
-      p.startsWith("/app/familie") ||
-      p.startsWith("/app/persoon") ||
+      p.startsWith("/app/collecte") ||
+      p.startsWith("/app/stem") ||
+      p.startsWith("/app/rad") ||
+      p.startsWith("/app/mijlpalen") ||
+      p.startsWith("/app/business") ||
       p.startsWith("/app/dashboard"),
   },
 ]
@@ -46,7 +47,7 @@ export function BottomNav() {
       className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-rand"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="max-w-md mx-auto grid grid-cols-5">
+      <div className="max-w-md mx-auto grid grid-cols-4">
         {items.map((item) => {
           const actief = item.match(pathname)
           return (
