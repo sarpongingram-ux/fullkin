@@ -58,7 +58,7 @@ export default async function OntdekPagina() {
                   {"'s "} {o.hun_kant}
                 </p>
                 <Link
-                  href={`/app/persoon/${o.ontdekt_id}`}
+                  href={`/app/ontdek/${o.ontdekt_id}`}
                   className="inline-block mt-1 text-goud font-bold text-sm"
                 >
                   Bekijk →

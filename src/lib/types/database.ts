@@ -2088,6 +2088,19 @@ export type Database = {
           samen: number
         }[]
       }
+      ontdekt_profiel: {
+        Args: { me: string; p_id: string }
+        Returns: {
+          achternaam: string
+          ander_familie: string
+          brug_naam: string
+          hun_kant: string
+          id: string
+          mijn_kant: string
+          photo_url: string
+          voornaam: string
+        }[]
+      }
       ontdekte_familie: {
         Args: { me: string }
         Returns: {
