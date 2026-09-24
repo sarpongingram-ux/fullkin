@@ -1,11 +1,32 @@
 # FULLKIN — Technische & product-audit
 
 _Opgesteld door Claude Code (implementatie-engineer) als onafhankelijk auditeerbaar
-document. Peildatum: 24 sep 2026. Doel: een externe reviewer (ChatGPT) kan elke
-belangrijke flow zelf nalopen._
+document. Versie 1.1 · peildatum 24 sep 2026 · **status: reviewer-klaar**. Doel: een
+externe reviewer kan elke belangrijke flow zelf nalopen._
 
 Missie: **families verbonden houden en familieleden ontdekken die je nog niet kent.**
 Kernloop: BUILD → INVITE → CLAIM → MATCH → DISCOVER → CONNECT → GROW.
+
+## Status in het kort
+
+| Onderdeel | Stand |
+|---|---|
+| Kernloop (build→invite→claim→match→discover→connect) | ✅ werkt end-to-end, getest |
+| Relatie-engine (ouder/kind/vol+half broer-zus/neef-nicht/oom-tante/grootouder/partner/ex-partner) | ✅ correct, gedekt door tests |
+| Geautomatiseerde tests | ✅ `npm test` = **27 checks**, 3 suites |
+| CI | ✅ `.github/workflows/test.yml` (draait tegen staging) |
+| Staging-omgeving | ✅ Supabase-branch `iuhozabjtufooklobzvi` (2 secrets gezet; 1 door oprichter) |
+| Privacy (namen wel, bedragen/geboortedatum/contact afgeschermd) | ✅ + keeper-IDOR gedicht |
+| Openstaand | Matching op schaal (P1), per-veld privacy/minderjarigen (P1), economie/juridisch (P2) |
+
+## Hoe je dit onafhankelijk verifieert (reviewer)
+
+1. **UX:** open de live app → https://fullkin.vercel.app
+2. **Engine + discovery + claim:** `npm test` (27 checks) tegen een staging/branch-DB —
+   zie `TESTING_SETUP.md` voor env-vars. Seedt en ruimt zelf op; raakt geen echte data.
+3. **Code/DB:** de kernlogica is SQL (te inspecteren via `pg_get_functiondef`), de app is
+   Next.js server actions. Repo is privé — vraag toegang of gebruik dit document + de
+   testresultaten als bewijs.
 
 ---
 
@@ -51,8 +72,8 @@ Relatie-model (fundament, matcht Fase 4/5 van de brief):
 
 | # | Zwakte | Impact | Prio |
 |---|---|---|---|
-| Z1 | **Geen geautomatiseerde tests.** De relatie-engine is alleen ad-hoc via SQL getest. | Grootste blokker voor "onafhankelijk auditeerbaar". | **P0** |
-| Z2 | **Geen staging-omgeving.** Eén Supabase-project + Vercel-prod; testdata is tot nu toe op prod aangemaakt/verwijderd. | Risico op vervuiling echte familiedata. | **P0** |
+| Z1 | ~~Geen geautomatiseerde tests.~~ **OPGELOST:** `npm test` = 27 checks (engine, discovery, claim), zelf-seedend/-opruimend; CI erbovenop. | — | ✅ done |
+| Z2 | ~~Geen staging-omgeving.~~ **OPGELOST:** Supabase-branch `iuhozabjtufooklobzvi` (geen echte data), aan CI gekoppeld. Rest: branch persistent maken + `STAGING_SUPABASE_SERVICE_ROLE_KEY` zetten (oprichter). | — | ✅ done (2 handmatige stappen) |
 | Z3 | **Duplicate-matching = exacte genormaliseerde naam/geboortenaam.** Geen fuzzy (pg_trgm niet geïnstalleerd), geen confidence-score, gebruikt nog niet gedeelde ouders/kinderen als signaal. | Mist typfouten; kan false positives geven op schaal. | P1 |
 | Z4 | **Matching schaalt niet.** `mogelijke_matches` doet een cross-join op genormaliseerde naam over álle netwerken, zonder index/blocking. | Bij miljoenen nodes onhoudbaar. | P1 |
 | Z5 | ~~`former_partner` niet gemodelleerd~~ **OPGELOST (24 sep 2026):** `relationship_kind` bevat nu `former_partner`; `relation_label` → "ex-partner", `relation_route` → "Jullie waren eerder partners"; toe te voegen via het formulier (relatie "Ex-partner"). Gedekt door de testsuite (Daniel↔Linda). Niet in de stamboom getekend. | — | ✅ done |
@@ -84,35 +105,42 @@ Relatie-model (fundament, matcht Fase 4/5 van de brief):
 
 ## 4. Aanbevelingen — P0 / P1 / P2
 
-**P0 (nodig om onafhankelijk te kunnen auditen):**
-- ✅ **Gedaan:** geautomatiseerde tests (`npm test`, **26 checks**, 3 suites):
-  relatie-engine (12), matching+discovery+privacy (8), **claim-flow (6)** met een echte
-  test-authgebruiker (claim → geaccepteerd → notificatie → duplicaat-preventie). Seeden en
-  ruimen zelf op. **CI:** `.github/workflows/test.yml` draait ze bij elke push/PR tegen de
-  **staging-branch** (`iuhozabjtufooklobzvi`); secrets `STAGING_SUPABASE_URL` + `_ANON_KEY`
-  gezet, `STAGING_SUPABASE_SERVICE_ROLE_KEY` door de oprichter te zetten.
-- Deterministische, resetbare **seed-familie** (zie `supabase/seed/test_family.sql`).
-- **Staging/test-isolatie** (Supabase-branch of tweede project) zodat testen nooit
-  prod-familiedata raakt. Zie `TESTING_SETUP.md`.
+**P0 (nodig om onafhankelijk te kunnen auditen) — ✅ ALLEMAAL GEDAAN:**
+- ✅ Geautomatiseerde tests (`npm test`, **27 checks**, 3 suites): relatie-engine (13),
+  matching+discovery+privacy (8), claim-flow (6, echte test-authgebruiker → claim →
+  geaccepteerd → notificatie → duplicaat-preventie). Seeden en ruimen zelf op.
+- ✅ CI: `.github/workflows/test.yml` bij elke push/PR tegen de staging-branch.
+- ✅ Deterministische, resetbare **seed-familie** (`supabase/seed/test_family.sql` +
+  DB-fixtures `laad_testfamilie`/`verwijder_testnetwerk`).
+- ✅ **Staging-isolatie** (Supabase-branch `iuhozabjtufooklobzvi`). Zie `TESTING_SETUP.md`.
 
 **P1:**
 - Matching: confidence-score + gedeelde-ouder/kind-signalen + fuzzy (pg_trgm) + index op
-  genormaliseerde naam.
-- `former_partner` toevoegen aan `relationship_kind`.
-- Per-veld zichtbaarheid + minderjarigen/consent.
-- Error-monitoring; PostgREST-timeouts herleiden.
+  genormaliseerde naam (Z3, Z4).
+- Per-veld zichtbaarheid + minderjarigen/consent (Z7).
+- Volledige audit per SECURITY DEFINER-functie (Z8); error-monitoring + PostgREST-timeouts (Z9).
 
 **P2:**
-- Volledige cross-graph relatie-engine (label over netwerken heen).
-- Economie/juridisch (PSD2/BTW) vóór live geld; economie secundair houden in de UX.
+- Volledige cross-graph relatie-engine (label over netwerken heen) (Z6); `relatie_pad`-limieten (Z10).
+- `relation_route`-uitleg fijnslijpen (Z13). Economie/juridisch (PSD2/BTW) vóór live geld (Z11).
+
+## Opgelost in deze sprint (24 sep 2026)
+Z1 tests · Z2 staging+CI · Z5 former_partner (ex-partner) · Z12 half-sibling · keeper-IDOR
+gedicht. Bewezen met `npm test` (27 checks) en handmatige verificatie op de Carter-seed.
 
 ---
 
 ## 5. Bewijs / reproduceerbaarheid voor de reviewer
 
-- Kernfuncties zijn SQL en te inspecteren via `pg_get_functiondef`.
-- De §25-scenario (twee families die een oom delen → nicht ontdekt) is op dataniveau
-  gedraaid en daarna opgeruimd; herhaalbaar via `supabase/seed/test_family.sql` + de
-  matching/discovery-RPC's.
-- `TESTING_SETUP.md` beschrijft hoe je een schone omgeving opzet, de seed laadt/reset en
-  de flows naloopt.
+- **Alles in één commando:** `npm test` (env naar staging; zie `TESTING_SETUP.md`) →
+  27 checks over relatie-engine, matching/discovery/privacy en de claim-flow. Seedt de
+  deterministische Carter-familie, controleert de uitkomsten en ruimt zelf op.
+- **Kritische eindtest (§25 van de brief):** twee families die een oom delen → nicht wordt
+  ontdekt met correct pad; gedekt door `tests/discovery.test.mjs`.
+- **Handmatige UX-flow:** de reviewer-checklist in `TESTING_SETUP.md` (§5) loopt
+  onboarding → invite → claim → match → discover → "zeg hallo" na op de live app.
+- **Code/DB:** kernlogica is SQL (`relation_label`, `relation_route`, `relatie_pad`,
+  `ancestors_of`, `descendants_of`, `mogelijke_matches`, `ontdekte_familie`, `ontdekt_profiel`,
+  `claim_invite`) — te inspecteren via `pg_get_functiondef`; app-laag is Next.js server actions.
+
+_Einde audit v1.1 — reviewer-klaar._
