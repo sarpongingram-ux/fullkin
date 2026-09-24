@@ -7,7 +7,7 @@ export function StartFamilie() {
   const [res, actie, bezig] = useActionState<StartResultaat | null, FormData>(
     async (v, fd) => {
       const r = await startFamilie(v, fd)
-      if (r.ok) window.location.assign("/app")
+      if (r.ok) window.location.assign("/app/opbouw")
       return r
     },
     null,
