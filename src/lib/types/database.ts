@@ -223,6 +223,42 @@ export type Database = {
           },
         ]
       }
+      begroetingen: {
+        Row: {
+          created_at: string
+          id: string
+          naar_persoon: string
+          van_persoon: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          naar_persoon: string
+          van_persoon: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          naar_persoon?: string
+          van_persoon?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "begroetingen_naar_persoon_fkey"
+            columns: ["naar_persoon"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "begroetingen_van_persoon_fkey"
+            columns: ["van_persoon"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_dreams: {
         Row: {
           approved_at: string | null
@@ -2045,6 +2081,15 @@ export type Database = {
           title: string
         }[]
       }
+      mijn_begroetingen: {
+        Args: { me: string }
+        Returns: {
+          van_familie: string
+          van_id: string
+          van_naam: string
+          wederzijds: boolean
+        }[]
+      }
       mijn_families: {
         Args: never
         Returns: {
@@ -2222,6 +2267,7 @@ export type Database = {
         }
         Returns: string
       }
+      zeg_hallo: { Args: { p_naar: string }; Returns: undefined }
       zet_actieve_familie: { Args: { p_net: string }; Returns: undefined }
     }
     Enums: {

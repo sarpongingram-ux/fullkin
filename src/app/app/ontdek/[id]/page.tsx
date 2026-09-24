@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import { HalloKnop } from "../HalloKnop"
 
 function initialen(voor: string, achter: string) {
   return (voor[0] ?? "") + (achter[0] ?? "")
@@ -23,9 +24,15 @@ export default async function OntdektProfielPagina({
   const { data: meId } = await supabase.rpc("me")
   if (!meId) redirect("/app")
 
-  const { data: profiel } = await supabase
-    .rpc("ontdekt_profiel", { me: meId, p_id: id })
-    .single()
+  const [{ data: profiel }, { data: alGegroet }] = await Promise.all([
+    supabase.rpc("ontdekt_profiel", { me: meId, p_id: id }).single(),
+    supabase
+      .from("begroetingen")
+      .select("id")
+      .eq("van_persoon", meId)
+      .eq("naar_persoon", id)
+      .maybeSingle(),
+  ])
 
   if (!profiel) {
     return (
@@ -84,6 +91,12 @@ export default async function OntdektProfielPagina({
           {profiel.hun_kant} {profiel.voornaam}
         </p>
       </section>
+
+      <HalloKnop
+        naar={profiel.id}
+        alGegroet={!!alGegroet}
+        voornaam={profiel.voornaam}
+      />
 
       <div className="fk-card text-center">
         <p className="text-sm text-inkt-zacht leading-relaxed">

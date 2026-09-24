@@ -13,12 +13,15 @@ export default async function OntdekPagina() {
   const { data: meId } = await supabase.rpc("me")
   if (!meId) redirect("/start")
 
-  const [{ data: matches }, { data: ontdekt }] = await Promise.all([
-    supabase.rpc("mogelijke_matches", { me: meId }),
-    supabase.rpc("ontdekte_familie", { me: meId }),
-  ])
+  const [{ data: matches }, { data: ontdekt }, { data: groeten }] =
+    await Promise.all([
+      supabase.rpc("mogelijke_matches", { me: meId }),
+      supabase.rpc("ontdekte_familie", { me: meId }),
+      supabase.rpc("mijn_begroetingen", { me: meId }),
+    ])
   const matchLijst = matches ?? []
   const ontdektLijst = ontdekt ?? []
+  const groetLijst = groeten ?? []
 
   return (
     <main className="max-w-md mx-auto px-5 py-8 space-y-8">
@@ -34,6 +37,33 @@ export default async function OntdekPagina() {
           verschijnen familieleden die je nog niet kende.
         </p>
       </header>
+
+      {/* Familie die jou gedag heeft gezegd. */}
+      {groetLijst.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-black text-inkt">Familie zei hallo 👋</h2>
+          {groetLijst.map((g) => (
+            <div key={g.van_id} className="fk-card flex items-center gap-3">
+              <span className="text-2xl shrink-0">👋</span>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-inkt">{g.van_naam}</p>
+                <p className="text-sm text-inkt-zacht">
+                  uit de familie {g.van_familie}
+                  {g.wederzijds ? " · jullie hebben allebei hallo gezegd" : ""}
+                </p>
+              </div>
+              {!g.wederzijds && (
+                <Link
+                  href={`/app/ontdek/${g.van_id}`}
+                  className="ml-auto text-terracotta font-bold text-sm shrink-0"
+                >
+                  Terug →
+                </Link>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
 
       {/* Het tweede magic moment: je familie is groter geworden. */}
       {ontdektLijst.length > 0 && (

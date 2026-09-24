@@ -19,3 +19,15 @@ export async function bevestigMatch(
   revalidatePath("/app")
   return { ok: true }
 }
+
+// Zeg hallo tegen een ontdekt familielid (vriendelijke wave, geen open chat).
+export async function zegHallo(
+  naar: string,
+): Promise<{ ok: boolean; fout?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc("zeg_hallo", { p_naar: naar })
+  if (error) return { ok: false, fout: "Kon geen hallo sturen." }
+  revalidatePath(`/app/ontdek/${naar}`)
+  revalidatePath("/app/ontdek")
+  return { ok: true }
+}
