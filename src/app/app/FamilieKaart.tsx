@@ -45,6 +45,7 @@ export function FamilieKaart({
   komendeVerjaardag,
   partnerNudge,
   geboorteHerinnering,
+  vorm,
 }: {
   voornaam: string
   familieNaam: string
@@ -63,6 +64,7 @@ export function FamilieKaart({
     aantalAnders: number
     meId: string | null
   }
+  vorm: { leden: number; herkend: number; generaties: number }
 }) {
   const anderenDromen = dromen.filter((d) => d.person_id !== mijnPersonId)
 
@@ -110,26 +112,43 @@ export function FamilieKaart({
         </Link>
       </header>
 
-      {/* Drie grote getallen */}
-      <section className="fk-card-white grid grid-cols-3 gap-2 text-center">
-        <div>
-          <p className="fk-stat-num text-inkt">{stats.total}</p>
-          <p className="text-sm text-inkt-zacht mt-1 font-semibold">Totaal familie</p>
-        </div>
-        <div>
-          <p className="fk-stat-num text-groen">{stats.known}</p>
-          <p className="text-sm text-inkt-zacht mt-1 font-semibold">Je kent al</p>
-        </div>
-        <div>
-          <p className="fk-stat-num text-goud">{stats.out_of_touch}</p>
-          <p className="text-sm text-inkt-zacht mt-1 font-semibold">Stil contact</p>
+      {/* Magic moment: je familie krijgt vorm — Fullkin rekent de relaties zelf uit. */}
+      <section className="fk-card-white text-center">
+        <p className="text-terracotta font-extrabold tracking-[0.18em] text-xs">
+          JE FAMILIE KRIJGT VORM 🌱
+        </p>
+        <p className="fk-stat-num text-inkt mt-2">{vorm.leden}</p>
+        <p className="text-sm text-inkt-zacht font-semibold">
+          {vorm.leden === 1 ? "familielid" : "familieleden"}
+        </p>
+        <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-rand">
+          <div>
+            <p className="text-2xl font-black text-groen">{vorm.herkend}</p>
+            <p className="text-xs text-inkt-zacht mt-0.5">
+              relaties automatisch herkend
+            </p>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-goud">{vorm.generaties}</p>
+            <p className="text-xs text-inkt-zacht mt-0.5">
+              {vorm.generaties === 1 ? "generatie" : "generaties"} in beeld
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* Eén grote contextuele actieknop */}
-      <Link href={cta.href} className="fk-btn fk-btn-primary fk-btn-full">
-        {cta.tekst}
+      {/* Groei-motor: familie uitnodigen is de belangrijkste actie. */}
+      <Link href="/app/familie" className="fk-btn fk-btn-primary fk-btn-full">
+        Nodig familie uit 👨‍👩‍👧‍👦
       </Link>
+      {cta.href !== "/app/familie" && (
+        <Link
+          href={cta.href}
+          className="block text-center text-sm font-bold text-inkt-zacht hover:text-inkt -mt-4"
+        >
+          {cta.tekst}
+        </Link>
+      )}
 
       {/* Herinnering: eigen geboortedatum ontbreekt → viert de familie je verjaardag. */}
       {geboorteHerinnering.eigenOntbreekt && geboorteHerinnering.meId && (

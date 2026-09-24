@@ -1870,6 +1870,14 @@ export type Database = {
       }
       draai_rad: { Args: never; Returns: string }
       ensure_tak_chats: { Args: never; Returns: undefined }
+      familie_vorm: {
+        Args: { me: string }
+        Returns: {
+          generaties: number
+          herkend: number
+          leden: number
+        }[]
+      }
       family_dreams: {
         Args: never
         Returns: {

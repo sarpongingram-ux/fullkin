@@ -139,6 +139,14 @@ export default async function AppHome({
     meId,
   }
 
+  // Magic moment: laat zien dat de familie vorm krijgt (leden, herkende relaties).
+  const { data: vormRow } = await supabase.rpc("familie_vorm", { me: meId }).single()
+  const vorm = {
+    leden: vormRow?.leden ?? 0,
+    herkend: vormRow?.herkend ?? 0,
+    generaties: vormRow?.generaties ?? 1,
+  }
+
   // Partner-nudge: hang je hier via je partner zonder eigen kant? Geef een zetje.
   const { data: nudge } = await supabase.rpc("partner_nudge", { me: meId })
   const nudgeRow = (nudge ?? [])[0]
@@ -161,6 +169,7 @@ export default async function AppHome({
       komendeVerjaardag={komendeVerjaardag}
       partnerNudge={partnerNudge}
       geboorteHerinnering={geboorteHerinnering}
+      vorm={vorm}
     />
   )
 }
