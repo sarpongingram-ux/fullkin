@@ -1,0 +1,28 @@
+# Supabase-config voor lokale/CI-reproductie. Productie/staging draaien op de hosted
+# projecten; dit bestand laat `supabase start` een VERSE database opbouwen uit
+# supabase/migrations/* (+ seed) zodat CI kan bewijzen dat de migraties reproduceerbaar
+# zijn (P1.3). Zie DATABASE_REPRODUCTION.md.
+project_id = "fullkin"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed/test_family.sql"]
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+
+[storage]
+enabled = true

@@ -1,12 +1,16 @@
--- Fullkin — Security hardening n.a.v. Supabase advisor
---
--- 1. De views collection_contributors/collection_totals draaiden als SECURITY
---    DEFINER en bypasten daarmee ALLE RLS — ook de netwerkgrens. Een ingelogde
---    gebruiker kon zo totalen van een vreemd netwerk opvragen. Vervangen door
---    functies die eerst controleren of de collecte in een eigen netwerk valt.
--- 2. RLS op de referentietabel event_suggestions.
--- 3. search_path pinnen op alle functies.
--- 4. anon execute intrekken op de helpers.
+-- Fullkin — Security hardening n.a.v. advisor
+-- 1. Views vervangen door netwerk-bewuste functies (dicht cross-network lek)
+-- 2. RLS op referentietabel
+-- 3. search_path op alle functies
+-- 4. anon execute intrekken op helpers
+
+-- ---------------------------------------------------------------------------
+-- 1. Views -> SECURITY DEFINER functies met netwerkcontrole.
+--    De aggregatie moet langs de contributions-RLS heen, maar mag alleen voor
+--    een collecte in een netwerk waar de aanroeper bij hoort. Bedragen blijven
+--    verborgen: alleen namen (collection_contributors) en de som
+--    (collection_total) verlaten de functie.
+-- ---------------------------------------------------------------------------
 
 drop view if exists collection_contributors;
 drop view if exists collection_totals;
@@ -45,9 +49,20 @@ language sql stable security definer set search_path = public as $$
     );
 $$;
 
+revoke execute on function collection_contributors(uuid) from anon;
+revoke execute on function collection_total(uuid) from anon;
+
+-- ---------------------------------------------------------------------------
+-- 2. Referentietabel: leesbaar voor ingelogde gebruikers, achter RLS.
+-- ---------------------------------------------------------------------------
+
 alter table event_suggestions enable row level security;
 create policy suggestions_read on event_suggestions for select
   to authenticated using (true);
+
+-- ---------------------------------------------------------------------------
+-- 3. search_path pinnen op de graaf- en hulpfuncties.
+-- ---------------------------------------------------------------------------
 
 alter function siblings_of(uuid)            set search_path = public;
 alter function ancestors_of(uuid, int)      set search_path = public;
@@ -56,3 +71,12 @@ alter function relation_label(uuid, uuid)   set search_path = public;
 alter function family_map(uuid)             set search_path = public;
 alter function family_stats(uuid)           set search_path = public;
 alter function compute_split(int)           set search_path = public;
+
+-- ---------------------------------------------------------------------------
+-- 4. Helpers niet aanroepbaar door anon. Voor authenticated blijven ze nodig
+--    (ze geven alleen de eigen identiteit/netwerken terug).
+-- ---------------------------------------------------------------------------
+
+revoke execute on function me()                          from anon;
+revoke execute on function my_networks()                 from anon;
+revoke execute on function has_role(uuid, family_role)   from anon;
