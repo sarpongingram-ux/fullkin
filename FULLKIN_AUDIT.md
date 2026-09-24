@@ -62,7 +62,7 @@ Relatie-model (fundament, matcht Fase 4/5 van de brief):
 | Z9 | **Geen error-monitoring** (Sentry o.i.d.); terugkerende PostgREST "Thread killed by timeout" in logs (nog niet herleid). | Blinde vlek bij incidenten. | P1 |
 | Z10 | **`relatie_pad` = recursieve BFS (depth ≤ 8)** — prima voor families, onbegrensd op enorme verbonden graphs. | Performance op schaal. | P2 |
 | Z11 | **Economie-laag** (collectes/pot/keeper/Stripe/Connect) vergroot oppervlak + **regelgeving** (PSD2/BTW). Niet kern van deze missie. | Afleiding + juridisch. | P2 (secundair houden) |
-| Z12 | **Half-siblings worden niet onderscheiden.** Op de Carter-seed geeft `relation_label(James, Tom)` = "broer of zus" terwijl Tom alleen de vader deelt (halfbroer). §3 vraagt halfbroer/halfzus expliciet. | Onnauwkeurig label. | P1 |
+| Z12 | ~~Half-siblings worden niet onderscheiden.~~ **OPGELOST (24 sep 2026):** `relation_label`/`relation_route` tellen gedeelde ouders → 2 = "broer of zus", 1 = "halfbroer of halfzus". Gedekt door de testsuite. | — | ✅ done |
 | Z13 | **`relation_route` noemt één gemeenschappelijke voorouder** ("voorouder is Helen") i.p.v. beide grootouders bij volle neven/nichten; bij oom/tante is de "tak"-naam soms de persoon zelf ("aan de kant van Michael via Michael"). | Cosmetisch, iets verwarrend. | P2 |
 
 ---
@@ -85,8 +85,10 @@ Relatie-model (fundament, matcht Fase 4/5 van de brief):
 ## 4. Aanbevelingen — P0 / P1 / P2
 
 **P0 (nodig om onafhankelijk te kunnen auditen):**
-- Geautomatiseerde tests voor de relatie-engine (`relation_label`, `relation_route`,
-  `relatie_pad`, `mogelijke_matches`, `ontdekte_familie`) op deterministische seed-data.
+- ✅ **Gedaan:** geautomatiseerde tests voor de relatie-engine op deterministische
+  seed-data (`tests/relatie-engine.test.mjs`, `npm test` — 12 checks, seedt+ruimt op via
+  `laad_testfamilie`/`verwijder_testnetwerk`). Nog uit te breiden naar
+  `mogelijke_matches`/`ontdekte_familie` + CI.
 - Deterministische, resetbare **seed-familie** (zie `supabase/seed/test_family.sql`).
 - **Staging/test-isolatie** (Supabase-branch of tweede project) zodat testen nooit
   prod-familiedata raakt. Zie `TESTING_SETUP.md`.

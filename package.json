@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --env-file=.env.local tests/relatie-engine.test.mjs"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.10.0",
