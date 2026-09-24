@@ -147,6 +147,10 @@ export default async function AppHome({
     generaties: vormRow?.generaties ?? 1,
   }
 
+  // Ontdekte familie: nieuwe familieleden via verbonden families (§10).
+  const { data: ontdekt } = await supabase.rpc("ontdekte_familie", { me: meId })
+  const ontdektAantal = (ontdekt ?? []).length
+
   // Partner-nudge: hang je hier via je partner zonder eigen kant? Geef een zetje.
   const { data: nudge } = await supabase.rpc("partner_nudge", { me: meId })
   const nudgeRow = (nudge ?? [])[0]
@@ -170,6 +174,7 @@ export default async function AppHome({
       partnerNudge={partnerNudge}
       geboorteHerinnering={geboorteHerinnering}
       vorm={vorm}
+      ontdektAantal={ontdektAantal}
     />
   )
 }

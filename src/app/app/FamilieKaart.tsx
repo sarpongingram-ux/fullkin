@@ -46,6 +46,7 @@ export function FamilieKaart({
   partnerNudge,
   geboorteHerinnering,
   vorm,
+  ontdektAantal,
 }: {
   voornaam: string
   familieNaam: string
@@ -65,6 +66,7 @@ export function FamilieKaart({
     meId: string | null
   }
   vorm: { leden: number; herkend: number; generaties: number }
+  ontdektAantal: number
 }) {
   const anderenDromen = dromen.filter((d) => d.person_id !== mijnPersonId)
 
@@ -136,6 +138,25 @@ export function FamilieKaart({
           </div>
         </div>
       </section>
+
+      {/* Het tweede magic moment: je familie is groter geworden (§10). */}
+      {ontdektAantal > 0 && (
+        <Link
+          href="/app/ontdek"
+          className="fk-card-dark block fk-rise"
+        >
+          <p className="text-sm uppercase tracking-wide opacity-70 font-bold">
+            Je familie is groter geworden 🎉
+          </p>
+          <p className="fk-amount text-goud mt-1">{ontdektAantal}</p>
+          <p className="text-sm opacity-80">
+            {ontdektAantal === 1
+              ? "familielid ontdekt dat je nog niet kende"
+              : "familieleden ontdekt die je nog niet kende"}{" "}
+            — bekijk ze →
+          </p>
+        </Link>
+      )}
 
       {/* Groei-motor: familie uitnodigen is de belangrijkste actie. */}
       <Link href="/app/familie" className="fk-btn fk-btn-primary fk-btn-full">
