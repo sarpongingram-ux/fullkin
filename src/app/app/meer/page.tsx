@@ -1,4 +1,8 @@
 import Link from "next/link"
+import { createClient } from "@/lib/supabase/server"
+
+const OPRICHTER =
+  process.env.FULLKIN_FOUNDER_EMAIL ?? "sarpongingram@gmail.com"
 
 // "Meer": alles wat de kern (familie ontdekken & verbinden) ondersteunt maar niet
 // de voordeur is — album, de familie-economie en beheer. Zo blijft de hoofd-
@@ -30,7 +34,14 @@ const GROEPEN: { titel: string; items: { href: string; emoji: string; naam: stri
   },
 ]
 
-export default function MeerPagina() {
+export default async function MeerPagina() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const isOprichter =
+    (user?.email ?? "").toLowerCase() === OPRICHTER.toLowerCase()
+
   return (
     <main className="max-w-md mx-auto px-5 py-8 space-y-8">
       <header>
@@ -61,6 +72,23 @@ export default function MeerPagina() {
           </div>
         </section>
       ))}
+
+      {isOprichter && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-black text-inkt">Oprichter</h2>
+          <Link
+            href="/app/meer/cijfers"
+            className="fk-card flex items-center gap-4 hover:bg-zand transition"
+          >
+            <span className="text-2xl shrink-0">📊</span>
+            <div className="min-w-0">
+              <p className="font-bold text-inkt">Groei-cijfers</p>
+              <p className="text-sm text-inkt-zacht">De North Star-funnel (privé)</p>
+            </div>
+            <span className="ml-auto text-inkt-zacht">›</span>
+          </Link>
+        </section>
+      )}
     </main>
   )
 }
