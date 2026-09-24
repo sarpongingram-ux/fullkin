@@ -178,9 +178,22 @@ export default async function PersoonPagina({
         />
       )}
 
-      {/* De leesbare route, hoe jullie verbonden zijn */}
-      {!ikZelf && route && (
-        <p className="fk-card text-inkt">{route}</p>
+      {/* Hoe zijn jullie familie? — in gewone taal, begrijpelijk voor iedereen. */}
+      {!ikZelf && (
+        <section className="fk-card border-2 border-terracotta/30 bg-terracotta/5">
+          <p className="text-xs font-extrabold tracking-[0.18em] text-terracotta">
+            HOE ZIJN JULLIE FAMILIE?
+          </p>
+          <p className="text-xl font-black text-inkt mt-1.5 leading-snug">
+            {p.first_name} is{" "}
+            {label && label !== "familie"
+              ? `je ${label}`
+              : "familie van je"}
+          </p>
+          {route && route !== "Jullie verbinding is nog niet volledig in kaart gebracht." && (
+            <p className="text-inkt-zacht mt-1.5 leading-relaxed">{route}</p>
+          )}
+        </section>
       )}
 
       {/* Naam invullen/aanpassen, bijv. voor een nog "Onbekende" gedeelde ouder. */}
