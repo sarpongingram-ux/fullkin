@@ -2122,6 +2122,7 @@ export type Database = {
           uitgekeerd_cents: number
         }[]
       }
+      naam_norm: { Args: { t: string }; Returns: string }
       netwerk_bevroren: { Args: { p_net: string }; Returns: boolean }
       ontdek_verbindingen: {
         Args: never
@@ -2198,6 +2199,13 @@ export type Database = {
           p_ref: string
         }
         Returns: undefined
+      }
+      relatie_pad: {
+        Args: { me: string; other: string }
+        Returns: {
+          naam: string
+          pos: number
+        }[]
       }
       relation_label: { Args: { me: string; other: string }; Returns: string }
       relation_route: { Args: { me: string; other: string }; Returns: string }

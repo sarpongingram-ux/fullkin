@@ -108,12 +108,17 @@ export default async function PersoonPagina({
       .map((m) => ({ id: m.id, naam: `${m.first_name} ${m.last_name}` }))
   }
 
-  // Relatie t.o.v. mij + leesbare route.
-  const [{ data: label }, { data: route }, { data: dromen }] = await Promise.all([
-    ikZelf ? { data: "jij" } : supabase.rpc("relation_label", { me: meId, other: id }),
-    ikZelf ? { data: null } : supabase.rpc("relation_route", { me: meId, other: id }),
-    supabase.rpc("family_dreams"),
-  ])
+  // Relatie t.o.v. mij + leesbare route + het zichtbare pad.
+  const [{ data: label }, { data: route }, { data: pad }, { data: dromen }] =
+    await Promise.all([
+      ikZelf ? { data: "jij" } : supabase.rpc("relation_label", { me: meId, other: id }),
+      ikZelf ? { data: null } : supabase.rpc("relation_route", { me: meId, other: id }),
+      ikZelf
+        ? { data: [] as { pos: number; naam: string }[] }
+        : supabase.rpc("relatie_pad", { me: meId, other: id }),
+      supabase.rpc("family_dreams"),
+    ])
+  const padLijst = (pad ?? []) as { pos: number; naam: string }[]
 
   const droom = (dromen ?? []).find((d) => d.person_id === id)
 
@@ -192,6 +197,28 @@ export default async function PersoonPagina({
           </p>
           {route && route !== "Jullie verbinding is nog niet volledig in kaart gebracht." && (
             <p className="text-inkt-zacht mt-1.5 leading-relaxed">{route}</p>
+          )}
+
+          {/* Node-voor-node pad: Jij → … → deze persoon */}
+          {padLijst.length > 1 && (
+            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 mt-3">
+              {padLijst.map((stap, n) => (
+                <span key={stap.pos} className="flex items-center gap-1.5">
+                  <span
+                    className={`text-sm font-bold ${
+                      n === 0 || n === padLijst.length - 1
+                        ? "text-terracotta"
+                        : "text-inkt"
+                    }`}
+                  >
+                    {n === 0 ? "Jij" : stap.naam.split(" ")[0]}
+                  </span>
+                  {n < padLijst.length - 1 && (
+                    <span className="text-inkt-zacht">→</span>
+                  )}
+                </span>
+              ))}
+            </div>
           )}
         </section>
       )}
