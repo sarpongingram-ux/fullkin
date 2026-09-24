@@ -37,6 +37,20 @@ export function UitnodigenKnop({
 
   const whatsappLink = `https://wa.me/?text=${encodeURIComponent(bericht)}`
 
+  async function deel() {
+    // Native deel-menu (iMessage, Telegram, mail, …) — de minste wrijving op
+    // mobiel. Valt terug op WhatsApp als delen niet beschikbaar is.
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title: `Fullkin — ${familieNaam}`, text: bericht })
+      } catch {
+        // gebruiker annuleerde het deelmenu — niets doen
+      }
+    } else {
+      window.open(whatsappLink, "_blank", "noopener")
+    }
+  }
+
   if (!link) {
     return (
       <div className="mt-2">
@@ -58,6 +72,13 @@ export function UitnodigenKnop({
       <p className="text-sm text-inkt-zacht font-semibold">
         Deel de uitnodiging met {voornaam}. Fullkin verstuurt niets voor je.
       </p>
+      <button
+        onClick={deel}
+        className="w-full rounded-full py-2.5 text-white font-bold hover:opacity-90 transition"
+        style={{ background: "var(--terracotta)" }}
+      >
+        📤 Deel uitnodiging
+      </button>
       <div className="flex gap-2">
         <a
           href={whatsappLink}
@@ -66,7 +87,7 @@ export function UitnodigenKnop({
           className="flex-1 text-center rounded-full py-2.5 text-white font-bold hover:opacity-90 transition"
           style={{ background: "var(--groen)" }}
         >
-          💬 Deel via WhatsApp
+          💬 WhatsApp
         </a>
         <button
           onClick={() => {
