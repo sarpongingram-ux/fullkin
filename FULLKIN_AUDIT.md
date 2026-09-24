@@ -85,13 +85,12 @@ Relatie-model (fundament, matcht Fase 4/5 van de brief):
 ## 4. Aanbevelingen — P0 / P1 / P2
 
 **P0 (nodig om onafhankelijk te kunnen auditen):**
-- ✅ **Gedaan:** geautomatiseerde tests (`npm test`, 20 checks) — relatie-engine
-  (`tests/relatie-engine.test.mjs`, 12) én matching+discovery+privacy
-  (`tests/discovery.test.mjs`, 8: `mogelijke_matches` → koppeling → `ontdekte_familie`
-  → `ontdekt_profiel` gating → geen dubbele match). Seedt en ruimt zelf op via
-  `laad_testfamilie`/`verwijder_testnetwerk`. **CI:** `.github/workflows/test.yml` draait
-  ze bij elke push/PR tegen een STAGING-DB (skipt netjes zonder staging-secrets).
-  Nog te doen: claim-flow onder test; echte staging provisionen.
+- ✅ **Gedaan:** geautomatiseerde tests (`npm test`, **26 checks**, 3 suites):
+  relatie-engine (12), matching+discovery+privacy (8), **claim-flow (6)** met een echte
+  test-authgebruiker (claim → geaccepteerd → notificatie → duplicaat-preventie). Seeden en
+  ruimen zelf op. **CI:** `.github/workflows/test.yml` draait ze bij elke push/PR tegen de
+  **staging-branch** (`iuhozabjtufooklobzvi`); secrets `STAGING_SUPABASE_URL` + `_ANON_KEY`
+  gezet, `STAGING_SUPABASE_SERVICE_ROLE_KEY` door de oprichter te zetten.
 - Deterministische, resetbare **seed-familie** (zie `supabase/seed/test_family.sql`).
 - **Staging/test-isolatie** (Supabase-branch of tweede project) zodat testen nooit
   prod-familiedata raakt. Zie `TESTING_SETUP.md`.

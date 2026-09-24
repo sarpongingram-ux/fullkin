@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node tests/relatie-engine.test.mjs && node tests/discovery.test.mjs",
-    "test:local": "node --env-file=.env.local tests/relatie-engine.test.mjs && node --env-file=.env.local tests/discovery.test.mjs"
+    "test": "node tests/relatie-engine.test.mjs && node tests/discovery.test.mjs && node tests/claim.test.mjs",
+    "test:local": "node --env-file=.env.local tests/relatie-engine.test.mjs && node --env-file=.env.local tests/discovery.test.mjs && node --env-file=.env.local tests/claim.test.mjs"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.10.0",
