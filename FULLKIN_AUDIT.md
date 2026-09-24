@@ -85,10 +85,13 @@ Relatie-model (fundament, matcht Fase 4/5 van de brief):
 ## 4. Aanbevelingen — P0 / P1 / P2
 
 **P0 (nodig om onafhankelijk te kunnen auditen):**
-- ✅ **Gedaan:** geautomatiseerde tests voor de relatie-engine op deterministische
-  seed-data (`tests/relatie-engine.test.mjs`, `npm test` — 12 checks, seedt+ruimt op via
-  `laad_testfamilie`/`verwijder_testnetwerk`). Nog uit te breiden naar
-  `mogelijke_matches`/`ontdekte_familie` + CI.
+- ✅ **Gedaan:** geautomatiseerde tests (`npm test`, 20 checks) — relatie-engine
+  (`tests/relatie-engine.test.mjs`, 12) én matching+discovery+privacy
+  (`tests/discovery.test.mjs`, 8: `mogelijke_matches` → koppeling → `ontdekte_familie`
+  → `ontdekt_profiel` gating → geen dubbele match). Seedt en ruimt zelf op via
+  `laad_testfamilie`/`verwijder_testnetwerk`. **CI:** `.github/workflows/test.yml` draait
+  ze bij elke push/PR tegen een STAGING-DB (skipt netjes zonder staging-secrets).
+  Nog te doen: claim-flow onder test; echte staging provisionen.
 - Deterministische, resetbare **seed-familie** (zie `supabase/seed/test_family.sql`).
 - **Staging/test-isolatie** (Supabase-branch of tweede project) zodat testen nooit
   prod-familiedata raakt. Zie `TESTING_SETUP.md`.
