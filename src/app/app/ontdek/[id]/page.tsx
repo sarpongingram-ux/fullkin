@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { HalloKnop } from "../HalloKnop"
+import { OntdekChat } from "../OntdekChat"
+import { markeerOntdekGelezen } from "../acties"
 
 function initialen(voor: string, achter: string) {
   return (voor[0] ?? "") + (achter[0] ?? "")
@@ -24,15 +26,20 @@ export default async function OntdektProfielPagina({
   const { data: meId } = await supabase.rpc("me")
   if (!meId) redirect("/app")
 
-  const [{ data: profiel }, { data: alGegroet }] = await Promise.all([
-    supabase.rpc("ontdekt_profiel", { me: meId, p_id: id }).single(),
-    supabase
-      .from("begroetingen")
-      .select("id")
-      .eq("van_persoon", meId)
-      .eq("naar_persoon", id)
-      .maybeSingle(),
-  ])
+  const [{ data: profiel }, { data: alGegroet }, { data: berichten }] =
+    await Promise.all([
+      supabase.rpc("ontdekt_profiel", { me: meId, p_id: id }).single(),
+      supabase
+        .from("begroetingen")
+        .select("id")
+        .eq("van_persoon", meId)
+        .eq("naar_persoon", id)
+        .maybeSingle(),
+      supabase.rpc("ontdek_berichten_met", { p_ander: id }),
+    ])
+
+  // Open we dit profiel, dan is het gesprek gelezen.
+  if ((berichten ?? []).length > 0) await markeerOntdekGelezen(id)
 
   if (!profiel) {
     return (
@@ -96,6 +103,12 @@ export default async function OntdektProfielPagina({
         naar={profiel.id}
         alGegroet={!!alGegroet}
         voornaam={profiel.voornaam}
+      />
+
+      <OntdekChat
+        anderId={profiel.id}
+        voornaam={profiel.voornaam}
+        berichten={berichten ?? []}
       />
 
       <div className="fk-card text-center">

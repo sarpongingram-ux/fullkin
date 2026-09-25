@@ -45,3 +45,28 @@ export async function zegHallo(
   revalidatePath("/app/ontdek")
   return { ok: true }
 }
+
+// Stuur een bericht in het tweeweg-gesprek met een ontdekt familielid (CONNECT).
+export async function stuurOntdekBericht(
+  ander: string,
+  tekst: string,
+): Promise<{ ok: boolean; fout?: string }> {
+  const schoon = tekst.trim()
+  if (!schoon) return { ok: false, fout: "Typ eerst een bericht." }
+  const supabase = await createClient()
+  const { error } = await supabase.rpc("stuur_ontdek_bericht", {
+    p_ander: ander,
+    p_tekst: schoon,
+  })
+  if (error) return { ok: false, fout: error.message || "Kon het bericht niet versturen." }
+  revalidatePath(`/app/ontdek/${ander}`)
+  revalidatePath("/app/ontdek")
+  return { ok: true }
+}
+
+// Markeer het gesprek met een ontdekt familielid als gelezen.
+export async function markeerOntdekGelezen(ander: string): Promise<void> {
+  const supabase = await createClient()
+  await supabase.rpc("markeer_ontdek_gelezen", { p_ander: ander })
+  revalidatePath("/app/ontdek")
+}

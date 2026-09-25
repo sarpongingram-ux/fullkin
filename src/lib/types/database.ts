@@ -1250,6 +1250,117 @@ export type Database = {
           },
         ]
       }
+      ontdek_berichten: {
+        Row: {
+          aangemaakt_op: string
+          afzender_id: string
+          gesprek_id: string
+          id: string
+          tekst: string
+        }
+        Insert: {
+          aangemaakt_op?: string
+          afzender_id: string
+          gesprek_id: string
+          id?: string
+          tekst: string
+        }
+        Update: {
+          aangemaakt_op?: string
+          afzender_id?: string
+          gesprek_id?: string
+          id?: string
+          tekst?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ontdek_berichten_afzender_id_fkey"
+            columns: ["afzender_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ontdek_berichten_gesprek_id_fkey"
+            columns: ["gesprek_id"]
+            isOneToOne: false
+            referencedRelation: "ontdek_gesprekken"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ontdek_gelezen: {
+        Row: {
+          gelezen_tot: string
+          gesprek_id: string
+          persoon_id: string
+        }
+        Insert: {
+          gelezen_tot?: string
+          gesprek_id: string
+          persoon_id: string
+        }
+        Update: {
+          gelezen_tot?: string
+          gesprek_id?: string
+          persoon_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ontdek_gelezen_gesprek_id_fkey"
+            columns: ["gesprek_id"]
+            isOneToOne: false
+            referencedRelation: "ontdek_gesprekken"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ontdek_gelezen_persoon_id_fkey"
+            columns: ["persoon_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ontdek_gesprekken: {
+        Row: {
+          aangemaakt_op: string
+          id: string
+          laatste_bericht_op: string | null
+          persoon_a: string
+          persoon_b: string
+        }
+        Insert: {
+          aangemaakt_op?: string
+          id?: string
+          laatste_bericht_op?: string | null
+          persoon_a: string
+          persoon_b: string
+        }
+        Update: {
+          aangemaakt_op?: string
+          id?: string
+          laatste_bericht_op?: string | null
+          persoon_a?: string
+          persoon_b?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ontdek_gesprekken_persoon_a_fkey"
+            columns: ["persoon_a"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ontdek_gesprekken_persoon_b_fkey"
+            columns: ["persoon_b"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payout_accounts: {
         Row: {
           country: string | null
@@ -2124,6 +2235,7 @@ export type Database = {
       maak_verjaardag_collectes: { Args: { p_dagen?: number }; Returns: number }
       mag_vantage: { Args: { p: string }; Returns: boolean }
       markeer_meldingen_gelezen: { Args: never; Returns: undefined }
+      markeer_ontdek_gelezen: { Args: { p_ander: string }; Returns: undefined }
       me: { Args: never; Returns: string }
       meld: {
         Args: {
@@ -2164,6 +2276,17 @@ export type Database = {
           network_id: string
         }[]
       }
+      mijn_ontdek_gesprekken: {
+        Args: never
+        Returns: {
+          ander_familie: string
+          ander_id: string
+          ander_naam: string
+          laatste_op: string
+          laatste_tekst: string
+          ongelezen: boolean
+        }[]
+      }
       mogelijke_matches: {
         Args: { me: string }
         Returns: {
@@ -2189,6 +2312,16 @@ export type Database = {
       }
       naam_norm: { Args: { t: string }; Returns: string }
       netwerk_bevroren: { Args: { p_net: string }; Returns: boolean }
+      ontdek_berichten_met: {
+        Args: { p_ander: string }
+        Returns: {
+          aangemaakt_op: string
+          afzender_naam: string
+          id: string
+          is_van_mij: boolean
+          tekst: string
+        }[]
+      }
       ontdek_verbindingen: {
         Args: never
         Returns: {
@@ -2340,6 +2473,10 @@ export type Database = {
         }
         Returns: string
       }
+      stuur_ontdek_bericht: {
+        Args: { p_ander: string; p_tekst: string }
+        Returns: undefined
+      }
       verwijder_testnetwerk: {
         Args: { p_net_naam: string }
         Returns: undefined
@@ -2398,6 +2535,7 @@ export type Database = {
         | "stem_winst"
         | "mijlpaal"
         | "uitnodiging_geaccepteerd"
+        | "ontdek_bericht"
       payout_provider: "stripe" | "flutterwave"
       payout_status: "onboarding" | "ready" | "restricted"
       pot_entry_kind:
@@ -2598,6 +2736,7 @@ export const Constants = {
         "stem_winst",
         "mijlpaal",
         "uitnodiging_geaccepteerd",
+        "ontdek_bericht",
       ],
       payout_provider: ["stripe", "flutterwave"],
       payout_status: ["onboarding", "ready", "restricted"],
