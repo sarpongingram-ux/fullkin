@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { bevestigMatch } from "./acties"
+import { bevestigMatch, wijsMatchAf } from "./acties"
 
 export function MatchKnop({
   mijnId,
@@ -27,6 +27,19 @@ export function MatchKnop({
     })
   }
 
+  function afwijzen() {
+    setFout(null)
+    setWeg(true) // meteen weg uit beeld
+    start(async () => {
+      const res = await wijsMatchAf(mijnId, anderId)
+      if (!res.ok) {
+        setWeg(false)
+        return setFout(res.fout ?? "Er ging iets mis.")
+      }
+      router.refresh()
+    })
+  }
+
   return (
     <div className="mt-3">
       <div className="flex gap-2">
@@ -38,7 +51,7 @@ export function MatchKnop({
           {bezig ? "Bezig…" : "Ja, dezelfde persoon"}
         </button>
         <button
-          onClick={() => setWeg(true)}
+          onClick={afwijzen}
           disabled={bezig}
           className="fk-btn fk-btn-secondary flex-1 text-sm py-2.5"
         >

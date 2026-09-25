@@ -6,8 +6,18 @@ on:
   pull_request:
 
 jobs:
-  relatie-engine:
-    name: Relatie-engine & discovery
+  # ---------------------------------------------------------------------------
+  # Kerntests (relatie-engine + discovery + claim + autorisatie) tegen de
+  # STAGING-database. GEEN silent skip meer (P1.4): als de vereiste secrets
+  # ontbreken faalt de job met een duidelijke melding, zodat een groene check
+  # nooit suggereert dat de tests gedraaid hebben terwijl ze zijn overgeslagen.
+  #
+  # NB fork-PR's hebben geen toegang tot secrets → deze job faalt daar bewust
+  # (rood), i.p.v. vals-groen. De reproductie-job hieronder heeft GEEN secrets
+  # nodig en geeft fork-PR's wél een zinvol signaal.
+  # ---------------------------------------------------------------------------
+  core-tests:
+    name: Core tests (staging DB)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,15 +26,33 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Run tests
+      - name: Run core tests (fails loudly if secrets missing)
         env:
-          # Wijs naar een STAGING/branch-DB — nooit productie met echte families.
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.STAGING_SUPABASE_SERVICE_ROLE_KEY }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
-        run: |
-          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
-            echo "::warning::STAGING_SUPABASE_URL / STAGING_SUPABASE_SERVICE_ROLE_KEY niet ingesteld — tests overgeslagen. Zie TESTING_SETUP.md."
-            exit 0
-          fi
-          npm test
+        run: npm test
+
+  # ---------------------------------------------------------------------------
+  # Clean-DB reproductie (P1.3): bouwt een VERSE lokale database volledig op uit
+  # supabase/migrations/* (+ seed) en controleert dat het kernschema bestaat.
+  # Bewijst: clone repo → migraties toepassen → Fullkin-core werkt. Vereist geen
+  # secrets (volledig lokaal in de runner) en draait dus ook op fork-PR's.
+  # ---------------------------------------------------------------------------
+  db-reproduction:
+    name: Clean DB reproduction (migrations from scratch)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Ensure psql is available
+        run: which psql || (sudo apt-get update && sudo apt-get install -y postgresql-client)
+      - name: Start Supabase (applies ALL migrations + seed on an empty DB)
+        run: supabase start
+      - name: Assert the core schema was reproduced
+        run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f tests/db-reproduction.sql
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop --no-backup
