@@ -19,6 +19,8 @@ const suites = [
   ["Discovery", "tests/discovery.test.mjs"],
   ["Claim", "tests/claim.test.mjs"],
   ["Autorisatie (IDOR/privacy/claim-race)", "tests/authz.test.mjs"],
+  ["Graph-integriteit + transactionele build", "tests/graph.test.mjs"],
+  ["Persistente match-afwijzing", "tests/rejection.test.mjs"],
 ]
 
 let totPass = 0, totFail = 0, hardFail = false

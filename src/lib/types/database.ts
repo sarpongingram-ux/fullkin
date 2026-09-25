@@ -1347,6 +1347,55 @@ export type Database = {
           },
         ]
       }
+      person_match_decisions: {
+        Row: {
+          decided_at: string
+          decided_by: string | null
+          decision: string
+          id: string
+          person_a: string
+          person_b: string
+        }
+        Insert: {
+          decided_at?: string
+          decided_by?: string | null
+          decision: string
+          id?: string
+          person_a: string
+          person_b: string
+        }
+        Update: {
+          decided_at?: string
+          decided_by?: string | null
+          decision?: string
+          id?: string
+          person_a?: string
+          person_b?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "person_match_decisions_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_match_decisions_person_a_fkey"
+            columns: ["person_a"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_match_decisions_person_b_fkey"
+            columns: ["person_b"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       persons: {
         Row: {
           birth_name: string | null
@@ -1850,6 +1899,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      add_family_member: {
+        Args: {
+          p_achternaam: string
+          p_anker?: string
+          p_geboortedatum?: string
+          p_is_kind?: boolean
+          p_land?: string
+          p_origin?: Database["public"]["Enums"]["relationship_origin"]
+          p_relatie: string
+          p_stad?: string
+          p_voornaam: string
+        }
+        Returns: string
+      }
       album_reaction_counts: {
         Args: { p_item: string }
         Returns: {
@@ -2059,6 +2122,7 @@ export type Database = {
       laad_testfamilie: { Args: { p_net_naam: string }; Returns: string }
       leg_chat_contact_vast: { Args: { p_room: string }; Returns: undefined }
       maak_verjaardag_collectes: { Args: { p_dagen?: number }; Returns: number }
+      mag_vantage: { Args: { p: string }; Returns: boolean }
       markeer_meldingen_gelezen: { Args: never; Returns: undefined }
       me: { Args: never; Returns: string }
       meld: {
@@ -2280,6 +2344,7 @@ export type Database = {
         Args: { p_net_naam: string }
         Returns: undefined
       }
+      wijs_match_af: { Args: { p_a: string; p_b: string }; Returns: undefined }
       zeg_hallo: { Args: { p_naar: string }; Returns: undefined }
       zet_actieve_familie: { Args: { p_net: string }; Returns: undefined }
     }
