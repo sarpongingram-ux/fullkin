@@ -10,15 +10,17 @@ een externe reviewer elke kernflow zelf kan nalopen._
 | Omgeving | Status | DB | Aanbeveling |
 |---|---|---|---|
 | Productie | live (`fullkin.vercel.app`) | Supabase project `fbphiwipvhmkvthmgvhv` | bevat echte familiedata — **niet** als testomgeving gebruiken |
-| Staging | **nog niet ingericht** | — | Supabase **branch** of tweede project + Vercel preview + Stripe testmodus |
+| Staging | **ingericht** | Supabase-branch `iuhozabjtufooklobzvi` (zelfde 62 migraties) | isolatie voor CI; vereist `STAGING_SUPABASE_*` GitHub-secrets |
 
-**Aanbevolen staging (P0):** maak een Supabase-branch (geïsoleerde DB, zelfde schema/migraties)
-en koppel een Vercel preview-deploy eraan met eigen env-vars. Zo raakt testen nooit
-productie. (Kan ik provisionen op jouw akkoord — er kunnen kosten aan een branch zitten.)
+De CI-kerntests draaien tegen de **staging-branch** (nooit productie met echte families).
+Voeg als GitHub-secrets toe: `STAGING_SUPABASE_URL`, `STAGING_SUPABASE_ANON_KEY` en
+`STAGING_SUPABASE_SERVICE_ROLE_KEY` (de `service_role`-key van de branch — een credential
+die de eigenaar zelf zet). Zolang de service-role-secret ontbreekt, **faalt** de
+CI-job `core-tests` bewust (geen silent skip).
 
-Tot staging er is, is de veilige tussenoplossing: **volledig genamespacete testdata**
-(netwerknaam begint met `TEST — …`) die na afloop wordt verwijderd. De seed hieronder
-is zo gebouwd.
+Alle tests gebruiken daarnaast **volledig genamespacete testdata** (netwerknaam begint met
+`TEST — …`) die na afloop wordt verwijderd, plus tijdelijke auth-users (`@fullkin.invalid`)
+die worden opgeruimd.
 
 ---
 
@@ -119,8 +121,45 @@ acceptatiegraad, koppelingen, groeten.
 
 ---
 
-## 6. Nog te doen voor volwaardige testbaarheid (P0)
+## 6. Geautomatiseerde tests (85 checks, 7 suites)
 
-- Geautomatiseerde tests (relatie-engine + matching) op deze seed.
-- Echte staging-branch provisionen (isolatie).
-- CI die de tests draait vóór deploy.
+Draai alle suites lokaal (leest `.env.local`):
+
+```bash
+npm run test:local
+```
+
+De runner (`tests/run-all.mjs`) print een eindregel: `FULLKIN CORE TESTS: PASS — 85/85
+checks executed`. In CI (`npm test`) leest hij de env-vars uit de job.
+
+| Suite | Checks | Dekt |
+|---|--:|---|
+| `relatie-engine.test.mjs` | 13 | ancestors/descendants/siblings/half-sibling, `relation_label`, `relatie_pad` |
+| `discovery.test.mjs` | 8 | matching → koppeling → `ontdekte_familie`/`ontdekt_profiel` (privacy) |
+| `claim.test.mjs` | 6 | `invite_preview` + `claim_invite` (ongeldig/verlopen/hergebruik/al geclaimd) |
+| `authz.test.mjs` | 19 | **IDOR/privacy-grens** (echte 2 gebruikers), forged-link, claim-race |
+| `graph.test.mjs` | 25 | graph-integriteit (self/dubbel/cross-network/cykel) + transactionele `add_family_member` |
+| `rejection.test.mjs` | 5 | persistente match-afwijzing |
+| `core-loop-two-users.test.mjs` | 9 | **BUILD → INVITE → CLAIM → GROW** met 2 echte gebruikers |
+
+### Clean-DB reproductie (geen secrets nodig)
+
+CI-job `db-reproduction` bouwt met de Supabase-CLI een verse DB uit `supabase/migrations/*`
++ seed en controleert het kernschema. Lokaal (met Docker):
+
+```bash
+supabase start
+psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f tests/db-reproduction.sql
+supabase stop --no-backup
+```
+
+Zie `DATABASE_REPRODUCTION.md`.
+
+## 7. Status van eerdere gaps
+
+- **Half-sibling** (was Z12): **opgelost** — `relation_route` onderscheidt nu volle
+  broer/zus (2 gedeelde ouders) van halfbroer/-zus (1 gedeelde ouder). Gedekt door
+  `relatie-engine.test.mjs`.
+- **Staging + CI**: **ingericht** (zie §1).
+- Cosmetisch open: route noemt bij volle neven/nichten één gemeenschappelijke voorouder
+  (Z13) — geen correctheidsfout.

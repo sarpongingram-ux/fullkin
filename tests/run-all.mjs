@@ -21,6 +21,7 @@ const suites = [
   ["Autorisatie (IDOR/privacy/claim-race)", "tests/authz.test.mjs"],
   ["Graph-integriteit + transactionele build", "tests/graph.test.mjs"],
   ["Persistente match-afwijzing", "tests/rejection.test.mjs"],
+  ["Two-user core loop (BUILD→INVITE→CLAIM→GROW)", "tests/core-loop-two-users.test.mjs"],
 ]
 
 let totPass = 0, totFail = 0, hardFail = false
