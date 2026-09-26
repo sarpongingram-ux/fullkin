@@ -3,6 +3,7 @@
 import { useState, useTransition, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { stuurOntdekBericht } from "./acties"
+import { createClient } from "@/lib/supabase/client"
 
 export type OntdekBericht = {
   id: string
@@ -30,6 +31,24 @@ export function OntdekChat({
   useEffect(() => {
     eindeRef.current?.scrollIntoView({ block: "nearest" })
   }, [berichten.length])
+
+  // Realtime: nieuwe berichten komen live binnen. RLS zorgt dat we alleen events van
+  // onze eigen gesprekken ontvangen; bij een nieuw bericht verversen we de pagina
+  // (server-component herlaadt de berichten en markeert gelezen).
+  useEffect(() => {
+    const supabase = createClient()
+    const kanaal = supabase
+      .channel(`ontdek-chat-${anderId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "ontdek_berichten" },
+        () => router.refresh(),
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(kanaal)
+    }
+  }, [anderId, router])
 
   function verstuur() {
     const schoon = tekst.trim()
