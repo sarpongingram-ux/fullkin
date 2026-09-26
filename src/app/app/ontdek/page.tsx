@@ -13,15 +13,17 @@ export default async function OntdekPagina() {
   const { data: meId } = await supabase.rpc("me")
   if (!meId) redirect("/start")
 
-  const [{ data: matches }, { data: ontdekt }, { data: groeten }] =
+  const [{ data: matches }, { data: ontdekt }, { data: groeten }, { data: gesprekken }] =
     await Promise.all([
       supabase.rpc("mogelijke_matches", { me: meId }),
       supabase.rpc("ontdekte_familie", { me: meId }),
       supabase.rpc("mijn_begroetingen", { me: meId }),
+      supabase.rpc("mijn_ontdek_gesprekken"),
     ])
   const matchLijst = matches ?? []
   const ontdektLijst = ontdekt ?? []
   const groetLijst = groeten ?? []
+  const gesprekLijst = gesprekken ?? []
 
   return (
     <main className="max-w-md mx-auto px-5 py-8 space-y-8">
@@ -37,6 +39,38 @@ export default async function OntdekPagina() {
           verschijnen familieleden die je nog niet kende.
         </p>
       </header>
+
+      {/* Lopende gesprekken met ontdekte familie (CONNECT). */}
+      {gesprekLijst.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-black text-inkt">Gesprekken 💬</h2>
+          {gesprekLijst.map((g) => (
+            <Link
+              key={g.ander_id}
+              href={`/app/ontdek/${g.ander_id}`}
+              className={`fk-card flex items-center gap-3 ${
+                g.ongelezen ? "ring-2 ring-terracotta" : ""
+              }`}
+            >
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-inkt">
+                  {g.ander_naam}
+                  <span className="font-normal text-inkt-zacht">
+                    {" "}
+                    · {g.ander_familie}
+                  </span>
+                </p>
+                <p className="text-sm text-inkt-zacht truncate">
+                  {g.laatste_tekst}
+                </p>
+              </div>
+              {g.ongelezen && (
+                <span className="w-2.5 h-2.5 rounded-full bg-terracotta shrink-0" />
+              )}
+            </Link>
+          ))}
+        </section>
+      )}
 
       {/* Familie die jou gedag heeft gezegd. */}
       {groetLijst.length > 0 && (
