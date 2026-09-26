@@ -3,6 +3,13 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { MatchKnop } from "./MatchKnop"
 
+// Confidence-label + kleur op basis van de match-score (0–100).
+function matchLabel(score: number): { tekst: string; klasse: string } {
+  if (score >= 75) return { tekst: "Sterke match", klasse: "bg-groen/10 text-groen" }
+  if (score >= 55) return { tekst: "Waarschijnlijk", klasse: "bg-goud/15 text-goud" }
+  return { tekst: "Mogelijk", klasse: "bg-oppervlak text-inkt-zacht" }
+}
+
 export default async function OntdekPagina() {
   const supabase = await createClient()
   const {
@@ -146,17 +153,29 @@ export default async function OntdekPagina() {
             </p>
           </div>
         ) : (
-          matchLijst.map((m) => (
-            <div key={`${m.mijn_id}-${m.ander_id}`} className="fk-card">
-              <p className="text-sm text-inkt-zacht">{m.signaal}</p>
-              <p className="font-black text-inkt mt-1">{m.mijn_naam}</p>
-              <p className="text-sm text-inkt-zacht">
-                lijkt dezelfde persoon als <b>{m.ander_naam}</b> uit de familie{" "}
-                {m.ander_familie}.
-              </p>
-              <MatchKnop mijnId={m.mijn_id} anderId={m.ander_id} />
-            </div>
-          ))
+          matchLijst.map((m) => {
+            const label = matchLabel(m.score ?? 0)
+            return (
+              <div key={`${m.mijn_id}-${m.ander_id}`} className="fk-card">
+                <div className="flex items-center justify-between gap-2">
+                  <span
+                    className={`text-xs font-extrabold px-2 py-0.5 rounded-full ${label.klasse}`}
+                  >
+                    {label.tekst} · {m.score ?? 0}%
+                  </span>
+                  {m.signaal && (
+                    <span className="text-xs text-inkt-zacht truncate">{m.signaal}</span>
+                  )}
+                </div>
+                <p className="font-black text-inkt mt-2">{m.mijn_naam}</p>
+                <p className="text-sm text-inkt-zacht">
+                  lijkt dezelfde persoon als <b>{m.ander_naam}</b> uit de familie{" "}
+                  {m.ander_familie}.
+                </p>
+                <MatchKnop mijnId={m.mijn_id} anderId={m.ander_id} />
+              </div>
+            )
+          })
         )}
       </section>
     </main>

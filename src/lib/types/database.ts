@@ -2215,6 +2215,7 @@ export type Database = {
         }[]
       }
       is_lid_van_room: { Args: { p_room: string }; Returns: boolean }
+      is_ontdek_deelnemer: { Args: { p_gesprek: string }; Returns: boolean }
       kan_bij_room: { Args: { p_room: string }; Returns: boolean }
       keeper_beschikbaar: { Args: { p_net: string }; Returns: number }
       keeper_saldo: { Args: { p_net: string }; Returns: number }
@@ -2236,6 +2237,7 @@ export type Database = {
       mag_vantage: { Args: { p: string }; Returns: boolean }
       markeer_meldingen_gelezen: { Args: never; Returns: undefined }
       markeer_ontdek_gelezen: { Args: { p_ander: string }; Returns: undefined }
+      match_score: { Args: { p_a: string; p_b: string }; Returns: number }
       me: { Args: never; Returns: string }
       meld: {
         Args: {
@@ -2295,6 +2297,7 @@ export type Database = {
           ander_naam: string
           mijn_id: string
           mijn_naam: string
+          score: number
           signaal: string
         }[]
       }
@@ -2411,6 +2414,8 @@ export type Database = {
         Args: { p_contribution: string; p_intent: string }
         Returns: undefined
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       siblings_of: {
         Args: { p: string }
         Returns: {
