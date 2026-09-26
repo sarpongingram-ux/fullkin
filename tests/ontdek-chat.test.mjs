@@ -79,6 +79,11 @@ async function main() {
     const { data: bijA } = await A.cli.rpc("ontdek_berichten_met", { p_ander: michelle })
     check("A ziet beide berichten in de juiste volgorde", (bijA ?? []).length === 2 && bijA[0].is_van_mij === true && bijA[1].is_van_mij === false)
 
+    // Realtime-voorwaarde: deelnemer mag de berichten direct lezen (SELECT-policy), zodat
+    // postgres_changes events doorkomen.
+    const { data: direct } = await A.cli.from("ontdek_berichten").select("id")
+    check("A mag zijn berichten direct lezen (RLS SELECT-policy voor realtime)", (direct ?? []).length === 2)
+
     console.log("\n— inbox + ongelezen + melding —")
     const { data: inboxA } = await A.cli.rpc("mijn_ontdek_gesprekken")
     const conv = (inboxA ?? []).find((g) => g.ander_id === michelle)
@@ -98,6 +103,8 @@ async function main() {
     await persoon(nu, "Vreemde", "Onbekend", { claimed_by: U.uid })
     const { data: gluur } = await U.cli.rpc("ontdek_berichten_met", { p_ander: meA })
     check("buitenstaander leest het gesprek NIET", (gluur ?? []).length === 0)
+    const { data: gluurDirect } = await U.cli.from("ontdek_berichten").select("id")
+    check("buitenstaander leest berichten ook niet direct (RLS)", (gluurDirect ?? []).length === 0)
     const s3 = await U.cli.rpc("stuur_ontdek_bericht", { p_ander: meA, p_tekst: "hallo?" })
     check("buitenstaander kan geen bericht sturen", !!s3.error)
   } finally {
