@@ -16,49 +16,56 @@ blijft altijd menselijk.**_
 
 ## Nu — kandidaat-generatie (`mogelijke_matches`)
 
-Een paar (mp in mijn netwerk, op in een ander netwerk) is een kandidaat als:
+### Kandidaat-generatie + fuzzy blocking
 
-1. `op.network_id <> mp.network_id` (cross-family), en
-2. **naam-signaal**: `naam_norm(voornaam+achternaam)` gelijk, **of** gelijke
-   genormaliseerde `birth_name` (dekt gewijzigde/meisjesnaam), en
-3. **geboortedatum verenigbaar**: één van beide `born_on` is leeg, of ze zijn gelijk, en
-4. nog niet bevestigd (`person_links`) en niet afgewezen (`person_match_decisions`).
+Een paar (mp in mijn netwerk, op in een ander netwerk) komt in aanmerking als
+`op.network_id <> mp.network_id` en één van:
 
-`naam_norm` maakt matching toleranter (kleine letters, accenten/leestekens/spaties weg),
-zodat "O'Brien", "obrien" en "Obrien" samenvallen.
+1. `naam_norm(voornaam+achternaam)` gelijk, of
+2. gelijke genormaliseerde `birth_name` (dekt gewijzigde/meisjesnaam), of
+3. **fuzzy**: `similarity(naam_norm(...), naam_norm(...)) > 0.4` (pg_trgm — spelvarianten/typefouten).
 
-Het `signaal`-veld benoemt waaróm iets een kandidaat is ("Zelfde naam en geboortedatum",
-"Zelfde geboortenaam", "Zelfde naam") — transparantie voor de gebruiker.
+`naam_norm` normaliseert (kleine letters, accenten/leestekens/spaties/tussenvoegsels weg),
+zodat "O'Brien", "obrien" en "Obrien" samenvallen. Een GIN-trigram-index
+(`persons_naam_trgm`) versnelt de fuzzy vergelijking.
 
-## Beschikbare signalen (voor toekomstige scoring)
+### Confidence-score (`match_score`, 0–100) — geïmplementeerd
 
-Al aanwezig op `persons` / de graaf en bruikbaar voor een confidence-score:
+Elk kandidaat-paar krijgt een gewogen score:
 
-- genormaliseerde voor- + achternaam, `birth_name`;
-- `born_on` (geboortedatum);
-- ouders, kinderen, partner (uit `relationships`) → gedeelde-verwanten-signaal;
-- locatie (`city`, `country`);
-- uitnodigingscontext (wie nodigde wie uit, gedeeld netwerk);
-- reeds bevestigde bruggen in de buurt van het paar.
+| Signaal | Bijdrage |
+|---|---|
+| Naam: exacte naam **of** exacte geboortenaam | +55 |
+| Naam: fuzzy (trigram-similariteit) | `round(45 × similarity)` |
+| Geboortedatum gelijk | +30 |
+| Geboortejaar dichtbij (≤ 366 dagen) | +12 |
+| Geboortedatum duidelijk verschillend | **−40** (drukt valse positieven weg) |
+| Families al verbonden (bestaande brug) | +15 |
+| Zelfde woonplaats / zelfde land | +6 / +3 |
 
-## Later — confidence / probabilistisch (ontworpen, nog niet gebouwd)
+Het naam-onderdeel neemt het **beste** van exact/geboortenaam/fuzzy. De som wordt geklemd
+op 0–100. **Drempel = 45**: alleen daarboven wordt een paar getoond. `mogelijke_matches`
+**rangschikt aflopend op score** en geeft de score + een leesbare reden (`signaal`) terug;
+de UI toont een label ("Sterke match / Waarschijnlijk / Mogelijk" + percentage).
 
-Wanneer volume dat vraagt, zonder de UX te compliceren:
+**Dezelfde score is de poort in `bevestig_persoon_match`** (score ≥ 45), zodat precies de
+getoonde kandidaten bevestigbaar zijn — en niets daarbuiten (P1.8).
 
-1. **Blocking keys** voor schaal: kandidaten eerst groeperen op goedkope sleutels
-   (bv. `naam_norm(achternaam)` + geboortejaar) i.p.v. alle-tegen-alle vergelijken.
-2. **Fuzzy matching**: `pg_trgm` (trigram-similarity) of Levenshtein op naam/birth_name
-   voor spelvarianten, met een drempel.
-3. **Confidence-score** (0–100) uit gewogen signalen: naam-similarity, geboortedatum-
-   nabijheid, gedeelde ouders/kinderen/partner, locatie, uitnodigingscontext. Tonen bij de
-   suggestie ("waarschijnlijk dezelfde persoon — 3 gedeelde signalen").
-4. **Ranking** i.p.v. harde filter: hoogste confidence eerst; lage confidence verbergen.
+### Later — probabilistisch / op schaal
+
+- **Blocking-keys** verfijnen bij groot volume (bv. `naam_norm(achternaam)` + geboortejaar)
+  om de vergelijkingsruimte verder te snoeien.
+- **Gedeelde-verwanten-signaal** verfijnen: niet alleen "families al verbonden", maar
+  concrete gedeelde ouders/kinderen/partner meewegen.
+- **Gewichten kalibreren** op echte bevestig/afwijs-data (de `person_match_decisions`-
+  historie is de labelset), eventueel een probabilistisch/ML-model.
 
 Wat **niet** verandert: geen automatische merge; `person_links` ontstaat alleen na
 menselijke bevestiging; afwijzingen blijven onthouden.
 
 ## Testdekking
 
+`tests/matching.test.mjs` (score/fuzzy/drempel/rangschikking),
 `tests/discovery.test.mjs` (matching → koppeling → ontdekking → privacy),
 `tests/rejection.test.mjs` (afwijzing persistent), `tests/authz.test.mjs`
 (kandidaat-validatie + IDOR). Zie `TESTING_SETUP.md`.
