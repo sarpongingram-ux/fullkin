@@ -2188,6 +2188,10 @@ export type Database = {
           total: number
         }[]
       }
+      gedeelde_verwanten_score: {
+        Args: { p_a: string; p_b: string }
+        Returns: number
+      }
       has_role: {
         Args: { net: string; r: Database["public"]["Enums"]["family_role"] }
         Returns: boolean
