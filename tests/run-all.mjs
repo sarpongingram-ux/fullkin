@@ -24,6 +24,7 @@ const suites = [
   ["Two-user core loop (BUILD→INVITE→CLAIM→GROW)", "tests/core-loop-two-users.test.mjs"],
   ["CONNECT tweeweg-chat (ontdekte familie)", "tests/ontdek-chat.test.mjs"],
   ["Matching-confidence (score/fuzzy/drempel)", "tests/matching.test.mjs"],
+  ["Pot-boeking idempotent (webhook-fix)", "tests/pot-idempotent.test.mjs"],
 ]
 
 let totPass = 0, totFail = 0, hardFail = false

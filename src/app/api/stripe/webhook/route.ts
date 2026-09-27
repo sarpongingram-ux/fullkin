@@ -5,6 +5,8 @@ import {
   settleHeractiveringFromSession,
 } from "@/lib/stripe/extraFamilie"
 import { settleKeeperUpgradeFromSession } from "@/lib/stripe/keeperUpgrade"
+import { settlePotDonationFromSession } from "@/lib/stripe/potDonation"
+import { settlePotSubscriptionFromSession } from "@/lib/stripe/potSubscription"
 import type Stripe from "stripe"
 
 // Stripe-webhook. Bij een geslaagde betaling wordt de bijdrage afgerekend:
@@ -48,6 +50,24 @@ export async function POST(req: Request) {
     if (session.metadata?.soort === "keeper_upgrade") {
       const ok = await settleKeeperUpgradeFromSession(session.id)
       if (!ok) return new Response("Upgrade mislukt", { status: 500 })
+      return new Response("ok")
+    }
+
+    // Eenmalige donatie aan de Familie Pot. Ook via de webhook boeken zodat er
+    // niets verloren gaat als de betaler de tab sluit vóór de redirect.
+    // Idempotent (pot_ledger uniek op payment intent).
+    if (session.metadata?.pot_network) {
+      const ok = await settlePotDonationFromSession(session.id)
+      if (!ok) return new Response("Pot-donatie boeken mislukt", { status: 500 })
+      return new Response("ok")
+    }
+
+    // Maandelijkse bijdrage aan de Familie Pot: legt het abonnement vast en boekt
+    // de eerste maand. Ook via de webhook, zodat een wees-abonnement / verloren
+    // eerste betaling niet kan ontstaan. Idempotent (sub-id + factuur-id).
+    if (session.mode === "subscription" && session.metadata?.sub_network) {
+      const ok = await settlePotSubscriptionFromSession(session.id)
+      if (!ok) return new Response("Pot-abonnement boeken mislukt", { status: 500 })
       return new Response("ok")
     }
 
