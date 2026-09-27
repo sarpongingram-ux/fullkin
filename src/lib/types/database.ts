@@ -2237,7 +2237,10 @@ export type Database = {
       }
       laad_testfamilie: { Args: { p_net_naam: string }; Returns: string }
       leg_chat_contact_vast: { Args: { p_room: string }; Returns: undefined }
-      maak_verjaardag_collectes: { Args: { p_dagen?: number }; Returns: number }
+      maak_verjaardag_collectes: {
+        Args: { p_dagen?: number; p_network?: string }
+        Returns: number
+      }
       mag_vantage: { Args: { p: string }; Returns: boolean }
       markeer_meldingen_gelezen: { Args: never; Returns: undefined }
       markeer_ontdek_gelezen: { Args: { p_ander: string }; Returns: undefined }
