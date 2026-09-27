@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/service"
 import { getStripe } from "@/lib/stripe/server"
+import { flutterwaveTransfer } from "@/lib/payout/flutterwave"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import type Stripe from "stripe"
@@ -116,14 +117,13 @@ export async function betaalKeeperUit(
     }
   }
 
-  // Rekening gekoppeld en klaar?
-  const { data: acc } = await svc
+  // Rekening gekoppeld en klaar? (Stripe voor EU/VK, Flutterwave voor o.a. Afrika/Suriname.)
+  const { data: accs } = await svc
     .from("payout_accounts")
-    .select("external_id, status")
+    .select("provider, external_id, status, currency")
     .eq("person_id", mij.id)
-    .eq("provider", "stripe")
-    .maybeSingle()
-  if (!acc || acc.status !== "ready" || !acc.external_id) {
+  const acc = (accs ?? []).find((a) => a.status === "ready")
+  if (!acc || !acc.external_id) {
     return {
       ok: false,
       fout: "Koppel eerst je uitbetaalrekening bij Uitbetaling.",
@@ -155,29 +155,62 @@ export async function betaalKeeperUit(
     }
   }
 
-  const stripe = getStripe()
-  if (!stripe) return { ok: false, fout: "Stripe is niet geconfigureerd." }
-
   let transferId: string
-  try {
-    const transfer = await stripe.transfers.create({
-      amount: beschikbaar,
-      currency: "eur",
-      destination: acc.external_id,
-      metadata: {
-        soort: "keeper_uitbetaling",
-        network: networkId,
-        person: mij.id,
-      },
-    })
-    transferId = transfer.id
-  } catch (e) {
-    return {
-      ok: false,
-      fout:
-        "Uitbetalen lukte niet: " +
-        (e instanceof Error ? e.message : "onbekende fout"),
+  if (acc.provider === "stripe") {
+    const stripe = getStripe()
+    if (!stripe) return { ok: false, fout: "Stripe is niet geconfigureerd." }
+    try {
+      const transfer = await stripe.transfers.create({
+        amount: beschikbaar,
+        currency: "eur",
+        destination: acc.external_id,
+        metadata: {
+          soort: "keeper_uitbetaling",
+          network: networkId,
+          person: mij.id,
+        },
+      })
+      transferId = transfer.id
+    } catch (e) {
+      return {
+        ok: false,
+        fout:
+          "Uitbetalen lukte niet: " +
+          (e instanceof Error ? e.message : "onbekende fout"),
+      }
     }
+  } else {
+    // Flutterwave — leest de gevoelige gegevens (eigenaar-only) via de service role en
+    // maakt een transfer. Achter een key-check: zonder FLUTTERWAVE_SECRET_KEY beweegt
+    // er niets en krijgt de keeper een duidelijke melding.
+    const { data: det } = await svc
+      .from("payout_details")
+      .select("method, currency, bank_code, account_number, momo_network, phone")
+      .eq("person_id", mij.id)
+      .maybeSingle()
+    if (!det) {
+      return { ok: false, fout: "Je uitbetaalgegevens ontbreken. Koppel opnieuw bij Uitbetaling." }
+    }
+    const res = await flutterwaveTransfer({
+      amountMajor: beschikbaar / 100,
+      currency: det.currency ?? acc.currency ?? "USD",
+      reference: `keeper-${mij.id}-${Date.now()}`,
+      narration: "Fullkin keeper-uitbetaling",
+      method: det.method as "bank" | "mobile_money",
+      bankCode: det.bank_code,
+      accountNumber: det.account_number,
+      momoNetwork: det.momo_network,
+      phone: det.phone,
+    })
+    if (!res.ok) {
+      return {
+        ok: false,
+        fout: res.notConfigured
+          ? "Flutterwave-uitbetaling is nog niet actief. Neem contact op met Fullkin."
+          : "Uitbetalen lukte niet: " + (res.fout ?? "onbekende fout"),
+      }
+    }
+    transferId = res.id
   }
 
   await svc.from("keeper_payouts").insert({

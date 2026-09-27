@@ -26,6 +26,8 @@ const suites = [
   ["Matching-confidence (score/fuzzy/drempel)", "tests/matching.test.mjs"],
   ["Pot-boeking idempotent (webhook-fix)", "tests/pot-idempotent.test.mjs"],
   ["Auto verjaardag-collectes", "tests/verjaardag-collectes.test.mjs"],
+  ["Payout-routing + Flutterwave key-check", "tests/payout-routing.test.mjs"],
+  ["Payout-privacy (owner-only gegevens)", "tests/payout-privacy.test.mjs"],
 ]
 
 let totPass = 0, totFail = 0, hardFail = false

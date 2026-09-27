@@ -31,11 +31,13 @@ export default async function UitbetalingPagina({
     .eq("id", meId)
     .single()
 
-  const { data: acc } = await supabase
+  const { data: accs } = await supabase
     .from("payout_accounts")
     .select("provider, status, country")
     .eq("person_id", meId)
-    .maybeSingle()
+  // Een persoon kan (theoretisch) meerdere providers hebben; toon de gekoppelde.
+  const acc =
+    (accs ?? []).find((a) => a.status === "ready") ?? (accs ?? [])[0] ?? null
 
   const isReady = acc?.status === "ready"
 
@@ -71,7 +73,7 @@ export default async function UitbetalingPagina({
         <section className="fk-card">
           {acc?.status === "onboarding" && (
             <p className="text-goud font-semibold mb-3">
-              Je koppeling is begonnen maar nog niet af. Maak 'm af om geld te
+              Je koppeling is begonnen maar nog niet af. Maak het af om geld te
               kunnen ontvangen.
             </p>
           )}

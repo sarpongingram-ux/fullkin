@@ -1365,6 +1365,7 @@ export type Database = {
         Row: {
           country: string | null
           created_at: string
+          currency: string | null
           external_id: string
           id: string
           network_id: string
@@ -1376,6 +1377,7 @@ export type Database = {
         Insert: {
           country?: string | null
           created_at?: string
+          currency?: string | null
           external_id: string
           id?: string
           network_id: string
@@ -1387,6 +1389,7 @@ export type Database = {
         Update: {
           country?: string | null
           created_at?: string
+          currency?: string | null
           external_id?: string
           id?: string
           network_id?: string
@@ -1407,6 +1410,56 @@ export type Database = {
             foreignKeyName: "payout_accounts_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_details: {
+        Row: {
+          account_name: string
+          account_number: string | null
+          bank_code: string | null
+          created_at: string
+          currency: string
+          method: string
+          momo_network: string | null
+          person_id: string
+          phone: string | null
+          provider: Database["public"]["Enums"]["payout_provider"]
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_number?: string | null
+          bank_code?: string | null
+          created_at?: string
+          currency: string
+          method: string
+          momo_network?: string | null
+          person_id: string
+          phone?: string | null
+          provider?: Database["public"]["Enums"]["payout_provider"]
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string | null
+          bank_code?: string | null
+          created_at?: string
+          currency?: string
+          method?: string
+          momo_network?: string | null
+          person_id?: string
+          phone?: string | null
+          provider?: Database["public"]["Enums"]["payout_provider"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_details_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: true
             referencedRelation: "persons"
             referencedColumns: ["id"]
           },
