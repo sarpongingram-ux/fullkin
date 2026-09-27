@@ -15,7 +15,7 @@ const STRIPE_LANDEN = new Set([
 
 // Landen waar we via Flutterwave uitbetalen (mobile money / lokale banken).
 const FLUTTERWAVE_LANDEN = new Set([
-  "GH", "NG", "KE", "UG", "TZ", "ZA", "RW", "ZM", "CI", "SN", "CM",
+  "GH", "NG", "KE", "UG", "TZ", "ZA", "RW", "ZM", "CI", "SN", "CM", "SR",
 ])
 
 export function kiesProvider(country: string): PayoutProvider {

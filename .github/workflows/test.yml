@@ -23,7 +23,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # Node 24: native TypeScript type-stripping, nodig voor de payout-routing-test
+          # die de .ts payout-modules rechtstreeks importeert.
+          node-version: 24
           cache: npm
       - run: npm ci
       - name: Run core tests (fails loudly if secrets missing)
