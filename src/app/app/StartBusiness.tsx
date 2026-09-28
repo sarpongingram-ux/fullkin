@@ -16,6 +16,10 @@ export function StartBusiness() {
 
   useEffect(() => {
     if (res?.ok) {
+      // Sluit het paneel + herlaad na een geslaagde inzending. Bewust via een effect:
+      // er is geen andere afrondingshook op een server action (useActionState), en het
+      // afleiden van 'open' uit res zou heropenen na een succes breken.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOpen(false)
       router.refresh()
     }
@@ -76,6 +80,14 @@ export function StartBusiness() {
         <input
           name="give_back"
           placeholder="Hoe geef je terug aan de familie?"
+          className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
+        />
+        <input
+          name="give_back_pledge"
+          type="number"
+          step="1"
+          min="0"
+          placeholder="Toegezegd terug aan de familie € (optioneel)"
           className="w-full rounded-lg border border-rand bg-achtergrond px-3 py-2 text-inkt outline-none focus:border-terracotta"
         />
         {res && !res.ok && <p className="text-sm text-terracotta">{res.fout}</p>}

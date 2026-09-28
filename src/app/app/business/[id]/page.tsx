@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Stemhok, Vragen, Updates } from "./BusinessClient"
+import { GeefTerug } from "./GeefTerug"
+import { settleBusinessGiveBackFromSession } from "@/lib/stripe/businessGiveBack"
 import { totaalZichtbaar } from "@/lib/collecte/privacy"
 
 function euro(cents: number) {
@@ -22,16 +24,22 @@ function datum(iso: string) {
 
 export default async function BusinessPagina({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ gb_session?: string }>
 }) {
   const { id } = await params
+  const { gb_session } = await searchParams
   const supabase = await createClient()
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) redirect("/inloggen")
+
+  // Terug van een teruggave-betaling? Boek 'm (idempotent; ook de webhook doet dit).
+  if (gb_session) await settleBusinessGiveBackFromSession(gb_session)
 
   const { data: meId } = await supabase.rpc("me")
 
@@ -100,6 +108,26 @@ export default async function BusinessPagina({
     opgehaald = totaal?.total_cents ?? 0
     financieringGevers = totaal?.contributor_count ?? 0
   }
+
+  // Teruggave aan de familie: voortgang + transparante lijst.
+  const { data: gbTotaal } = await supabase
+    .rpc("business_give_back_totaal", { bid: id })
+    .single()
+  const { data: gbLijstRaw } = await supabase
+    .from("business_give_backs")
+    .select("id, person_id, amount_cents, created_at")
+    .eq("business_id", id)
+    .order("created_at", { ascending: false })
+  const gbIds = [...new Set((gbLijstRaw ?? []).map((g) => g.person_id))]
+  const { data: gbPersonen } = gbIds.length
+    ? await supabase.from("persons").select("id, first_name").in("id", gbIds)
+    : { data: [] }
+  const gbNaam = new Map((gbPersonen ?? []).map((p) => [p.id, p.first_name]))
+  const gbLijst = gbLijstRaw ?? []
+  const gegeven = gbTotaal?.gegeven_cents ?? 0
+  const toegezegd = b.give_back_pledge_cents as number | null
+  const toonTeruggave =
+    b.status === "goedgekeurd" || gegeven > 0 || toegezegd != null
 
   return (
     <main className="max-w-md mx-auto px-5 py-8 space-y-4">
@@ -171,6 +199,56 @@ export default async function BusinessPagina({
             </div>
           </div>
         </Link>
+      )}
+
+      {/* Teruggeven aan de familie — echt geld terug in de familiepot. */}
+      {toonTeruggave && (
+        <section className="fk-card">
+          <p className="text-xs font-extrabold tracking-[0.18em] text-terracotta">
+            TERUGGEVEN AAN DE FAMILIE 💛
+          </p>
+          {toegezegd != null ? (
+            <>
+              <p className="text-inkt mt-1 font-black">
+                {euro(gegeven)} van {euro(toegezegd)} teruggegeven
+              </p>
+              <div className="mt-2 h-2 rounded-full bg-oppervlak overflow-hidden">
+                <div
+                  className="h-full bg-groen"
+                  style={{
+                    width: `${Math.min(100, Math.round((100 * gegeven) / Math.max(1, toegezegd)))}%`,
+                  }}
+                />
+              </div>
+            </>
+          ) : (
+            <p className="text-inkt mt-1 font-black">
+              {euro(gegeven)} teruggegeven aan de familie
+            </p>
+          )}
+
+          {gbLijst.length > 0 && (
+            <ul className="mt-3 space-y-1.5 border-t border-rand pt-3">
+              {gbLijst.map((g) => (
+                <li key={g.id} className="flex justify-between text-sm">
+                  <span className="text-inkt-zacht">
+                    {gbNaam.get(g.person_id) ?? "Familielid"} · {datum(g.created_at)}
+                  </span>
+                  <span className="font-bold text-groen">{euro(g.amount_cents)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {isEigenaar && b.status === "goedgekeurd" && <GeefTerug businessId={id} />}
+
+          {!isEigenaar && gegeven === 0 && (
+            <p className="text-sm text-inkt-zacht mt-2">
+              Zodra de zaak loopt, geeft {ondernemer?.first_name} een deel terug aan de
+              familiepot — daar profiteert de hele familie van.
+            </p>
+          )}
+        </section>
       )}
 
       <Vragen businessId={id} vragen={vragen} isEigenaar={isEigenaar} />

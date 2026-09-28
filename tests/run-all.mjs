@@ -28,6 +28,7 @@ const suites = [
   ["Auto verjaardag-collectes", "tests/verjaardag-collectes.test.mjs"],
   ["Payout-routing + Flutterwave key-check", "tests/payout-routing.test.mjs"],
   ["Payout-privacy (owner-only gegevens)", "tests/payout-privacy.test.mjs"],
+  ["Business-teruggave (echt geld naar de pot)", "tests/business-give-back.test.mjs"],
 ]
 
 let totPass = 0, totFail = 0, hardFail = false

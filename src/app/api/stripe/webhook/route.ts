@@ -7,6 +7,7 @@ import {
 import { settleKeeperUpgradeFromSession } from "@/lib/stripe/keeperUpgrade"
 import { settlePotDonationFromSession } from "@/lib/stripe/potDonation"
 import { settlePotSubscriptionFromSession } from "@/lib/stripe/potSubscription"
+import { settleBusinessGiveBackFromSession } from "@/lib/stripe/businessGiveBack"
 import type Stripe from "stripe"
 
 // Stripe-webhook. Bij een geslaagde betaling wordt de bijdrage afgerekend:
@@ -68,6 +69,13 @@ export async function POST(req: Request) {
     if (session.mode === "subscription" && session.metadata?.sub_network) {
       const ok = await settlePotSubscriptionFromSession(session.id)
       if (!ok) return new Response("Pot-abonnement boeken mislukt", { status: 500 })
+      return new Response("ok")
+    }
+
+    // De ondernemer geeft geld terug aan de familie(pot) uit zijn Business Droom.
+    if (session.metadata?.give_back_business) {
+      const ok = await settleBusinessGiveBackFromSession(session.id)
+      if (!ok) return new Response("Teruggave boeken mislukt", { status: 500 })
       return new Response("ok")
     }
 
