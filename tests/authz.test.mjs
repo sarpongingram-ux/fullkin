@@ -170,6 +170,9 @@ async function main() {
       const { count } = await svc.from("person_links").select("*", { count: "exact", head: true })
         .eq("person_a", x).eq("person_b", y)
       check("de bevestigde link bestaat", (count ?? 0) === 1)
+      const { data: besl } = await svc.from("person_match_decisions")
+        .select("decision").eq("person_a", x).eq("person_b", y).maybeSingle()
+      check("bevestiging vastgelegd als 'confirmed' (kalibratie-labelset)", besl?.decision === "confirmed")
     }
     {
       // A mag GEEN niet-kandidaat koppelen (verschillende namen).

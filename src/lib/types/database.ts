@@ -2364,6 +2364,7 @@ export type Database = {
       markeer_meldingen_gelezen: { Args: never; Returns: undefined }
       markeer_ontdek_gelezen: { Args: { p_ander: string }; Returns: undefined }
       match_score: { Args: { p_a: string; p_b: string }; Returns: number }
+      matching_kalibratie: { Args: never; Returns: Json }
       me: { Args: never; Returns: string }
       meld: {
         Args: {
