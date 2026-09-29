@@ -45,7 +45,7 @@ const items = [
   },
 ]
 
-export function BottomNav() {
+export function BottomNav({ ontdekOngelezen = false }: { ontdekOngelezen?: boolean }) {
   const pathname = usePathname() ?? "/app"
 
   return (
@@ -56,6 +56,7 @@ export function BottomNav() {
       <div className="max-w-md mx-auto grid grid-cols-5">
         {items.map((item) => {
           const actief = item.match(pathname)
+          const badge = item.href === "/app/ontdek" && ontdekOngelezen
           return (
             <Link
               key={item.href}
@@ -63,11 +64,17 @@ export function BottomNav() {
               className="flex flex-col items-center justify-center gap-1 py-2.5 min-h-[60px] transition"
             >
               <span
-                className={`text-2xl leading-none transition-transform ${
+                className={`relative text-2xl leading-none transition-transform ${
                   actief ? "scale-110" : "opacity-60"
                 }`}
               >
                 {item.emoji}
+                {badge && (
+                  <span
+                    aria-label="nieuw bericht"
+                    className="absolute -top-0.5 -right-1 w-2.5 h-2.5 rounded-full bg-terracotta ring-2 ring-white"
+                  />
+                )}
               </span>
               <span
                 className={`text-xs font-bold ${
