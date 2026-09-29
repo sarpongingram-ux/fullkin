@@ -12,9 +12,14 @@ export default async function AppLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
-  const { data: families } = await supabase.rpc("mijn_families")
+  const [{ data: families }, { data: gesprekken }] = await Promise.all([
+    supabase.rpc("mijn_families"),
+    supabase.rpc("mijn_ontdek_gesprekken"),
+  ])
   const lijst = (families ?? []) as Familie[]
   const actief = lijst.find((f) => f.is_active) ?? lijst[0]
+  // Ongelezen ontdek-bericht? Dan een stip op de Ontdek-tab.
+  const ontdekOngelezen = (gesprekken ?? []).some((g) => g.ongelezen)
 
   return (
     <div className="pb-24">
@@ -27,7 +32,7 @@ export default async function AppLayout({
         <PauzeBanner networkId={actief.network_id} familieNaam={actief.name} />
       )}
       {children}
-      <BottomNav />
+      <BottomNav ontdekOngelezen={ontdekOngelezen} />
     </div>
   )
 }
