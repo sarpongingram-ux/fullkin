@@ -267,6 +267,7 @@ export type Database = {
           description: string
           expected_revenue_cents: number | null
           give_back: string | null
+          give_back_pledge_cents: number | null
           id: string
           name: string
           network_id: string
@@ -281,6 +282,7 @@ export type Database = {
           description: string
           expected_revenue_cents?: number | null
           give_back?: string | null
+          give_back_pledge_cents?: number | null
           id?: string
           name: string
           network_id: string
@@ -295,6 +297,7 @@ export type Database = {
           description?: string
           expected_revenue_cents?: number | null
           give_back?: string | null
+          give_back_pledge_cents?: number | null
           id?: string
           name?: string
           network_id?: string
@@ -319,6 +322,58 @@ export type Database = {
           },
           {
             foreignKeyName: "business_dreams_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_give_backs: {
+        Row: {
+          amount_cents: number
+          business_id: string
+          created_at: string
+          id: string
+          network_id: string
+          person_id: string
+          stripe_ref: string | null
+        }
+        Insert: {
+          amount_cents: number
+          business_id: string
+          created_at?: string
+          id?: string
+          network_id: string
+          person_id: string
+          stripe_ref?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          business_id?: string
+          created_at?: string
+          id?: string
+          network_id?: string
+          person_id?: string
+          stripe_ref?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_give_backs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_dreams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_give_backs_network_id_fkey"
+            columns: ["network_id"]
+            isOneToOne: false
+            referencedRelation: "family_networks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_give_backs_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "persons"
@@ -2105,6 +2160,14 @@ export type Database = {
         Args: { p_a: string; p_b: string }
         Returns: undefined
       }
+      business_give_back_totaal: {
+        Args: { bid: string }
+        Returns: {
+          aantal: number
+          gegeven_cents: number
+          toegezegd_cents: number
+        }[]
+      }
       business_tally: {
         Args: { bid: string }
         Returns: {
@@ -2470,6 +2533,15 @@ export type Database = {
       }
       relation_label: { Args: { me: string; other: string }; Returns: string }
       relation_route: { Args: { me: string; other: string }; Returns: string }
+      settle_business_give_back: {
+        Args: {
+          p_amount: number
+          p_business: string
+          p_person: string
+          p_ref: string
+        }
+        Returns: undefined
+      }
       settle_contribution: {
         Args: { p_contribution: string; p_intent: string }
         Returns: undefined
@@ -2608,6 +2680,7 @@ export type Database = {
         | "maandbijdrage"
         | "donatie"
         | "uitkering"
+        | "teruggave"
       pot_sub_status: "actief" | "geannuleerd"
       rad_choice: "zelf" | "gunnen" | "pot" | "dromen"
       rad_status: "getrokken" | "besloten"
@@ -2810,6 +2883,7 @@ export const Constants = {
         "maandbijdrage",
         "donatie",
         "uitkering",
+        "teruggave",
       ],
       pot_sub_status: ["actief", "geannuleerd"],
       rad_choice: ["zelf", "gunnen", "pot", "dromen"],

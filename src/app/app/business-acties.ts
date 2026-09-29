@@ -1,7 +1,10 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { getStripe } from "@/lib/stripe/server"
+import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
+import type Stripe from "stripe"
 
 type Res = { ok: true } | { ok: false; fout: string }
 
@@ -31,6 +34,7 @@ export async function startBusiness(
   const euro = Number(formData.get("target") ?? 0)
   const omzet = Number(formData.get("revenue") ?? 0)
   const give_back = String(formData.get("give_back") ?? "").trim() || null
+  const pledgeEuro = Number(formData.get("give_back_pledge") ?? 0)
 
   if (!name || !description) return { ok: false, fout: "Vul naam en beschrijving in." }
   if (!euro || euro <= 0) return { ok: false, fout: "Vul een doelbedrag in." }
@@ -46,11 +50,70 @@ export async function startBusiness(
     target_cents: Math.round(euro * 100),
     expected_revenue_cents: omzet > 0 ? Math.round(omzet * 100) : null,
     give_back,
+    give_back_pledge_cents: pledgeEuro > 0 ? Math.round(pledgeEuro * 100) : null,
   })
   if (error) return { ok: false, fout: "Kon de Business Droom niet opslaan." }
 
   revalidatePath("/app")
   return { ok: true }
+}
+
+export type TeruggaveResultaat =
+  | { ok: true; devPending?: boolean }
+  | { ok: false; fout: string }
+
+// De ondernemer geeft ECHT geld terug aan de familie: een betaling die als 'teruggave'
+// in de familiepot wordt geboekt (via de Stripe-webhook én de terugkeer-pagina, idempotent).
+export async function geefTerugAanFamilie(
+  businessId: string,
+  formData: FormData,
+): Promise<TeruggaveResultaat> {
+  const euro = Number(formData.get("bedrag") ?? 0)
+  if (!euro || euro <= 0) return { ok: false, fout: "Vul een bedrag in." }
+  const cents = Math.round(euro * 100)
+
+  const { supabase, meId, network_id } = await ikEnNetwerk()
+  if (!meId || !network_id) return { ok: false, fout: "Je bent niet ingelogd." }
+
+  const { data: b } = await supabase
+    .from("business_dreams")
+    .select("person_id, name")
+    .eq("id", businessId)
+    .maybeSingle()
+  if (!b) return { ok: false, fout: "Business Droom niet gevonden." }
+  if (b.person_id !== meId) {
+    return { ok: false, fout: "Alleen de ondernemer kan teruggeven aan de familie." }
+  }
+
+  const stripe = getStripe()
+  if (!stripe) return { ok: true, devPending: true }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3210"
+  const params: Stripe.Checkout.SessionCreateParams = {
+    mode: "payment",
+    line_items: [
+      {
+        price_data: {
+          currency: "eur",
+          product_data: { name: `Teruggave aan de familie — ${b.name}` },
+          unit_amount: cents,
+        },
+        quantity: 1,
+      },
+    ],
+    metadata: {
+      give_back_business: businessId,
+      give_back_person: meId,
+      give_back_amount: String(cents),
+      give_back_network: network_id,
+    },
+    success_url: `${appUrl}/app/business/${businessId}?gb_session={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${appUrl}/app/business/${businessId}?gb_geannuleerd=1`,
+  }
+  ;(params as Record<string, unknown>).managed_payments = { enabled: false }
+
+  const session = await stripe.checkout.sessions.create(params)
+  redirect(session.url!)
 }
 
 // 2. Een vraag stellen in de vragenronde.
