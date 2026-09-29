@@ -2538,6 +2538,13 @@ export type Database = {
       }
       relation_label: { Args: { me: string; other: string }; Returns: string }
       relation_route: { Args: { me: string; other: string }; Returns: string }
+      reverse_contribution: {
+        Args: {
+          p_contribution: string
+          p_status: Database["public"]["Enums"]["contribution_status"]
+        }
+        Returns: undefined
+      }
       settle_business_give_back: {
         Args: {
           p_amount: number
@@ -2644,7 +2651,12 @@ export type Database = {
         | "uitbetaald"
         | "verwijderd"
       contact_status: "verbonden" | "stil" | "herstellend"
-      contribution_status: "wachtend" | "betaald" | "mislukt" | "terugbetaald"
+      contribution_status:
+        | "wachtend"
+        | "betaald"
+        | "mislukt"
+        | "terugbetaald"
+        | "betwist"
       dream_status: "actief" | "vervuld" | "gepauzeerd"
       family_role:
         | "co_founder"
@@ -2844,7 +2856,13 @@ export const Constants = {
         "verwijderd",
       ],
       contact_status: ["verbonden", "stil", "herstellend"],
-      contribution_status: ["wachtend", "betaald", "mislukt", "terugbetaald"],
+      contribution_status: [
+        "wachtend",
+        "betaald",
+        "mislukt",
+        "terugbetaald",
+        "betwist",
+      ],
       dream_status: ["actief", "vervuld", "gepauzeerd"],
       family_role: [
         "co_founder",

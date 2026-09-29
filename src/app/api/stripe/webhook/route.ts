@@ -8,6 +8,12 @@ import { settleKeeperUpgradeFromSession } from "@/lib/stripe/keeperUpgrade"
 import { settlePotDonationFromSession } from "@/lib/stripe/potDonation"
 import { settlePotSubscriptionFromSession } from "@/lib/stripe/potSubscription"
 import { settleBusinessGiveBackFromSession } from "@/lib/stripe/businessGiveBack"
+import {
+  verwerkRefund,
+  verwerkDispute,
+  verwerkDisputeGesloten,
+  verwerkMislukt,
+} from "@/lib/stripe/refunds"
 import type Stripe from "stripe"
 
 // Stripe-webhook. Bij een geslaagde betaling wordt de bijdrage afgerekend:
@@ -122,6 +128,41 @@ export async function POST(req: Request) {
         .from("family_subscriptions")
         .update({ status: "actief", canceled_at: null })
         .eq("stripe_subscription_id", subId)
+    }
+  }
+
+  // Terugbetaling van een collecte-bijdrage → status + grootboek terugdraaien.
+  if (event.type === "charge.refunded") {
+    const charge = event.data.object as Stripe.Charge
+    const intent = charge.payment_intent as string | null
+    if (intent && !(await verwerkRefund(intent))) {
+      return new Response("Refund verwerken mislukt", { status: 500 })
+    }
+  }
+
+  // Dispute geopend → bijdrage 'betwist' + grootboek terugdraaien.
+  if (event.type === "charge.dispute.created") {
+    const d = event.data.object as Stripe.Dispute
+    const intent = (d.payment_intent as string | null) ?? null
+    if (intent && !(await verwerkDispute(intent))) {
+      return new Response("Dispute verwerken mislukt", { status: 500 })
+    }
+  }
+
+  // Dispute gesloten → gewonnen: herstellen; verloren: terugbetaald.
+  if (event.type === "charge.dispute.closed") {
+    const d = event.data.object as Stripe.Dispute
+    const intent = (d.payment_intent as string | null) ?? null
+    if (intent && !(await verwerkDisputeGesloten(intent, d.status === "won"))) {
+      return new Response("Dispute-afhandeling mislukt", { status: 500 })
+    }
+  }
+
+  // Mislukte betaling op een nog niet-afgerekende bijdrage → 'mislukt'.
+  if (event.type === "payment_intent.payment_failed") {
+    const pi = event.data.object as Stripe.PaymentIntent
+    if (!(await verwerkMislukt(pi.id))) {
+      return new Response("Mislukte betaling verwerken mislukt", { status: 500 })
     }
   }
 
