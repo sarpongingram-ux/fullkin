@@ -111,10 +111,9 @@ export default async function OntdektProfielPagina({
           HOE ZIJN JULLIE FAMILIE?
         </p>
         <p className="text-xl font-black text-inkt mt-1.5 leading-snug">
-          {profiel.voornaam}
-          {profiel.hun_kant === "kind"
-            ? ` is het kind van je ${profiel.mijn_kant} ${profiel.brug_naam}`
-            : ` — via je ${profiel.mijn_kant} ${profiel.brug_naam}`}
+          {profiel.voornaam} is {profiel.brug_naam}
+          {"'s "}
+          {profiel.hun_kant}
         </p>
         <p className="text-inkt-zacht mt-1.5 leading-relaxed">
           Jij → je {profiel.mijn_kant} {profiel.brug_naam} → {profiel.brug_naam}

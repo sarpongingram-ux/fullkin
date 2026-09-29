@@ -274,6 +274,26 @@ export async function stelGeboortedatum(
   return { ok: true }
 }
 
+// Zet het (optionele) geslacht van een familielid — maakt relatie-labels persoonlijker
+// (oom/tante, neef/nicht, opa/oma). RLS bepaalt wie het mag.
+export async function stelGeslacht(
+  personId: string,
+  geslacht: string | null,
+): Promise<KindResultaat> {
+  const g = geslacht === "man" || geslacht === "vrouw" ? geslacht : null
+  const supabase = await createClient()
+  const { error } = await supabase.from("persons").update({ geslacht: g }).eq("id", personId)
+  if (error) {
+    return {
+      ok: false,
+      fout: "Kon dit niet opslaan. Alleen de persoon zelf, de beheerder of de Family Keeper kan dit.",
+    }
+  }
+  revalidatePath(`/app/persoon/${personId}`)
+  revalidatePath("/app")
+  return { ok: true }
+}
+
 // Past de naam van een familielid aan. Handig om een nog "Onbekende" (automatisch
 // aangemaakte gedeelde ouder) alsnog een naam te geven. RLS bepaalt wie het mag.
 export async function stelNaam(

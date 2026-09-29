@@ -141,21 +141,37 @@ export function FamilielidToevoegen({
               Je <b>opa/oma</b> = <b>Ouder</b> van je vader of moeder
             </p>
             <p className="italic pt-1">
-              Voeg de tussenpersoon eerst toe (bijv. je vader), kies 'm daarna bij
+              Voeg de tussenpersoon eerst toe (bijv. je vader), kies die daarna bij
               &quot;van&quot;.
             </p>
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm text-inkt-zacht mb-1 font-semibold">
-            Geboortedatum <span className="font-normal">(optioneel)</span>
-          </label>
-          <input
-            name="geboortedatum"
-            type="date"
-            className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
-          />
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <label className="block text-sm text-inkt-zacht mb-1 font-semibold">
+              Geboortedatum <span className="font-normal">(optioneel)</span>
+            </label>
+            <input
+              name="geboortedatum"
+              type="date"
+              className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm text-inkt-zacht mb-1 font-semibold">
+              Geslacht <span className="font-normal">(optioneel)</span>
+            </label>
+            <select
+              name="geslacht"
+              defaultValue=""
+              className="w-full rounded-2xl border-2 border-rand bg-white px-4 py-3 text-inkt text-base outline-none focus:border-terracotta"
+            >
+              <option value="">—</option>
+              <option value="man">Man</option>
+              <option value="vrouw">Vrouw</option>
+            </select>
+          </div>
         </div>
 
         <label className="flex items-start gap-3 rounded-2xl bg-oppervlak p-3 cursor-pointer">

@@ -10,6 +10,7 @@ import { OuderKoppelen } from "./OuderKoppelen"
 import { ProfielFoto } from "./ProfielFoto"
 import { WoonplaatsKnop } from "./WoonplaatsKnop"
 import { GeboortedatumKnop } from "./GeboortedatumKnop"
+import { GeslachtKnop } from "./GeslachtKnop"
 
 function leeftijd(bornOn: string | null): number | null {
   if (!bornOn) return null
@@ -56,7 +57,7 @@ export default async function PersoonPagina({
   const { data: p } = await supabase
     .from("persons")
     .select(
-      "id, first_name, last_name, city, country, photo_url, claimed_by, managed_by, born_on, died_on, network_id",
+      "id, first_name, last_name, city, country, photo_url, claimed_by, managed_by, born_on, died_on, geslacht, network_id",
     )
     .eq("id", id)
     .single()
@@ -268,6 +269,16 @@ export default async function PersoonPagina({
           personId={p.id}
           voornaam={p.first_name}
           bornOn={p.born_on}
+          ikZelf={ikZelf}
+        />
+      )}
+
+      {/* Geslacht (optioneel) — maakt relatie-labels persoonlijker. */}
+      {kanRelatieBeheren && (
+        <GeslachtKnop
+          personId={p.id}
+          voornaam={p.first_name}
+          geslacht={p.geslacht}
           ikZelf={ikZelf}
         />
       )}
