@@ -1309,23 +1309,26 @@ export type Database = {
         Row: {
           aangemaakt_op: string
           afzender_id: string
+          foto_pad: string | null
           gesprek_id: string
           id: string
-          tekst: string
+          tekst: string | null
         }
         Insert: {
           aangemaakt_op?: string
           afzender_id: string
+          foto_pad?: string | null
           gesprek_id: string
           id?: string
-          tekst: string
+          tekst?: string | null
         }
         Update: {
           aangemaakt_op?: string
           afzender_id?: string
+          foto_pad?: string | null
           gesprek_id?: string
           id?: string
-          tekst?: string
+          tekst?: string | null
         }
         Relationships: [
           {
@@ -2443,6 +2446,7 @@ export type Database = {
         Returns: {
           aangemaakt_op: string
           afzender_naam: string
+          foto_pad: string
           id: string
           is_van_mij: boolean
           tekst: string
@@ -2611,7 +2615,7 @@ export type Database = {
         Returns: string
       }
       stuur_ontdek_bericht: {
-        Args: { p_ander: string; p_tekst: string }
+        Args: { p_ander: string; p_foto_pad?: string; p_tekst?: string }
         Returns: undefined
       }
       verwijder_testnetwerk: {

@@ -2,14 +2,15 @@
 
 import { useState, useTransition, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { stuurOntdekBericht } from "./acties"
+import { stuurOntdekBericht, maakOntdekFotoUploadUrl, stuurOntdekFoto } from "./acties"
 import { createClient } from "@/lib/supabase/client"
 
 export type OntdekBericht = {
   id: string
   is_van_mij: boolean
   afzender_naam: string
-  tekst: string
+  tekst: string | null
+  foto_url?: string | null
   aangemaakt_op: string
 }
 
@@ -26,7 +27,9 @@ export function OntdekChat({
   const [bezig, start] = useTransition()
   const [tekst, setTekst] = useState("")
   const [fout, setFout] = useState<string | null>(null)
+  const [uploadt, setUploadt] = useState(false)
   const eindeRef = useRef<HTMLDivElement>(null)
+  const fotoInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     eindeRef.current?.scrollIntoView({ block: "nearest" })
@@ -62,6 +65,31 @@ export function OntdekChat({
     })
   }
 
+  async function stuurFoto(bestand: File) {
+    setFout(null)
+    setUploadt(true)
+    try {
+      const supabase = createClient()
+      const ext = bestand.name.split(".").pop()?.toLowerCase() || "jpg"
+      const link = await maakOntdekFotoUploadUrl(ext)
+      if (!link.ok) return setFout(link.fout)
+      const { error: uploadFout } = await supabase.storage
+        .from("ontdek-media")
+        .uploadToSignedUrl(link.pad, link.token, bestand, {
+          contentType: bestand.type || undefined,
+          upsert: false,
+        })
+      if (uploadFout) return setFout("Uploaden mislukt: " + uploadFout.message)
+      const res = await stuurOntdekFoto(anderId, link.pad, tekst.trim() || undefined)
+      if (!res.ok) return setFout(res.fout ?? "Kon de foto niet versturen.")
+      setTekst("")
+      router.refresh()
+    } finally {
+      setUploadt(false)
+      if (fotoInput.current) fotoInput.current.value = ""
+    }
+  }
+
   return (
     <section className="fk-card">
       <p className="text-xs font-extrabold tracking-[0.18em] text-terracotta">
@@ -92,6 +120,14 @@ export function OntdekChat({
                     {b.afzender_naam}
                   </p>
                 )}
+                {b.foto_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={b.foto_url}
+                    alt="Gedeelde foto"
+                    className="rounded-lg max-h-60 w-auto mb-1"
+                  />
+                )}
                 {b.tekst}
               </div>
             </div>
@@ -101,6 +137,25 @@ export function OntdekChat({
       )}
 
       <div className="mt-3 flex items-end gap-2">
+        <input
+          ref={fotoInput}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            if (f) stuurFoto(f)
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => fotoInput.current?.click()}
+          disabled={bezig || uploadt}
+          aria-label="Foto sturen"
+          className="shrink-0 rounded-2xl border-2 border-rand bg-white px-3 py-2.5 text-lg leading-none hover:border-terracotta disabled:opacity-60"
+        >
+          📷
+        </button>
         <textarea
           value={tekst}
           onChange={(e) => setTekst(e.target.value)}
@@ -112,15 +167,15 @@ export function OntdekChat({
           }}
           rows={1}
           placeholder={`Bericht aan ${voornaam}…`}
-          disabled={bezig}
+          disabled={bezig || uploadt}
           className="flex-1 resize-none rounded-2xl border-2 border-rand bg-white px-4 py-2.5 text-inkt text-sm outline-none focus:border-terracotta"
         />
         <button
           onClick={verstuur}
-          disabled={bezig || !tekst.trim()}
+          disabled={bezig || uploadt || !tekst.trim()}
           className="fk-btn fk-btn-primary text-sm py-2.5 px-4 shrink-0"
         >
-          {bezig ? "…" : "Stuur"}
+          {uploadt ? "Foto…" : bezig ? "…" : "Stuur"}
         </button>
       </div>
       {fout && <p className="text-terracotta text-sm font-semibold mt-2">{fout}</p>}
