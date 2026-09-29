@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
+import { createClient } from "@/lib/supabase/client"
 
 // Navigatie rond de North Star: Thuis (belong) · Familie (discover/build) ·
 // Chat (connect) · Meer (alle ondersteunende features, incl. de economie).
@@ -45,8 +47,45 @@ const items = [
   },
 ]
 
-export function BottomNav({ ontdekOngelezen = false }: { ontdekOngelezen?: boolean }) {
+export function BottomNav({
+  ontdekOngelezen = false,
+  meId = null,
+}: {
+  ontdekOngelezen?: boolean
+  meId?: string | null
+}) {
   const pathname = usePathname() ?? "/app"
+
+  // Live ongelezen-stip: de server geeft de waarheid bij (her)render; realtime zet 'm aan
+  // zodra er een bericht van een ánder binnenkomt (RLS scopet events tot eigen gesprekken).
+  const [live, setLive] = useState(false)
+
+  // Bij navigatie herrende't de server ontdekOngelezen → de live-override resetten.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLive(false)
+  }, [pathname])
+
+  useEffect(() => {
+    if (!meId) return
+    const supabase = createClient()
+    const kanaal = supabase
+      .channel(`nav-ontdek-${meId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "ontdek_berichten" },
+        (p) => {
+          const nieuw = p.new as { afzender_id?: string }
+          if (nieuw?.afzender_id && nieuw.afzender_id !== meId) setLive(true)
+        },
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(kanaal)
+    }
+  }, [meId])
+
+  const ongelezen = ontdekOngelezen || live
 
   return (
     <nav
@@ -56,7 +95,7 @@ export function BottomNav({ ontdekOngelezen = false }: { ontdekOngelezen?: boole
       <div className="max-w-md mx-auto grid grid-cols-5">
         {items.map((item) => {
           const actief = item.match(pathname)
-          const badge = item.href === "/app/ontdek" && ontdekOngelezen
+          const badge = item.href === "/app/ontdek" && ongelezen
           return (
             <Link
               key={item.href}
