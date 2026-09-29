@@ -79,6 +79,26 @@ async function main() {
       await padNamen(J, id["Michelle"]),
       ["James Carter", "Daniel Carter", "Helen Carter", "Michael Carter", "Michelle Carter"],
     )
+
+    console.log("Gegenderde labels (O1):")
+    await db.from("persons").update({ geslacht: "man" }).eq("id", id["Daniel"])
+    await db.from("persons").update({ geslacht: "vrouw" }).eq("id", id["Michelle"])
+    await db.from("persons").update({ geslacht: "man" }).eq("id", id["Michael"])
+    await db.from("persons").update({ geslacht: "vrouw" }).eq("id", id["Rebecca"])
+    await db.from("persons").update({ geslacht: "man" }).eq("id", id["George"])
+    await db.from("persons").update({ geslacht: "vrouw" }).eq("id", id["Leah"])
+    check("Daniel = vader (man)", await label(J, id["Daniel"]), "vader")
+    check("Michelle = nicht (vrouw)", await label(J, id["Michelle"]), "nicht")
+    check("Michael = oom (man)", await label(J, id["Michael"]), "oom")
+    check("Rebecca = zus (vrouw)", await label(J, id["Rebecca"]), "zus")
+    check("George = opa (man)", await label(J, id["George"]), "opa")
+    check("Leah = dochter (vrouw)", await label(J, id["Leah"]), "dochter")
+    check("Sarah = oom of tante (geslacht onbekend → neutraal)", await label(J, id["Sarah"]), "oom of tante")
+
+    console.log("O4 — beide gemeenschappelijke voorouders:")
+    const { data: route } = await db.rpc("relation_route", { me: J, other: id["Michelle"] })
+    check("relation_route noemt beide grootouders (George én Helen)",
+      /George/.test(route) && /Helen/.test(route), true)
   } finally {
     console.log("Opruimen…")
     await db.rpc("verwijder_testnetwerk", { p_net_naam: NET })

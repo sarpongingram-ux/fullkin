@@ -1629,6 +1629,7 @@ export type Database = {
           created_by: string | null
           died_on: string | null
           first_name: string
+          geslacht: string | null
           id: string
           last_name: string
           managed_by: string | null
@@ -1645,6 +1646,7 @@ export type Database = {
           created_by?: string | null
           died_on?: string | null
           first_name: string
+          geslacht?: string | null
           id?: string
           last_name: string
           managed_by?: string | null
@@ -1661,6 +1663,7 @@ export type Database = {
           created_by?: string | null
           died_on?: string | null
           first_name?: string
+          geslacht?: string | null
           id?: string
           last_name?: string
           managed_by?: string | null
@@ -2126,6 +2129,7 @@ export type Database = {
           p_achternaam: string
           p_anker?: string
           p_geboortedatum?: string
+          p_geslacht?: string
           p_is_kind?: boolean
           p_land?: string
           p_origin?: Database["public"]["Enums"]["relationship_origin"]
@@ -2310,6 +2314,15 @@ export type Database = {
       gedeelde_verwanten_score: {
         Args: { p_a: string; p_b: string }
         Returns: number
+      }
+      gelabel: {
+        Args: {
+          p_ges: string
+          p_man: string
+          p_neutraal: string
+          p_vrouw: string
+        }
+        Returns: string
       }
       has_role: {
         Args: { net: string; r: Database["public"]["Enums"]["family_role"] }

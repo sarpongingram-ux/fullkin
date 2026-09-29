@@ -29,6 +29,8 @@ export async function voegFamilielidToe(
   const isKind = formData.get("is_kind") === "on"
   const origin = (String(formData.get("origin") ?? "biological") ||
     "biological") as Enums<"relationship_origin">
+  const geslachtRaw = String(formData.get("geslacht") ?? "")
+  const geslacht = geslachtRaw === "man" || geslachtRaw === "vrouw" ? geslachtRaw : undefined
 
   if (!voornaam || !achternaam) {
     return { ok: false, fout: "Vul een voor- en achternaam in." }
@@ -57,6 +59,7 @@ export async function voegFamilielidToe(
     p_geboortedatum: geboortedatum ?? undefined,
     p_is_kind: isKind,
     p_origin: origin,
+    p_geslacht: geslacht,
   })
   if (error) {
     // De RPC geeft gebruikersvriendelijke Nederlandse foutmeldingen terug.
