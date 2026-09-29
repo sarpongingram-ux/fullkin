@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/service"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { HalloKnop } from "../HalloKnop"
@@ -40,6 +41,29 @@ export default async function OntdektProfielPagina({
 
   // Open we dit profiel, dan is het gesprek gelezen.
   if ((berichten ?? []).length > 0) await markeerOntdekGelezen(id)
+
+  // Foto-berichten: korte-levende signed download-URL (private bucket). De berichten zijn
+  // al deelnemer-gescoped door ontdek_berichten_met, dus signen is geautoriseerd.
+  const svc = createServiceClient()
+  const berichtenUI = await Promise.all(
+    (berichten ?? []).map(async (b) => {
+      let foto_url: string | null = null
+      if (b.foto_pad) {
+        const { data: s } = await svc.storage
+          .from("ontdek-media")
+          .createSignedUrl(b.foto_pad, 3600)
+        foto_url = s?.signedUrl ?? null
+      }
+      return {
+        id: b.id,
+        is_van_mij: b.is_van_mij,
+        afzender_naam: b.afzender_naam,
+        tekst: b.tekst,
+        foto_url,
+        aangemaakt_op: b.aangemaakt_op,
+      }
+    }),
+  )
 
   if (!profiel) {
     return (
@@ -108,7 +132,7 @@ export default async function OntdektProfielPagina({
       <OntdekChat
         anderId={profiel.id}
         voornaam={profiel.voornaam}
-        berichten={berichten ?? []}
+        berichten={berichtenUI}
       />
 
       <div className="fk-card text-center">

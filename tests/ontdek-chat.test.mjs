@@ -107,6 +107,15 @@ async function main() {
     check("buitenstaander leest berichten ook niet direct (RLS)", (gluurDirect ?? []).length === 0)
     const s3 = await U.cli.rpc("stuur_ontdek_bericht", { p_ander: meA, p_tekst: "hallo?" })
     check("buitenstaander kan geen bericht sturen", !!s3.error)
+
+    console.log("\n— foto's in de chat —")
+    const sFoto = await A.cli.rpc("stuur_ontdek_bericht", { p_ander: michelle, p_foto_pad: "demo/foto.jpg" })
+    check("A stuurt een foto-bericht", !sFoto.error)
+    const { data: naFoto } = await B.cli.rpc("ontdek_berichten_met", { p_ander: meA })
+    const laatste = (naFoto ?? [])[(naFoto ?? []).length - 1]
+    check("B ontvangt het foto-bericht met foto_pad", laatste?.foto_pad === "demo/foto.jpg")
+    const leeg = await A.cli.rpc("stuur_ontdek_bericht", { p_ander: michelle })
+    check("leeg bericht (geen tekst, geen foto) wordt geweigerd", !!leeg.error)
   } finally {
     console.log("\nOpruimen…")
     await opruimen()
